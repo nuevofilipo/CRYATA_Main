@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, text
 import pandas as pd
@@ -738,17 +739,11 @@ def query_zones2():
 def query_momentum():
     user_query = str(request.args.get("coin"))
     timeframe_query = str(request.args.get("timeframe"))
-    table_name = user_query + timeframe_query
-    sql = text(f"SELECT * FROM {table_name}")
-    with engine.connect() as conn:
-        result = conn.execute(sql)
-        df = pd.DataFrame(result.fetchall())
-        df1 = transformDf(df)
-        red_boxes, green_boxes = main(df1)
-        json_data = red_boxes.to_json(orient="records")
-        json_data2 = green_boxes.to_json(orient="records")
-        df_combined = pd.concat([red_boxes, green_boxes])
-        return df_combined.to_json(orient="records")
+    df = gettingData(user_query, timeframe_query, 1000)
+    df1 = transformDf(df)
+    red_boxes, green_boxes = main(df1)
+    df_combined = pd.concat([red_boxes, green_boxes])
+    return df_combined.to_json(orient="records")
 
 
 @app.route("/api/varv/", methods=["GET"])
