@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, text
-import pandas as pd
+
 import json, time
 from datetime import datetime
 
@@ -17,20 +17,22 @@ from scipy.signal import find_peaks
 
 import numpy as np
 
+# packages needed to fetch data
+import pandas as pd
 from binance.spot import Spot as Client
 
 
 app = Flask(__name__)
 CORS(app)
-app.config[
-    "SQLALCHEMY_DATABASE_URI"
-] = "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee"
-db = SQLAlchemy(app)
+# app.config[
+#     "SQLALCHEMY_DATABASE_URI"
+# ] = "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee"
+# db = SQLAlchemy(app)
 
-engine = create_engine(
-    "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
-)
-conn = engine.connect()
+# engine = create_engine(
+#     "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
+# )
+# conn = engine.connect()
 
 
 def gettingData(coin, candleTimeFrame, limit):
