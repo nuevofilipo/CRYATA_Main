@@ -1,8 +1,6 @@
 import requests as rq
 
 # packages needed for data fetching from binance API
-# this is what actually happens on an import:
-#       pd = __import__("pandas")
 import pandas as pd
 
 from binance.spot import Spot as Client
@@ -11,11 +9,15 @@ from binance.spot import Spot as Client
 from dataclasses import dataclass
 from requests_cache import CachedSession
 
+from datetime import datetime
+
+
+
 
 # this allows to cache the data
 session = CachedSession(
     cache_name='cache/cached_btc',
-    expire_after=60
+    expire_after=60 # seconds
 )
 
 # class which can save the json crypto data
@@ -29,27 +31,65 @@ class CryptoData:
 
 url = "https://api.twelvedata.com/time_series?"
 
-parameters = {
-    "end_date": "2023-11-23",
-    'outputsize': 20,
-    'symbol': "BTC/USD",
-    'interval': "1day",
-    'apikey': "aa3e44f41ce445f49a5dc838a1ecfd59"
-}
 
 
-def getResponse():
+
+def getResponse(coin, candleTimeFrame,limit ):
+
+    # parameter_mapping = {
+    #     '1d':'1day',
+    #     '1w':'1week',
+    #     '1M':'1month',
+    # }
+
+
+    
+
+    now = datetime.now()
+
+    parameters = {
+        "end_date": now,
+        'outputsize': limit,
+        'symbol': coin,
+        'interval': candleTimeFrame,
+        'apikey': "aa3e44f41ce445f49a5dc838a1ecfd59"
+    }
+
     response = session.get(url, params=parameters)
     json_data = response.json()
 
 
     # df = pd.DataFrame(json_data["values"])
+    
 
     # creating a class instance and assigning the json values to it
     instanceCryptoData = CryptoData(meta=json_data["meta"], values=json_data["values"], status=json_data["status"])
 
-    # print(instanceCryptoData.values)
     df = pd.DataFrame(instanceCryptoData.values)
+
+
+    # renaming columns to match exactly those from binance
+    column_mapping = {
+        'datetime': 'time',
+        'open':'Open',
+        'high':'High',
+        'low':'Low',
+        'close':'Close'
+    }
+    
+    # "inplace" means, that it applies it directly to the object, and you don't need to assign it again to another variable
+    df.rename(columns=column_mapping, inplace=True)
+
+
+
+    # reversing df
+    df = df.iloc[::-1].reset_index(drop=True)
+
+    # have to make floats out of it, as it is initialized as string
+    df[["Open", "High", "Low", "Close", ]] = df[
+        ["Open", "High", "Low", "Close", ]
+    ].astype(float) 
+
     return df
 
 
@@ -98,5 +138,4 @@ def gettingData(coin, candleTimeFrame, limit):
     # df.set_index("time", inplace=False)
     return df
 
-print(getResponse())
-# print(gettingData("BTCUSDT", "1d", 10))
+# print(getResponse("BTC/USD", "1day", 5))

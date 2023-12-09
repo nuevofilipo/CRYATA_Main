@@ -1,0 +1,208 @@
+<!-- https://www.kaiko.com/delivery/cryptocurrency-rest-api
+    potential data provider -->
+
+    <!-- https://lukka.tech/lukka-prime/ -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chart Dashboard</title>
+    <link rel="stylesheet" href="dashboard-style.css" /> <!--do not forget that we have an external stylesheet-->>
+    <script src="../lightweight-charts/dist/lightweight-charts.standalone.development.js"></script> 
+    <style>
+      body {
+        font-family: Arial;
+      }
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* Style the tab */
+      .btn-group {
+        overflow: hidden;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+        border-radius: 10px;
+      }
+
+      /* Style the buttons inside the tab */
+      .btn-group button {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.3s;
+        font-size: 17px;
+      }
+
+      /* Change background color of buttons on hover */
+      .btn-group button:hover {
+        background-color: #ddd;
+      }
+
+      /* Create an active/current tablink class */
+      .btn-group button.active {
+        background-color: #ccc;
+      }
+
+    </style>
+  </head>
+  <body>
+    <header class="header"></header>
+
+    <section class="sidebar">
+      <div class="btn-group">
+        <button
+          class="tablinks"
+          ,
+          onclick="updateTimeframe(event, '1h')"
+          ,
+          value="1h"
+        >
+          1h
+        </button>
+        <button
+          class="tablinks"
+          ,
+          onclick="updateTimeframe(event, '4h')"
+          ,
+          value="4h"
+        >
+          4h
+        </button>
+        <button
+          class="tablinks active"
+          ,
+          onclick="updateTimeframe(event, '1day')"
+          ,
+          value="1day"
+        >
+          1d
+        </button>
+        <button
+          class="tablinks"
+          ,
+          onclick="updateTimeframe(event, '1week')"
+          ,
+          value="1week"
+        >
+          1w
+        </button>
+      </div>
+
+      <select
+        name="coin-selector"
+        ,
+        id="coin-selector"
+        ,
+        onchange="setData(), setLineData(), setBoxes(), setBoxes2(), setMomentum(), setVarvData(), setRanges('1y', addedRanges, '#e02bd4'), setRanges('3m', addedRanges3m, '#ffdd00'), 
+        setRanges('1m', addedRanges1m, '#03c4ff'), setRanges('1w', addedRanges1w, '#ff03a3'), setRanges('1d', addedRanges1d, '#03ff81')"
+      >
+        <option value="BTC/USD">bitcoin</option>
+        <option value="ETH/USD">ethereum</option>
+        <option value="BNB/USD">binance-coin</option>
+        <option value="XRP/USD">ripple</option>
+        <option value="ADA/USD">cardano</option>
+        <option value="DOGE/USD">dogecoin</option>
+      </select>
+
+      <div class="indicator-container">
+        <p class="indicator-tag">4line indicator</p>
+        <label class="switch">
+          <input id="indicator-switch" type="checkbox" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="indicator-container">
+        <p class="indicator-tag">zones indicator</p>
+        <label class="switch">
+          <input id="zones-indicator-switch" type="checkbox" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="indicator-container">
+        <p class="indicator-tag">imbalance zones</p>
+        <label class="switch">
+          <input id="zones2-indicator-switch" type="checkbox" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="indicator-container">
+        <p class="indicator-tag">momentum boxes</p>
+        <label class="switch">
+          <input id="momentum-indicator-switch" type="checkbox" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="indicator-container">
+        <p class="indicator-tag">varv</p>
+        <label class="switch">
+          <input id="varv-indicator-switch" type="checkbox" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="indicator-container">
+        <p class="indicator-tag">1y_range</p>
+        <label class="switch">
+          <input id="1y" type="checkbox" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="indicator-container">
+        <p class="indicator-tag">3m_range</p>
+        <label class="switch">
+          <input id="3m" type="checkbox" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="indicator-container">
+        <p class="indicator-tag">1M_range</p>
+        <label class="switch">
+          <input id="1m" type="checkbox" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="indicator-container">
+        <p class="indicator-tag">1w_range</p>
+        <label class="switch">
+          <input id="1w" type="checkbox" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="indicator-container">
+        <p class="indicator-tag">1d_range</p>
+        <label class="switch">
+          <input id="1d" type="checkbox" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+    </section>
+
+    
+
+
+    <main id="main" , class="main">
+      <div id="tvchart"></div>
+    </main>
+
+    <script></script>
+  </body>
+  <script type="text/javascript" src="./test3.js"></script>
+</html>
