@@ -90,6 +90,10 @@ def getResponse(coin, candleTimeFrame,limit ):
         ["Open", "High", "Low", "Close", ]
     ].astype(float) 
 
+
+    df["time"] = pd.to_datetime(df["time"])
+
+
     return df
 
 
