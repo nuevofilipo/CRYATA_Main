@@ -30,16 +30,16 @@ class CryptoData:
         self.status = status
 
 
-url = "https://api.twelvedata.com/time_series?end_date=2023-11-23&outputsize=20&symbol=BTC/USD&interval=1day&apikey=aa3e44f41ce445f49a5dc838a1ecfd59"
-
+url = "https://api.twelvedata.com/time_series?end_date=2023-12-23&outputsize=100&symbol=BTC/USD:Binance&interval=1day&apikey=aa3e44f41ce445f49a5dc838a1ecfd59"
+url2 = "https://api.twelvedata.com/time_series?symbol=ETH/BTC:Huobi,TRP:TSX,INFY:BSE&interval=30min&outputsize=12&apikey=demo"
 
 
 
 def getResponse():
-    response = session.get(url)
+    response = rq.get(url2)
     json_data = response.json()
 
-
+    print(json_data)
     # df = pd.DataFrame(json_data["values"])
 
     # creating a class instance and assigning the json values to it
@@ -47,7 +47,8 @@ def getResponse():
 
     # print(instanceCryptoData.values)
     df = pd.DataFrame(instanceCryptoData.values)
-    print(df)
+    # print(df.to_string())
+    # print(df)
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, text
+from flask_caching import Cache
 
 import json, time
 from datetime import datetime
@@ -24,12 +25,17 @@ from binance.spot import Spot as Client
 from moduls.getTwelveData import getResponse
 
 
+cache = Cache()
+
 app = Flask(__name__)
 CORS(app)
 
+app.config['CACHE_TYPE'] = "simple"
+cache.init_app(app)
+
+
 def gettingData(coin, candleTimeFrame, limit):
     return getResponse(coin, candleTimeFrame, limit)
-
 
 def create4Lines(df, timeFrame):
     if timeFrame == "1w":
@@ -654,12 +660,21 @@ def transformDf(df):
     df.set_index("time", inplace=True)
     return df
 
+#this is a function used for making keys for caching
+def make_cache_key(*args, **kwargs): 
+    return request.url
+
+# this is the main function for getting data and then caching it
+@cache.cached(timeout=60, key_prefix=make_cache_key)
+def main_data_fetch(coin, timeframe):
+    data = gettingData(coin, timeframe, 1000)
+    return data
 
 @app.route("/api/query/", methods=["GET"])
 def query_nodb():
     user_query = str(request.args.get("coin"))  # /user/?user=USER_NAME
     timeframe_query = str(request.args.get("timeframe"))
-    df = gettingData(user_query, timeframe_query, 1000)
+    df = main_data_fetch(user_query, timeframe_query)
     return df.to_json(orient="records")
 
 

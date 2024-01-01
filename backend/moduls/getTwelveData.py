@@ -55,7 +55,7 @@ def getResponse(coin, candleTimeFrame,limit ):
         'apikey': "aa3e44f41ce445f49a5dc838a1ecfd59"
     }
 
-    response = session.get(url, params=parameters)
+    response = rq.get(url, params=parameters)
     json_data = response.json()
 
 
