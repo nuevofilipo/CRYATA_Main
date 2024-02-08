@@ -1,122 +1,4 @@
-import pandas as pd
-
-pd.options.mode.chained_assignment = None
-import numpy as np
-
-import pandas_ta as tan
-import plotly.graph_objects as go
-
-
-from scipy.signal import savgol_filter
-from scipy.signal import find_peaks
-
-from getTwelveData import (
-    getResponse,
-)  # so stupid needs to be changed to moduls. whne calling from other file
-
-df = getResponse("BTC/USD", "1day", 300)
-
-
-def intToTime(integer, dataframe):
-    if integer > 0:
-        timestamp = dataframe.loc[integer, "time"]
-    else:
-        timestamp = dataframe.loc[0, "time"]
-    return timestamp
-
-
-# this two are helper functions for the supplyDemandZones function
-def findLastGreenCandle(intIndex, df):
-    for index, row in df[intIndex::-1].iterrows():
-        if row["Close"] > row["Open"]:
-            return index
-    return 0
-
-
-def findLastRedCandle(intIndex, df):
-    for index, row in df[intIndex::-1].iterrows():
-        if row["Close"] < row["Open"]:
-            return index
-    return 0
-
-
-def supplyDemandZones(df):
-    df = highsForSupplyZones(df)[0]
-    lowest_df2 = highsForSupplyZones(df)[1]
-
-    zones = []
-
-    # finding high zones
-    # explanation: given a high that wasn't broken, we go back until we find a green candle
-    # from that green candle we take the open and plot a zone from there to the high
-    # vice versa for the low zones
-
-    last_high_zone = 0
-    last_index_zone = 0
-    for index, row in df[::-1].iterrows():
-
-        if row["ultra_stationary"] == 1 and row["Low"] > last_high_zone:
-            start_index = findLastGreenCandle(index, df)
-            zones.append(
-                {
-                    "x0": intToTime(start_index, df),
-                    "y0": df.loc[start_index, "Open"],
-                    "x1": intToTime(df.index[-1], df),
-                    "y1": df.loc[index, "High"],
-                }
-            )
-
-            last_high_zone = df.loc[index, "High"]
-            last_index_zone = index
-        elif row["ultra_stationary"] == 1 and row["Low"] <= last_high_zone:
-            start_index = findLastGreenCandle(index, df)
-
-            zones.append(
-                {
-                    "x0": intToTime(start_index, df),
-                    "y0": df.loc[start_index, "Open"],
-                    "x1": intToTime(last_index_zone, df),
-                    "y1": df.loc[index, "High"],
-                }
-            )
-            last_high_zone = df.loc[index, "High"]
-            last_index_zone = index
-
-    # finding low zones
-    last_low_zone = 1000000
-    last_index_zone1 = 0
-    for index, row in df[::-1].iterrows():
-        if row["ultra_stationary"] == -1 and row["High"] < last_low_zone:
-            start_index = findLastRedCandle(index, df)
-            zones.append(
-                {
-                    "x0": intToTime(start_index, df),
-                    "y0": df.loc[start_index, "Open"],
-                    "x1": intToTime(df.index[-1], df),
-                    "y1": df.loc[index, "Low"],
-                }
-            )
-
-            last_low_zone = lowest_df2.loc[index, "Low"]
-            last_index_zone1 = index
-        elif row["ultra_stationary"] == -1 and row["High"] >= last_low_zone:
-            start_index = findLastRedCandle(index, df)
-            zones.append(
-                {
-                    "x0": intToTime(start_index, df),
-                    "y0": df.loc[start_index, "Open"],
-                    "x1": intToTime(last_index_zone1, df),
-                    "y1": df.loc[index, "Low"],
-                }
-            )
-            last_low_zone = lowest_df2.loc[index, "Low"]
-            last_index_zone1 = index
-
-    zones_df = pd.DataFrame(zones)
-    return zones_df
-
-
-def highsForSupplyZones(df):
+def calculatingZones(df):
     df_length = len(df.index)
 
     df["atr"] = tan.atr(df["High"], df["Low"], df["Close"], length=1)
@@ -228,8 +110,7 @@ def highsForSupplyZones(df):
                 df.at[index, "protected_highs_and_lows"] = 0
 
     # checking whether the high is protected or not, name = ultra_stationary----------------------------------------------
-    # there is no difference between valid highs and protected, however ones are in another
-    # based on the ultra stationary we will define the zones
+    # I don't quite understand what the difference is between valid highs and protected
     df["ultra_stationary"] = 0
     valid_high_bool = False
     for index, row in df.iterrows():
@@ -269,91 +150,65 @@ def highsForSupplyZones(df):
             if row["actual_high"] == 1:
                 last_high = row["High"]
 
-    return df, lowest_df2
+    zones = []
 
+    last_high_zone = 0
+    last_index_zone = 0
+    for index, row in df[::-1].iterrows():
+        if row["ultra_stationary"] == 1 and row["Low"] > last_high_zone:
+            zones.append(
+                {
+                    "x0": index,
+                    "y0": df.loc[index, "Low"],
+                    "x1": df.index[-1],
+                    "y1": df.loc[index, "High"],
+                }
+            )
 
-def momentumIndicator(df):
-    currState = "neutral"
-    last_high = None
-    last_low = None
+            last_high_zone = df.loc[index, "High"]
+            last_index_zone = index
+        elif row["ultra_stationary"] == 1 and row["Low"] <= last_high_zone:
+            # df.at[
+            #     index, "zones"
+            # ] = f"{index}, {df.loc[index, 'Low']},{last_index_zone}, {df.loc[index, 'High']} "
 
-    df["momentum"] = "neutral"
+            zones.append(
+                {
+                    "x0": index,
+                    "y0": df.loc[index, "Low"],
+                    "x1": last_index_zone,
+                    "y1": df.loc[index, "High"],
+                }
+            )
+            last_high_zone = df.loc[index, "High"]
+            last_index_zone = index
 
-    for index, row in df.iterrows():
-        if row["actual_high"] == 1:
-            last_high = row["High"]
-        if row["actual_low"] == 1:
-            last_low = row["Low"]
+    last_low_zone = 1000000
+    last_index_zone1 = 0
+    for index, row in df[::-1].iterrows():
+        if row["ultra_stationary"] == -1 and row["High"] < last_low_zone:
+            zones.append(
+                {
+                    "x0": index,
+                    "y0": df.loc[index, "Low"],
+                    "x1": df.index[-1],
+                    "y1": df.loc[index, "High"],
+                }
+            )
 
-        if last_high != None and last_low != None:
-            if row["Close"] > last_high and currState != "bullish":
-                currState = "bullish"
-            elif row["Close"] < last_low and currState != "bearish":
-                currState = "bearish"
+            last_low_zone = lowest_df2.loc[index, "Low"]
+            last_index_zone1 = index
+        elif row["ultra_stationary"] == -1 and row["High"] >= last_low_zone:
+            zones.append(
+                {
+                    "x0": index,
+                    "y0": df.loc[index, "Low"],
+                    "x1": last_index_zone,
+                    "y1": df.loc[index, "High"],
+                }
+            )
+            last_low_zone = lowest_df2.loc[index, "Low"]
+            last_index_zone1 = index
 
-        df.at[index, "momentum"] = currState
-
-    return df
-
-
-df = getResponse("BTC/USD", "1day", 1000)
-df = highsForSupplyZones(df)[0]
-
-df = momentumIndicator(df)
-
-# print(df.to_string())
-
-# plotting chart in plotly
-fig = go.Figure(
-    data=[
-        go.Candlestick(
-            x=df["time"],
-            open=df["Open"],
-            high=df["High"],
-            low=df["Low"],
-            close=df["Close"],
-        )
-    ]
-)
-
-highs = go.Scatter(
-    x=df[df["actual_high"] == 1]["time"],
-    y=df[df["actual_high"] == 1]["High"],
-    mode="markers",
-    marker=dict(color="red", size=8),
-    name="Highs",
-)
-
-lows = go.Scatter(
-    x=df[df["actual_low"] == 1]["time"],
-    y=df[df["actual_low"] == 1]["Low"],
-    mode="markers",
-    marker=dict(color="blue", size=8),
-    name="Lows",
-)
-
-visualizeBullish = go.Scatter(
-    x=df[df["momentum"] == "bullish"]["time"],
-    y=[20000] * len(df),
-    mode="markers",
-    marker=dict(color="green", size=8),
-    name="Bullish",
-)
-
-visualizeBearish = go.Scatter(
-    x=df[df["momentum"] == "bearish"]["time"],
-    y=[20000] * len(df),
-    mode="markers",
-    marker=dict(color="red", size=8),
-    name="Bearish",
-)
-
-fig.add_trace(visualizeBullish)
-fig.add_trace(visualizeBearish)
-
-
-fig.add_trace(highs)
-fig.add_trace(lows)
-
-
-fig.show()
+    zones_df = pd.DataFrame(zones)
+    return zones_df

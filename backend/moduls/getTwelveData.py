@@ -30,12 +30,6 @@ url = "https://api.twelvedata.com/time_series?"
 
 def getResponse(coin, candleTimeFrame, limit):
 
-    # parameter_mapping = {
-    #     '1d':'1day',
-    #     '1w':'1week',
-    #     '1M':'1month',
-    # }
-
     now = datetime.now()
 
     parameters = {
@@ -43,20 +37,20 @@ def getResponse(coin, candleTimeFrame, limit):
         "outputsize": limit,
         "symbol": coin,
         "interval": candleTimeFrame,
+        "exchange": "Binance",
         "apikey": "aa3e44f41ce445f49a5dc838a1ecfd59",
     }
 
     response = rq.get(url, params=parameters)
     json_data = response.json()
 
-    # df = pd.DataFrame(json_data["values"])
+    # creating a class instance and assigning the json values to it this is used for caching
 
-    # creating a class instance and assigning the json values to it
-    instanceCryptoData = CryptoData(
-        meta=json_data["meta"], values=json_data["values"], status=json_data["status"]
-    )
+    # instanceCryptoData = CryptoData(
+    #     meta=json_data["meta"], values=json_data["values"], status=json_data["status"]
+    # )
 
-    df = pd.DataFrame(instanceCryptoData.values)
+    df = pd.DataFrame(json_data["values"])
 
     # renaming columns to match exactly those from binance
     column_mapping = {
@@ -93,7 +87,6 @@ def getResponse(coin, candleTimeFrame, limit):
     df["time"] = pd.to_datetime(df["time"])
 
     df = fixingData(df)
-
     return df
 
 
@@ -113,9 +106,12 @@ def fixingData(df):
     for index, row in df.iterrows():
         if index == 0:
             prev_high = row["High"]
-        elif (row["High"] / prev_high) > 5:
+        elif (row["High"] / prev_high) > 10:
             df.at[index, "High"] = prev_high
         else:
             prev_high = row["High"]
 
     return df
+
+
+# print(getResponse("BTC/USD", "1week", 200).to_string())
