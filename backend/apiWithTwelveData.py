@@ -23,6 +23,7 @@ import pandas as pd
 from binance.spot import Spot as Client
 
 from moduls.getTwelveData import getResponse
+from moduls.supplyZonesUpdate import supplyDemandZones
 
 
 cache = Cache()
@@ -30,12 +31,13 @@ cache = Cache()
 app = Flask(__name__)
 CORS(app)
 
-app.config['CACHE_TYPE'] = "simple"
+app.config["CACHE_TYPE"] = "simple"
 cache.init_app(app)
 
 
 def gettingData(coin, candleTimeFrame, limit):
     return getResponse(coin, candleTimeFrame, limit)
+
 
 def create4Lines(df, timeFrame):
     if timeFrame == "1w":
@@ -54,6 +56,7 @@ def intToTime(integer, dataframe):
     return timestamp
 
 
+# can be removed soon, as I have a new helper function
 def calculatingZones(df):
     df_length = len(df.index)
 
@@ -76,7 +79,9 @@ def calculatingZones(df):
     df["is_trough"] = 0
     df["is_trough"].iloc[troughs_idx] = 1  # troughs are minima from the savgol filter
 
-    df["actual_high"] = 0
+    df["actual_high"] = (
+        0  # actual highs are the real highs surrounding the approximate high
+    )
     for index, row in df.iterrows():
         if row["is_peak"] == 1:
             integer_index = df.index.get_loc(index)
@@ -130,9 +135,9 @@ def calculatingZones(df):
             if last_high == 0:
                 highest_point = df.loc[index:, "High"].idxmax()
                 highest_df2.at[highest_point, "valid_high"] = 1
-                df.at[
-                    highest_point, "protected_highs_and_lows"
-                ] = 1  # trying to add to normal df, so to not need the highest_df2
+                df.at[highest_point, "protected_highs_and_lows"] = (
+                    1  # trying to add to normal df, so to not need the highest_df2
+                )
                 last_high = df.at[highest_point, "High"]
             elif row["High"] > last_high:
                 highest_df2.at[index, "valid_high"] = 1
@@ -237,7 +242,7 @@ def calculatingZones(df):
             last_high_zone = df.loc[index, "High"]
             last_index_zone = index
 
-    last_low_zone = 100000
+    last_low_zone = 1000000
     last_index_zone1 = 0
     for index, row in df[::-1].iterrows():
         if row["ultra_stationary"] == -1 and row["High"] < last_low_zone:
@@ -660,9 +665,11 @@ def transformDf(df):
     df.set_index("time", inplace=True)
     return df
 
-#this is a function used for making keys for caching
-def make_cache_key(*args, **kwargs): 
+
+# this is a function used for making keys for caching
+def make_cache_key(*args, **kwargs):
     return request.url
+
 
 # this is the main function for getting data and then caching it
 @cache.cached(timeout=60, key_prefix=make_cache_key)
@@ -670,7 +677,8 @@ def main_data_fetch(coin, timeframe):
     data = gettingData(coin, timeframe, 1000)
     return data
 
-@app.route("/api/query/", methods=["GET"])
+
+@app.route("/api/query/", methods=["GET"])  # regular endpoint for simply getting data
 def query_nodb():
     user_query = str(request.args.get("coin"))  # /user/?user=USER_NAME
     timeframe_query = str(request.args.get("timeframe"))
@@ -678,18 +686,20 @@ def query_nodb():
     return df.to_json(orient="records")
 
 
-@app.route("/api/zones/", methods=["GET"])
+@app.route(
+    "/api/zones/", methods=["GET"]
+)  # endpoint for getting suply and demand zones
 def query_nodbzones():
     user_query = str(request.args.get("coin"))
     timeframe_query = str(request.args.get("timeframe"))
     df = gettingData(user_query, timeframe_query, 1000)
-    df = transformDf(df)
-    zones_df = calculatingZones(df)
+    # df = transformDf(df)
+    zones_df = supplyDemandZones(df)  # working on
     json_data = zones_df.to_json(orient="records")
     return json_data
 
 
-@app.route("/api/zones2/", methods=["GET"])
+@app.route("/api/zones2/", methods=["GET"])  # endpoint for getting imbalance zones
 def query_zones2():
     user_query = str(request.args.get("coin"))
     timeframe_query = str(request.args.get("timeframe"))

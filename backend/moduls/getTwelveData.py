@@ -12,13 +12,9 @@ from requests_cache import CachedSession
 from datetime import datetime
 
 
-
-
 # this allows to cache the data
-session = CachedSession(
-    cache_name='cache/cached_btc',
-    expire_after=60 # seconds
-)
+session = CachedSession(cache_name="cache/cached_btc", expire_after=60)  # seconds
+
 
 # class which can save the json crypto data
 @dataclass
@@ -32,9 +28,7 @@ class CryptoData:
 url = "https://api.twelvedata.com/time_series?"
 
 
-
-
-def getResponse(coin, candleTimeFrame,limit ):
+def getResponse(coin, candleTimeFrame, limit):
 
     # parameter_mapping = {
     #     '1d':'1day',
@@ -42,104 +36,86 @@ def getResponse(coin, candleTimeFrame,limit ):
     #     '1M':'1month',
     # }
 
-
-    
-
     now = datetime.now()
 
     parameters = {
         "end_date": now,
-        'outputsize': limit,
-        'symbol': coin,
-        'interval': candleTimeFrame,
-        'apikey': "aa3e44f41ce445f49a5dc838a1ecfd59"
+        "outputsize": limit,
+        "symbol": coin,
+        "interval": candleTimeFrame,
+        "apikey": "aa3e44f41ce445f49a5dc838a1ecfd59",
     }
 
     response = rq.get(url, params=parameters)
     json_data = response.json()
 
-
     # df = pd.DataFrame(json_data["values"])
-    
 
     # creating a class instance and assigning the json values to it
-    instanceCryptoData = CryptoData(meta=json_data["meta"], values=json_data["values"], status=json_data["status"])
+    instanceCryptoData = CryptoData(
+        meta=json_data["meta"], values=json_data["values"], status=json_data["status"]
+    )
 
     df = pd.DataFrame(instanceCryptoData.values)
 
-
     # renaming columns to match exactly those from binance
     column_mapping = {
-        'datetime': 'time',
-        'open':'Open',
-        'high':'High',
-        'low':'Low',
-        'close':'Close'
+        "datetime": "time",
+        "open": "Open",
+        "high": "High",
+        "low": "Low",
+        "close": "Close",
     }
-    
+
     # "inplace" means, that it applies it directly to the object, and you don't need to assign it again to another variable
     df.rename(columns=column_mapping, inplace=True)
-
-
 
     # reversing df
     df = df.iloc[::-1].reset_index(drop=True)
 
     # have to make floats out of it, as it is initialized as string
-    df[["Open", "High", "Low", "Close", ]] = df[
-        ["Open", "High", "Low", "Close", ]
-    ].astype(float) 
-
+    df[
+        [
+            "Open",
+            "High",
+            "Low",
+            "Close",
+        ]
+    ] = df[
+        [
+            "Open",
+            "High",
+            "Low",
+            "Close",
+        ]
+    ].astype(float)
 
     df["time"] = pd.to_datetime(df["time"])
 
+    df = fixingData(df)
 
     return df
 
 
+def fixingData(df):
+    prev_low = 0
 
+    for index, row in df.iterrows():
+        if index == 0:
+            prev_low = row["Low"]
+        elif (row["Low"] / prev_low) < 0.1:
+            df.at[index, "Low"] = prev_low
+        else:
+            prev_low = row["Low"]
 
-def gettingData(coin, candleTimeFrame, limit):
+    prev_high = 0
 
-    # keys from binance
-    api_key = "LS2FxhfRjqp6TOv3q2QFOGuQzU8KoSGwlcLIOVaxjRjc0UOhncD2ZRMzT4xRGsfu"
-    secret_key = "p3AHHm2sq26yV2y92y0XkFkDxNqE3AAPVphtslNzrmLAJOrMN3r5Gm8ohNolfsXn"
+    for index, row in df.iterrows():
+        if index == 0:
+            prev_high = row["High"]
+        elif (row["High"] / prev_high) > 5:
+            df.at[index, "High"] = prev_high
+        else:
+            prev_high = row["High"]
 
-    spot_client = Client(api_key, secret_key)
-    btcusd_historical = spot_client.klines(coin, candleTimeFrame, limit=limit)
-
-
-    # columns to structure incoming data
-    columns = [
-        "Open time",
-        "Open",
-        "High",
-        "Low",
-        "Close",
-        "Volume",
-        "Close_time",
-        "quote_asset_volume",
-        "number_of_trades",
-        "taker_buy_base_asset_volume",
-        "taker_buy_quote_asset_volume",
-        "ignore",
-    ]
-
-    # creating the df
-    df = pd.DataFrame(btcusd_historical, columns=columns)
-
-    df["time"] = pd.to_datetime(df["Open time"], unit="ms")
-
-    # selecting the data
-    df = df[["time", "Open", "High", "Low", "Close", "Volume"]]
-
-    # transforming into float values
-    df[["Open", "High", "Low", "Close", "Volume"]] = df[
-        ["Open", "High", "Low", "Close", "Volume"]
-    ].astype(float)
-
-
-    # df.set_index("time", inplace=False)
     return df
-
-# print(getResponse("BTC/USD", "1day", 5))
