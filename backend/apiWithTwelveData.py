@@ -23,7 +23,7 @@ import pandas as pd
 from binance.spot import Spot as Client
 
 from moduls.getTwelveData import getResponse
-from moduls.supplyZonesUpdate import supplyDemandZones
+from moduls.supplyZonesUpdate import supplyDemandZones, momentumIndicator
 
 
 cache = Cache()
@@ -134,7 +134,7 @@ def calculatingZones2(df):
     return zones_df
 
 
-def superTrend(df, atr_period, multiplier):
+def superTrend(df, atr_period, multiplier):  # can be removed soon, as it's part of main
     high = df["High"]
     low = df["Low"]
     close = df["Close"]
@@ -207,7 +207,7 @@ def superTrend(df, atr_period, multiplier):
     return df
 
 
-def calculateRMI(df):
+def calculateRMI(df):  # can be removed soon because it's part of main
     len = 4
     length = 1
 
@@ -229,7 +229,7 @@ def calculateRMI(df):
     return df
 
 
-def main(df):
+def main(df):  # can be removed soon
     df1 = superTrend(df, 14, 3)
     df2 = calculateRMI(df)
     frames = [df1, df2]
@@ -496,13 +496,14 @@ def query_zones2():
     return json_data
 
 
-@app.route("/api/momentum/", methods=["GET"])
+@app.route(
+    "/api/momentum/", methods=["GET"]
+)  # http://127.0.0.1:5000/api/momentum/?coin=BTC/USD&timeframe=1day
 def query_momentum():
     user_query = str(request.args.get("coin"))
     timeframe_query = str(request.args.get("timeframe"))
     df = gettingData(user_query, timeframe_query, 1000)
-    df1 = transformDf(df)
-    red_boxes, green_boxes = main(df1)
+    red_boxes, green_boxes = momentumIndicator(df)
     df_combined = pd.concat([red_boxes, green_boxes])
     return df_combined.to_json(orient="records")
 

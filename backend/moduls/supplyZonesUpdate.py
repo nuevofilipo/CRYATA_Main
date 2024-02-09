@@ -10,11 +10,9 @@ import plotly.graph_objects as go
 from scipy.signal import savgol_filter
 from scipy.signal import find_peaks
 
-from getTwelveData import (
+from moduls.getTwelveData import (
     getResponse,
 )  # so stupid needs to be changed to moduls. whne calling from other file
-
-df = getResponse("BTC/USD", "1day", 300)
 
 
 def intToTime(integer, dataframe):
@@ -272,7 +270,7 @@ def highsForSupplyZones(df):
     return df, lowest_df2
 
 
-def momentumIndicator(df):
+def momentumIndicatorPrep(df):
     currState = "neutral"
     last_high = None
     last_low = None
@@ -296,64 +294,141 @@ def momentumIndicator(df):
     return df
 
 
-df = getResponse("BTC/USD", "1day", 1000)
-df = highsForSupplyZones(df)[0]
+def momentumIndicator(df):  # takes df with integer indices
+    df = momentumIndicatorPrep(highsForSupplyZones(df)[0])
 
-df = momentumIndicator(df)
+    red_boxes = []
+    green_boxes = []
+    red_box_open = False
+    green_box_open = False
 
-# print(df.to_string())
+    high_y = df["High"].max()
+    low_y = df["Low"].min()
+
+    for index, row in df.iterrows():
+        if row["momentum"] == "bearish" and red_box_open == False:
+            red_box_start = index
+            red_box_open = True
+        elif row["momentum"] != "bearish" and red_box_open == True:
+            red_box_end = index
+            red_boxes.append(
+                {
+                    "x0": intToTime(red_box_start, df),
+                    "y0": low_y,
+                    "x1": intToTime(red_box_end, df),
+                    "y1": high_y,
+                    "color": "#f52a45",
+                }
+            )
+            red_box_open = False
+        elif index == df.index[-1] and red_box_open == True:
+            red_box_end = index
+            red_boxes.append(
+                {
+                    "x0": intToTime(red_box_start, df),
+                    "y0": low_y,
+                    "x1": intToTime(red_box_end, df),
+                    "y1": high_y,
+                    "color": "#f52a45",
+                }
+            )
+            red_box_open = False
+
+        if row["momentum"] == "bullish" and green_box_open == False:
+            green_box_start = index
+            green_box_open = True
+        elif row["momentum"] != "bullish" and green_box_open == True:
+            green_box_end = index
+            green_boxes.append(
+                {
+                    "x0": intToTime(green_box_start, df),
+                    "y0": low_y,
+                    "x1": intToTime(green_box_end, df),
+                    "y1": high_y,
+                    "color": "#2af5c2",
+                }
+            )
+            green_box_open = False
+        elif index == df.index[-1] and green_box_open == True:
+            green_box_end = index
+            green_boxes.append(
+                {
+                    "x0": intToTime(green_box_start, df),
+                    "y0": low_y,
+                    "x1": intToTime(green_box_end, df),
+                    "y1": high_y,
+                    "color": "#2af5c2",
+                }
+            )
+            green_box_open = False
+
+    red_df = pd.DataFrame(red_boxes)
+    green_df = pd.DataFrame(green_boxes)
+
+    return red_df, green_df
+
+
+# getting data for testing some stuff
+
+# df = getResponse("BTC/USD", "1day", 1000)
+# df = highsForSupplyZones(df)[0]
+
+# dfZones = momentumIndicator(df)[0]
+
+# print(dfZones.to_string())
+
 
 # plotting chart in plotly
-fig = go.Figure(
-    data=[
-        go.Candlestick(
-            x=df["time"],
-            open=df["Open"],
-            high=df["High"],
-            low=df["Low"],
-            close=df["Close"],
-        )
-    ]
-)
+# fig = go.Figure(
+#     data=[
+#         go.Candlestick(
+#             x=df["time"],
+#             open=df["Open"],
+#             high=df["High"],
+#             low=df["Low"],
+#             close=df["Close"],
+#         )
+#     ]
+# )
 
-highs = go.Scatter(
-    x=df[df["actual_high"] == 1]["time"],
-    y=df[df["actual_high"] == 1]["High"],
-    mode="markers",
-    marker=dict(color="red", size=8),
-    name="Highs",
-)
+# highs = go.Scatter(
+#     x=df[df["actual_high"] == 1]["time"],
+#     y=df[df["actual_high"] == 1]["High"],
+#     mode="markers",
+#     marker=dict(color="red", size=8),
+#     name="Highs",
+# )
 
-lows = go.Scatter(
-    x=df[df["actual_low"] == 1]["time"],
-    y=df[df["actual_low"] == 1]["Low"],
-    mode="markers",
-    marker=dict(color="blue", size=8),
-    name="Lows",
-)
+# lows = go.Scatter(
+#     x=df[df["actual_low"] == 1]["time"],
+#     y=df[df["actual_low"] == 1]["Low"],
+#     mode="markers",
+#     marker=dict(color="blue", size=8),
+#     name="Lows",
+# )
 
-visualizeBullish = go.Scatter(
-    x=df[df["momentum"] == "bullish"]["time"],
-    y=[20000] * len(df),
-    mode="markers",
-    marker=dict(color="green", size=8),
-    name="Bullish",
-)
+# visualizeBullish = go.Scatter(
+#     x=df[df["momentum"] == "bullish"]["time"],
+#     y=[20000] * len(df),
+#     mode="markers",
+#     marker=dict(color="green", size=8),
+#     name="Bullish",
+# )
 
-visualizeBearish = go.Scatter(
-    x=df[df["momentum"] == "bearish"]["time"],
-    y=[20000] * len(df),
-    mode="markers",
-    marker=dict(color="red", size=8),
-    name="Bearish",
-)
+# visualizeBearish = go.Scatter(
+#     x=df[df["momentum"] == "bearish"]["time"],
+#     y=[20000] * len(df),
+#     mode="markers",
+#     marker=dict(color="red", size=8),
+#     name="Bearish",
+# )
 
-fig.add_trace(visualizeBullish)
-fig.add_trace(visualizeBearish)
-
-
-fig.add_trace(highs)
-fig.add_trace(lows)
+# fig.add_trace(visualizeBullish)
+# fig.add_trace(visualizeBearish)
 
 
-fig.show()
+# fig.add_trace(highs)
+# fig.add_trace(lows)
+
+
+# fig.show()

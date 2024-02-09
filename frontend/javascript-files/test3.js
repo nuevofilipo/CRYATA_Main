@@ -111,14 +111,14 @@ async function createBoxesData(list, functionToApply, color){
     });
 }
 
-async function createBoxesData2(list, functionToApply){
+async function createBoxesData2(list, functionToApply){ // I think this is for momentum
   const data = await functionToApply;
   console.log(data);
 
   data.forEach(element => {
     const i = candleSeries.createBox({
-        lowPrice: 0,
-        highPrice: 500000,
+        lowPrice: element["y0"],
+        highPrice: element["y1"],
         earlyTime: element["x0"] / 1000,
         lateTime: element["x1"] / 1000,
         borderColor: '#00008B',
