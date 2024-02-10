@@ -114,4 +114,4 @@ def fixingData(df):
     return df
 
 
-# print(getResponse("BTC/USD", "1week", 200).to_string())
+# print(getResponse("BTC/USD", "1month", 200).to_string())

@@ -525,13 +525,15 @@ def query_ranges():
         request.args.get("ranges")
     )  # here we get which range we want to see
     if ranges_query == "1y":
-        df = transformDf(gettingData(user_query, "1M", 1000))
+        df = transformDf(
+            gettingData(user_query, "1month", 1000)
+        )  # I need to change the syntax here, however don't know exactly what it is
         df2 = create_yearly_candles(df)
     elif ranges_query == "3m":
-        df = transformDf(gettingData(user_query, "1M", 1000))
+        df = transformDf(gettingData(user_query, "1month", 1000))
         df2 = createQuarterlyCandles(create_yearly_candles(df), df)
     elif ranges_query == "1m":
-        df2 = transformDf(gettingData(user_query, "1M", 1000))
+        df2 = transformDf(gettingData(user_query, "1month", 1000))
     else:
         df2 = transformDf(gettingData(user_query, ranges_query, 1000))
     df = transformDf(gettingData(user_query, timeframe_query, 1000))
