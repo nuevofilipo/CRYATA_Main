@@ -351,15 +351,18 @@ function setAll(){
   setRanges("1y", addedRanges, '#e02bd4');
   setRanges("3m", addedRanges3m, '#ffdd00');
   setRanges("1m", addedRanges1m, '#03c4ff');
-  setRanges("1w", addedRanges1w, '#ff03a3');
-  setRanges("1d", addedRanges1d, '#03ff81');
+  setRanges("1week", addedRanges1w, '#ff03a3');
+  setRanges("1day", addedRanges1d, '#03ff81');
 }
 
 
 
 
+setData(); // changed this because otherwise api calls get wasted, each time
 
-setAll();
+// although then after a refresh you have to set your stuff again
+
+// setAll();
 
 
 
@@ -436,15 +439,15 @@ switchElement1m.addEventListener("change", function(){
   console.log("switched")
 });
 
-const switchElement1w = document.getElementById("1w");
+const switchElement1w = document.getElementById("1week");
 switchElement1w.addEventListener("change", function(){
-  setRanges("1w", addedRanges1w, '#ff03a3');
+  setRanges("1week", addedRanges1w, '#ff03a3');
   console.log("switched")
 });
 
-const switchElement1d = document.getElementById("1d");
+const switchElement1d = document.getElementById("1day");
 switchElement1d.addEventListener("change", function(){
-  setRanges("1d", addedRanges1d, '#03ff81');
+  setRanges("1day", addedRanges1d, '#03ff81');
   console.log("switched")
 });
 

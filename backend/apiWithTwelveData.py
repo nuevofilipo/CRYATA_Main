@@ -1,7 +1,6 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine, text
+
 from flask_caching import Cache
 
 import json, time

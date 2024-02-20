@@ -10,54 +10,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chart Dashboard</title>
-    <link rel="stylesheet" href="../css-files/dashboard-style.css" /> <!--do not forget that we have an external stylesheet-->>
-    <script src="../../libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script> 
-    <style>
-      body {
-        font-family: Arial;
-      }
-      .sidebar {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-      }
+    <!-- <link rel="stylesheet" href="../css-files/dashboard-style.css" />  -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/nuevofilipo/CRYATA_Main/frontend/css-files/dashboard-style.css" />
+    <!-- <script src="../../libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script>  -->
+    <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/CRYATA_Main/libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script> 
 
-      /* Style the tab */
-      .btn-group {
-        overflow: hidden;
-        border: 1px solid #ccc;
-        background-color: #f1f1f1;
-        border-radius: 10px;
-      }
-
-      /* Style the buttons inside the tab */
-      .btn-group button {
-        background-color: inherit;
-        float: left;
-        border: none;
-        outline: none;
-        cursor: pointer;
-        padding: 14px 16px;
-        transition: 0.3s;
-        font-size: 17px;
-      }
-
-      /* Change background color of buttons on hover */
-      .btn-group button:hover {
-        background-color: #ddd;
-      }
-
-      /* Create an active/current tablink class */
-      .btn-group button.active {
-        background-color: #ccc;
-      }
-
-    </style>
   </head>
   <body>
     <header class="header"></header>
-
     <section class="sidebar">
       <div class="btn-group">
         <button
@@ -181,7 +141,7 @@
       <div class="indicator-container">
         <p class="indicator-tag">1w_range</p>
         <label class="switch">
-          <input id="1w" type="checkbox" />
+          <input id="1week" type="checkbox" />
           <span class="slider round"></span>
         </label>
       </div>
@@ -189,19 +149,16 @@
       <div class="indicator-container">
         <p class="indicator-tag">1d_range</p>
         <label class="switch">
-          <input id="1d" type="checkbox" />
+          <input id="1day" type="checkbox" />
           <span class="slider round"></span>
         </label>
       </div>
     </section>
 
-    
-
-
     <main id="main" , class="main">
       <div id="tvchart"></div>
     </main>
-
+    
     <script></script>
   </body>
   <script type="text/javascript" src="../javascript-files/test3.js"></script>
