@@ -541,15 +541,15 @@ function rangeIndicatorState(range_indicator_id){
 
 
 
-const horizontalBox = { 
-  corners: [{ time: 1687708800, price: 24000 }, { time: 1693526400, price: 22000 }],
-  borderColor: '#ededed',
-  borderWidth: 2,
-  borderStyle: LightweightCharts.LineStyle.Solid,
-  fillColor: '#e82ec0',
-  fillOpacity: 0.4,
-  borderVisible: true,
-  axisLabelVisible: false,
-  title: 'My box',
-};
+// const horizontalBox = { 
+//   corners: [{ time: 1687708800, price: 24000 }, { time: 1693526400, price: 22000 }],
+//   borderColor: '#ededed',
+//   borderWidth: 2,
+//   borderStyle: LightweightCharts.LineStyle.Solid,
+//   fillColor: '#e82ec0',
+//   fillOpacity: 0.4,
+//   borderVisible: true,
+//   axisLabelVisible: false,
+//   title: 'My box',
+// };
 

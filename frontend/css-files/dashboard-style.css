@@ -6,17 +6,11 @@ body,html {
     grid-template-columns: 250px 1fr;
     grid-template-rows: 60px 1fr;
     grid-template-areas: 
-        "sidebar header"
+        "sidebar main"
         "sidebar main";
 }
 
-.header {
-    background-color: #2196F3;
 
-    grid-area: header;
-
-
-}
 
 .sidebar {
     background-color: black;
@@ -31,7 +25,7 @@ body,html {
 .main {
     background-color: black;
     grid-area: main;
-    height: calc(100vh - 60px);
+    height: calc(100vh );
     width: calc(100vw - 250px);
 
 }
