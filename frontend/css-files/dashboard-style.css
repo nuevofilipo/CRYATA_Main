@@ -13,7 +13,7 @@
   background-color: black;
   grid-area: main;
   height: calc(100vh );
-  width: calc(100vw );
+  width: calc(100vw - 200px);
 
 }
 
