@@ -36,13 +36,13 @@ columns = [
     "Low",
     "Close",
     "Volume",
-    "MA",
-    "EMA",
 ]
 
 
 def transformDf(df):
-    df.set_index("time", inplace=True)
+    df = df[["time", "Open", "High", "Low", "Close", "Volume"]]
+
+    # df.set_index("time", inplace=True)
     return df
 
 
@@ -54,9 +54,15 @@ def gettingData(symbol, timeFrame):
         print(e)
 
 
+# print(gettingData("BTCUSDT", "1d"))
+
+
+# example: http://127.0.0.1:5000/?coin=BTCUSDT&timeframe=1d
 @app.route("/", methods=["GET"])
 def index():
-    df = gettingData("BTCUSDT", "1d")
+    coin = str(request.args.get("coin"))
+    timeFrame = str(request.args.get("timeframe"))
+    df = gettingData(coin, timeFrame)
     return df.to_json(orient="records")
 
 

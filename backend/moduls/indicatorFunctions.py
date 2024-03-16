@@ -368,7 +368,74 @@ def momentumIndicator(df):  # takes df with integer indices
     return red_df, green_df
 
 
-# getting data for testing some stuff
+def createVarv(df):
+    df["standard_deviation"] = df["Close"].rolling(window=200).std() * 100
+    df["moving_average"] = df["Close"].rolling(window=200).mean()
+
+    df["deviationRatio"] = df["standard_deviation"] / df["moving_average"]
+
+    df["percentageShift"] = (1 + (0.115 * df["deviationRatio"])) ** (0.1)
+
+    df["band1"] = df["Close"] / (1 + (0.115 * df["deviationRatio"])) ** (0.5)
+
+    df["band2"] = df["band1"] * df["percentageShift"]
+    df["band3"] = df["band1"] * df["percentageShift"] ** 2
+    df["band4"] = df["band1"] * df["percentageShift"] ** 3
+    df["band5"] = df["band1"] * df["percentageShift"] ** 4
+    df["band6"] = df["band1"] * df["percentageShift"] ** 5
+    df["band7"] = df["band1"] * df["percentageShift"] ** 6
+    df["band8"] = df["band1"] * df["percentageShift"] ** 7
+    df["band9"] = df["band1"] * df["percentageShift"] ** 8
+    df["band10"] = df["band1"] * df["percentageShift"] ** 9
+    df["band11"] = df["band1"] * df["percentageShift"] ** 10
+
+    lenMa = 200
+
+    df["out1"] = tan.ema(df["band1"], length=lenMa)
+    df["out2"] = tan.ema(df["band2"], length=lenMa)
+    df["out3"] = tan.ema(df["band3"], length=lenMa)
+    df["out4"] = tan.ema(df["band4"], length=lenMa)
+    df["out5"] = tan.ema(df["band5"], length=lenMa)
+    df["out6"] = tan.ema(df["band6"], length=lenMa)
+    df["out7"] = tan.ema(df["band7"], length=lenMa)
+    df["out8"] = tan.ema(df["band8"], length=lenMa)
+    df["out9"] = tan.ema(df["band9"], length=lenMa)
+    df["out10"] = tan.ema(df["band10"], length=lenMa)
+    df["out11"] = tan.ema(df["band11"], length=lenMa)
+
+    df = df[
+        [
+            "time",
+            "out1",
+            "out2",
+            "out3",
+            "out4",
+            "out5",
+            "out6",
+            "out7",
+            "out8",
+            "out9",
+            "out10",
+            "out11",
+        ]
+    ]
+    df = df.dropna(subset=["out1"])
+    return df
+
+
+def create4Lines(df, timeFrame):
+    if timeFrame == "1week":
+        df["MA"] = tan.sma(df["Close"], length=9)
+        df["EMA"] = tan.ema(df["Close"], length=12)
+    elif timeFrame == "1day":
+        # df["MA"] = ta.SMA(df["Close"], timeperiod=63)
+        # df["EMA"] = ta.EMA(df["Close"], timeperiod=84) # using talib you have to give timeperiod, and using pandas_ta you have to give length
+        df["MA"] = tan.sma(df["Close"], length=63)
+        df["EMA"] = tan.ema(df["Close"], length=84)
+    return df
+
+
+# getting data for testing some stuff  + plotly for testing--------------------------------------------------------------
 
 # df = getResponse("BTC/USD", "1day", 1000)
 # df = highsForSupplyZones(df)[0]

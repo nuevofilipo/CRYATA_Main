@@ -63,35 +63,13 @@ var addedRanges1d = [];
 
 // functions for fetchng data asyncronously ----------------------------------------------
 
-// async function getData(route){
-  
-//   const selectedBtn = document.querySelector(".active");
-//   const response = await fetch(
-//     `http://127.0.0.1:5000/api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
-//   )
-  
-//   const data = await response.json();
-//   return data;
-// }
 
-// async function getRangesData(range_value){
-//   const selectedBtn = document.querySelector(".active");
-//   const response = await fetch(
-//     `http://127.0.0.1:5000/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
-//   )
-  
-//   const data = await response.json();
-//   return data;
-
-// }
-
-
-
+// for use with local data
 async function getData(route){
   
   const selectedBtn = document.querySelector(".active");
   const response = await fetch(
-    `https://cryatabackendv2-production.up.railway.app/api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
+    `http://127.0.0.1:5000/api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
   )
   
   const data = await response.json();
@@ -101,13 +79,37 @@ async function getData(route){
 async function getRangesData(range_value){
   const selectedBtn = document.querySelector(".active");
   const response = await fetch(
-    `https://cryatabackendv2-production.up.railway.app/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
+    `http://127.0.0.1:5000/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
   )
   
   const data = await response.json();
   return data;
 
 }
+
+
+// // for use with external hosted data
+// async function getData(route){
+  
+//   const selectedBtn = document.querySelector(".active");
+//   const response = await fetch(
+//     `https://cryatabackendv2-production.up.railway.app/api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
+//   )
+  
+//   const data = await response.json();
+//   return data;
+// }
+
+// async function getRangesData(range_value){
+//   const selectedBtn = document.querySelector(".active");
+//   const response = await fetch(
+//     `https://cryatabackendv2-production.up.railway.app/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
+//   )
+  
+//   const data = await response.json();
+//   return data;
+
+// }
 
 
 

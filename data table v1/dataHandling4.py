@@ -27,7 +27,10 @@ import asyncio
 
 import talib as ta
 
-from dataHandling2 import removeData
+import logging
+
+# logging.basicConfig(level=logging.WARNING)
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
 pd.options.mode.chained_assignment = None
 
@@ -45,15 +48,9 @@ def transformingDF(df, timeFrame):
             ["Open", "High", "Low", "Close", "Volume"]
         ].astype(float)
 
-        # print(df)
-
-        if timeFrame == "1w":
-            df["MA"] = ta.SMA(df["Close"], timeperiod=9)
-            df["EMA"] = ta.EMA(df["Close"], timeperiod=12)
-        elif timeFrame == "1d":
-            df["MA"] = ta.SMA(df["Close"], timeperiod=63)
-            df["EMA"] = ta.EMA(df["Close"], timeperiod=84)
         return df
+
+        # print(df)
     except Exception as e:
         print(e)
 
@@ -74,7 +71,7 @@ timeFrames = ["1h", "4h", "1w", "1d", "1M"]
 
 engine = create_engine(
     "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
-)
+)  # set echo to True to see the logs in the console
 
 # for using with my external railway db
 
@@ -220,12 +217,17 @@ for i in range(0, len(results) - 1):
 
 
 # create tables based on results from async request
-# this below works pretty sure-----------
 
 
 async def save_to_database(name, df, engine):
     try:
-        await asyncio.to_thread(df.to_sql, name, con=engine, if_exists="append")
+        await asyncio.to_thread(
+            df.to_sql,
+            name,
+            con=engine,
+            if_exists="replace",
+            chunksize=1000,
+        )
     except Exception as e:
         print(f"{name}, wasn't able to be added")
 
@@ -241,21 +243,10 @@ async def main(dfs_dictionary, engine):
 
 
 def loadData():
-    removeData()
     starttime = time.time()
     asyncio.run(main(dfs_dictionary, engine))
     duration = time.time() - starttime
-    print(f"success!! : {duration} seconds")
+    print(f" {duration} seconds")
 
 
 loadData()
-
-# for name, df in dfs_dictionary.items():
-#     df.to_sql(name, con=engine, if_exists="append")
-
-
-# delete tables created with async way
-# for name, df in dfs_dictionary.items():
-#     sql = text(f"DROP TABLE {name}")
-#     with engine.connect() as conn:
-#         conn.execute(sql)

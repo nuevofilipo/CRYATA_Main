@@ -1,9 +1,10 @@
 from flask import Flask
 from apscheduler.schedulers.background import BackgroundScheduler
-from dataHandling4 import loadData
-from dataHandling2 import removeData
+from dH4_railway import loadData
 
 app = Flask(__name__)
+
+loadData()  # first time loading data upon start
 
 
 def dbdataLoading():
