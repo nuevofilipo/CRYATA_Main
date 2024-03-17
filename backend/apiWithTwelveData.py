@@ -39,7 +39,7 @@ CORS(app)
 app.config["CACHE_TYPE"] = "simple"
 cache.init_app(app)
 
-mainLimit = 1000
+mainLimit = 2000
 
 
 # helper functions
@@ -50,81 +50,6 @@ def gettingData(coin, candleTimeFrame, limit):
 def intToTime(integer, dataframe):
     timestamp = dataframe.index[integer]
     return timestamp
-
-
-def imbalanceZones(df):
-    df_length = len(df.index)
-    zonesRed = []
-    updated_zonesRed = []
-    for index, row in df.iterrows():
-        if row["Open"] > row["Close"]:  # this means this is a red candle
-            integer_idx = df.index.get_loc(index)
-            if integer_idx > 4 and integer_idx < df_length - 4:
-                high_boundary = df.loc[
-                    intToTime(integer_idx - 4, df) : intToTime(integer_idx - 1, df),
-                    "Low",
-                ].min()
-                low_boundary = df.loc[
-                    intToTime(integer_idx + 1, df) : intToTime(integer_idx + 4, df),
-                    "High",
-                ].max()
-                end_plot = df.index[-1]
-                # print(high_boundary)
-                # print(low_boundary)
-                # print("-------------------")
-                # i += 1
-                if high_boundary - low_boundary > 0:
-                    zone = {
-                        "x0": index,
-                        "y0": low_boundary,
-                        "x1": end_plot,
-                        "y1": high_boundary,
-                    }
-                    zonesRed.append(zone)
-        for zone in zonesRed:
-            if row["High"] > (zone["y1"] + zone["y0"]) / 2 and zone["x0"] != index:
-                zone["x1"] = index
-                updated_zonesRed.append(zone)
-                zonesRed.remove(zone)
-
-    zonesGreen = []
-    updated_zonesGreen = []
-    for index, row in df.iterrows():
-        if row["Open"] < row["Close"]:
-            integer_idx = df.index.get_loc(index)
-            if integer_idx > 4 and integer_idx < df_length - 4:
-                low_boundary = df.loc[
-                    intToTime(integer_idx - 4, df) : intToTime(integer_idx - 1, df),
-                    "High",
-                ].max()
-                high_boundary = df.loc[
-                    intToTime(integer_idx + 1, df) : intToTime(integer_idx + 4, df),
-                    "Low",
-                ].min()
-                end_plot = df.index[-1]
-                # print(high_boundary)
-                # print(low_boundary)
-                # print("-------------------")
-                # i += 1
-                if high_boundary - low_boundary > 0:
-                    zone = {
-                        "x0": index,
-                        "y0": low_boundary,
-                        "x1": end_plot,
-                        "y1": high_boundary,
-                    }
-                    zonesGreen.append(zone)
-
-        for zone in zonesGreen:
-            if row["Low"] < (zone["y1"] + zone["y0"]) / 2 and zone["x0"] != index:
-                zone["x1"] = index
-                updated_zonesGreen.append(zone)
-                zonesGreen.remove(zone)
-
-    all_zones = updated_zonesRed + updated_zonesGreen + zonesGreen + zonesRed
-
-    zones_df = pd.DataFrame(all_zones)
-    return zones_df
 
 
 def create_yearly_candles(monthly_candles):
@@ -264,6 +189,7 @@ def query_nodb():
     user_query = str(request.args.get("coin"))  # /user/?user=USER_NAME
     timeframe_query = str(request.args.get("timeframe"))
     df = main_data_fetch(user_query, timeframe_query)
+    print(df)
     return df.to_json(orient="records")
 
 
@@ -279,7 +205,7 @@ def query_nodbzones():
     return json_data
 
 
-@app.route("/api/zones2/", methods=["GET"])  # endpoint for getting imbalance zones
+@app.route("/api/zones2/", methods=["GET"])  # !endpoint for getting imbalance zones
 def query_zones2():
     user_query = str(request.args.get("coin"))
     timeframe_query = str(request.args.get("timeframe"))

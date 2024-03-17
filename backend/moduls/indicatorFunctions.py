@@ -10,9 +10,9 @@ import plotly.graph_objects as go
 from scipy.signal import savgol_filter
 from scipy.signal import find_peaks
 
-from moduls.getTwelveData import (
-    getResponse,
-)  # so stupid needs to be changed to moduls. whne calling from other file
+# from moduls.getTwelveData import (
+#     getResponse,
+# )  # so stupid needs to be changed to moduls. whne calling from other file
 
 
 def intToTime(integer, dataframe):
@@ -20,6 +20,11 @@ def intToTime(integer, dataframe):
         timestamp = dataframe.loc[integer, "time"]
     else:
         timestamp = dataframe.loc[0, "time"]
+    return timestamp
+
+
+def intToTime1(integer, dataframe):
+    timestamp = dataframe.index[integer]
     return timestamp
 
 
@@ -433,6 +438,81 @@ def create4Lines(df, timeFrame):
         df["MA"] = tan.sma(df["Close"], length=63)
         df["EMA"] = tan.ema(df["Close"], length=84)
     return df
+
+
+def imbalanceZones(df):
+    df_length = len(df.index)
+    zonesRed = []
+    updated_zonesRed = []
+    for index, row in df.iterrows():
+        if row["Open"] > row["Close"]:  # this means this is a red candle
+            integer_idx = df.index.get_loc(index)
+            if integer_idx > 4 and integer_idx < df_length - 4:
+                high_boundary = df.loc[
+                    intToTime1(integer_idx - 4, df) : intToTime1(integer_idx - 1, df),
+                    "Low",
+                ].min()
+                low_boundary = df.loc[
+                    intToTime1(integer_idx + 1, df) : intToTime1(integer_idx + 4, df),
+                    "High",
+                ].max()
+                end_plot = df.index[-1]
+                # print(high_boundary)
+                # print(low_boundary)
+                # print("-------------------")
+                # i += 1
+                if high_boundary - low_boundary > 0:
+                    zone = {
+                        "x0": index,
+                        "y0": low_boundary,
+                        "x1": end_plot,
+                        "y1": high_boundary,
+                    }
+                    zonesRed.append(zone)
+        for zone in zonesRed:
+            if row["High"] > (zone["y1"] + zone["y0"]) / 2 and zone["x0"] != index:
+                zone["x1"] = index
+                updated_zonesRed.append(zone)
+                zonesRed.remove(zone)
+
+    zonesGreen = []
+    updated_zonesGreen = []
+    for index, row in df.iterrows():
+        if row["Open"] < row["Close"]:
+            integer_idx = df.index.get_loc(index)
+            if integer_idx > 4 and integer_idx < df_length - 4:
+                low_boundary = df.loc[
+                    intToTime1(integer_idx - 4, df) : intToTime1(integer_idx - 1, df),
+                    "High",
+                ].max()
+                high_boundary = df.loc[
+                    intToTime1(integer_idx + 1, df) : intToTime1(integer_idx + 4, df),
+                    "Low",
+                ].min()
+                end_plot = df.index[-1]
+                # print(high_boundary)
+                # print(low_boundary)
+                # print("-------------------")
+                # i += 1
+                if high_boundary - low_boundary > 0:
+                    zone = {
+                        "x0": index,
+                        "y0": low_boundary,
+                        "x1": end_plot,
+                        "y1": high_boundary,
+                    }
+                    zonesGreen.append(zone)
+
+        for zone in zonesGreen:
+            if row["Low"] < (zone["y1"] + zone["y0"]) / 2 and zone["x0"] != index:
+                zone["x1"] = index
+                updated_zonesGreen.append(zone)
+                zonesGreen.remove(zone)
+
+    all_zones = updated_zonesRed + updated_zonesGreen + zonesGreen + zonesRed
+
+    zones_df = pd.DataFrame(all_zones)
+    return zones_df
 
 
 # getting data for testing some stuff  + plotly for testing--------------------------------------------------------------
