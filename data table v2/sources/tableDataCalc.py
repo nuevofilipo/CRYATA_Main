@@ -1,5 +1,7 @@
 import pandas as pd
 import sys
+import time
+
 
 sys.path.append("../../")
 
@@ -38,7 +40,11 @@ def fourLineIndicatorMetric(df):
 def varvIndicatorMetric(df):
     price = df.iloc[-1]["Close"]
     dfVarv = createVarv(df)
-    dfLastRow = dfVarv.iloc[-1]
+
+    try:
+        dfLastRow = dfVarv.iloc[-1]
+    except:
+        return {"error": "not enough data"}
 
     zone = 1
 
@@ -90,27 +96,23 @@ def createTableRow(df, coin):
 def createEntireTable():
     allEntries = []
     coins = ["BTC/USD", "ETH/USD", "ADA/USD", "XRP/USD", "DOGE/USD"]
+    totalTime = 0
+
     for coin in coins:
         df = getResponse(
             coin,
             "1day",
             1000,
         )
+        start = time.time()
         entry = createTableRow(df, coin)
+        end = time.time()
+        print(f"Time for {coin}: {end - start} sec")
+        totalTime += end - start
         allEntries.append(entry)
 
+    print(f"Total time: {totalTime}")
     return allEntries
 
 
-def main():
-    df = getResponse(
-        "BTC/USD",
-        "1day",
-        1000,
-    )
-
-    result = createTableRow(df, "BTC/USD")
-    print(result)
-
-
-main()
+# createEntireTable()
