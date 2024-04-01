@@ -78,6 +78,7 @@ def volatilityIndicatorMetric(df):
 
 
 def createTableRow(df, coin):
+    print(f"Creating table row for {coin}")
     lastRow = df.iloc[-1]
     price = lastRow["Close"]
 
@@ -115,4 +116,3 @@ def createEntireTable():
     return allEntries
 
 
-# createEntireTable()

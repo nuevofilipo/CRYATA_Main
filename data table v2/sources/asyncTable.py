@@ -1,106 +1,25 @@
-from sqlalchemy import (
-    create_engine,
-    ForeignKey,
-    Column,
-    Integer,
-    String,
-    Float,
-    DateTime,
-    Boolean,
-    BigInteger,
-    CHAR,
-    Table,
-    update,
-    insert,
-)
-
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-
-from sqlalchemy import text
-import pandas as pd
-from binance.spot import Spot as Client
-
 import time
+
+# for data manipulation
+import pandas as pd
+import talib as ta
+
+# for async requests
 import aiohttp
 import asyncio
 
-import talib as ta
-
-import logging
-
+# for multiprocessing
 import multiprocessing as mp
 import concurrent.futures
 
-# logging.basicConfig(level=logging.WARNING)
-logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+# for turning of logging of warnings
+import logging
 
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 pd.options.mode.chained_assignment = None
 
+# importing own functions
 from tableDataCalc import createTableRow
-
-
-# api_key = "LS2FxhfRjqp6TOv3q2QFOGuQzU8KoSGwlcLIOVaxjRjc0UOhncD2ZRMzT4xRGsfu"
-# secret_key = "p3AHHm2sq26yV2y92y0XkFkDxNqE3AAPVphtslNzrmLAJOrMN3r5Gm8ohNolfsXn"
-# spot_client = Client(api_key, secret_key)
-
-
-def transformingDF(df, timeFrame):
-    try:
-        df["time"] = pd.to_datetime(df["Open time"], unit="ms")
-        df = df[["time", "Open", "High", "Low", "Close", "Volume"]]
-        df[["Open", "High", "Low", "Close", "Volume"]] = df[
-            ["Open", "High", "Low", "Close", "Volume"]
-        ].astype(float)
-
-        return df
-
-        # print(df)
-    except Exception as e:
-        print(e)
-
-
-tableNames = [
-    "BTCUSDT",
-    "ETHUSDT",
-    "BNBUSDT",
-    "ADAUSDT",
-    "XRPUSDT",
-    "DOGEUSDT",
-    "TRXUSDT",
-]
-# tableNames = ["BTCUSDT"]
-
-timeFrames = ["1d", "1w", "4h"]
-
-# timeFrames = ["1d", "1w", "1M", "1h", "4h"]
-
-
-engine = create_engine(
-    "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
-)  # set echo to True to see the logs in the console
-
-# for using with my external railway db
-
-# engine = create_engine(
-#     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
-#     echo=True,
-# )
-
-
-# conn = engine.connect()  # needed to perform stuff like direct sql queries
-
-# Session = sessionmaker(bind=engine)  # this is the class
-
-# this is the instance
-
-# getting data asynchronously from api
-
-# url = "https://api.binance.com/api/v3/klines"
-url = "https://api.binance.us/api/v3/klines"
-
-# url = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1000"
-# url2 =" https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1000"
 
 columns = [
     "Open time",
@@ -117,6 +36,18 @@ columns = [
     "ignore",
 ]
 
+
+## ! different urls-------------------
+url = "https://api.binance.us/api/v3/klines"
+# url = "https://api.binance.com/api/v3/klines"
+# urlfull = "https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1000"
+# url = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1000"
+# url2 =" https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1000"
+
+
+##! parameters -------------------
+# timeFrames = ["1d", "1w", "1M", "1h", "4h"]
+timeFrames = ["1d", "1w", "4h"]
 symbols = [
     "BTCUSDT",
     "ETHUSDT",
@@ -181,12 +112,20 @@ symbols = [
 ]
 
 
-results = []
-realTableNames = []
+def transformingDF(df, timeFrame):
+    try:
+        df["time"] = pd.to_datetime(df["Open time"], unit="ms")
+        df = df[["time", "Open", "High", "Low", "Close", "Volume"]]
+        df[["Open", "High", "Low", "Close", "Volume"]] = df[
+            ["Open", "High", "Low", "Close", "Volume"]
+        ].astype(float)
+        return df
+    except Exception as e:
+        print(e)
 
 
-async def fetch_data(session, semaphore, symbol, time_frame):
-    realTableNames.append((symbol + time_frame).lower())
+# this is helper function for get_data() function
+async def request_data_pair(session, semaphore, symbol, time_frame):
     async with semaphore:
         response = await session.get(
             url,
@@ -197,115 +136,55 @@ async def fetch_data(session, semaphore, symbol, time_frame):
         return data
 
 
-async def get_data():
+async def get_entire_data():
+    results = []
+    realTableNames = []
+
     async with aiohttp.ClientSession() as session:
         semaphore = asyncio.Semaphore(50)  # Limit to 10 concurrent requests
-        tasks = [
-            fetch_data(session, semaphore, symbol, time_frame)
-            for symbol in symbols
-            for time_frame in timeFrames
-        ]
+        tasks = []
+        for symbol in symbols:
+            for time_frame in timeFrames:
+                realTableNames.append((symbol + time_frame).lower())
+                tasks.append(request_data_pair(session, semaphore, symbol, time_frame))
         responses = await asyncio.gather(*tasks)
         for data in responses:
             df = pd.DataFrame(data, columns=columns)
             results.append(df)
 
-
-asyncio.run(get_data())
-
-# I need this below-----------------
+    return results, realTableNames
 
 
-dfs_dictionary = {}
+def asyncio_main():
+    out_dfs_dictionary = {}
+    results, realTableNames = asyncio.run(get_entire_data())
 
+    for i in range(0, len(results)):
+        if len(results[i]) == 0:
+            print("continuing")
+            continue
+        out_dfs_dictionary[realTableNames[i]] = transformingDF(
+            results[i], realTableNames[i][-2:]
+        )
 
-for i in range(0, len(results)):
-    if len(results[i]) == 0:
-        continue
+    return out_dfs_dictionary
 
-    dfs_dictionary[realTableNames[i]] = transformingDF(
-        results[i], realTableNames[i][-2:]
-    )
-
-
-# until here everything scales very well
-
-
-# async def createRowAsync(df, name):
-
-#     startRow = time.time()
-#     output =  createTableRow(df, name)
-#     endRow = time.time()
-#     print(f"time for {name}: {endRow - startRow} sec")
-#     return output
-
-
-# async def create_tasks_for_dataframes(dfs_dictionary):
-#     tasks = []
-#     for table_name, df in dfs_dictionary.items():
-#         task = asyncio.create_task(createRowAsync(df, table_name))
-#         tasks.append(task)
-#     task_results = await asyncio.gather(*tasks)
-#     return task_results
-
-
-# def main():
-#     start = time.time()
-#     task_results = asyncio.run(create_tasks_for_dataframes(dfs_dictionary))
-#     end = time.time()
-#     print(end - start)
-
-
-# main()
 
 # # using concurrent futures -------------------
 
 if __name__ == "__main__":
+    dfs_dictionary = asyncio_main()
     start = time.time()
 
     with concurrent.futures.ProcessPoolExecutor(
-        max_workers=4
+        max_workers=mp.cpu_count()
     ) as executor:  # 4 is current best
-        results = [
+        futures_results = [
             executor.submit(createTableRow, df, df_name)
             for df_name, df in dfs_dictionary.items()
         ]
 
-    # for f in concurrent.futures.as_completed(results):
-    #     print(f.result())
-
     end = time.time()
     print(f"Finished in: {end-start} sec")
-    print(f"length of results: {len(results)}")
-
-
-# # single process option for comparing -------------------
-
-# if __name__ == "__main__":
-#     start = time.time()
-#     results = []
-#     for df_name, df in dfs_dictionary.items():
-#         result = createTableRow(df, df_name)
-#         results.append(result)
-#     end = time.time()
-#     print(f"Finished in: {end-start} sec")
-#     print(f"length of results: {len(results)}")
-
-
-# # using multiprocessing -------------------
-
-# if __name__ == "__main__":
-#     start = time.time()
-
-#     processes = []
-
-#     for df_name, df in dfs_dictionary.items():
-#         p = mp.Process(target=createTableRow, args=(df, df_name))
-#         p.start()
-#         processes.append(p)
-
-#     for process in processes:
-#         process.join()
-
-#     end = time.time()
-#     print(f"Finished in: {end-start} sec")
+    print(f"length of results: {len(futures_results)}")
+    print(futures_results)

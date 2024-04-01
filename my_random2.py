@@ -1,4 +1,5 @@
 import concurrent.futures
+import multiprocessing as mp
 import time
 
 
@@ -36,3 +37,5 @@ if __name__ == "__main__":
 
     end = time.time()
     print(f"Finished script in: {end-start} sec")
+    coresAmount = mp.cpu_count()
+    print(f"Amount of cores: {coresAmount}")
