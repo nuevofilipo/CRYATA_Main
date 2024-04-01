@@ -44,7 +44,7 @@ def varvIndicatorMetric(df):
     try:
         dfLastRow = dfVarv.iloc[-1]
     except:
-        return {"error": "not enough data"}
+        return "error: not enough data"
 
     zone = 1
 
@@ -60,6 +60,11 @@ def momentumIndicatorMetric(df):
     redDf = momentumIndicator(df)[0]
     greenDf = momentumIndicator(df)[1]
     dataframes = [redDf, greenDf]
+
+    # case when there is not enough data
+    if redDf.empty or greenDf.empty:
+        return 0
+
     combinedDf = pd.concat(dataframes).sort_values(by="x0")
     dfLastRow = combinedDf.iloc[-1]
     if dfLastRow["color"] == "#2af5c2":
@@ -78,7 +83,7 @@ def volatilityIndicatorMetric(df):
 
 
 def createTableRow(df, coin):
-    print(f"Creating table row for {coin}")
+    # print(f"Creating table row for {coin}")
     lastRow = df.iloc[-1]
     price = lastRow["Close"]
 
@@ -114,5 +119,3 @@ def createEntireTable():
 
     print(f"Total time: {totalTime}")
     return allEntries
-
-

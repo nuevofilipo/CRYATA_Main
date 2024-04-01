@@ -1,5 +1,8 @@
 import time
 
+# importing for database connection
+from sqlalchemy import create_engine
+
 # for data manipulation
 import pandas as pd
 import talib as ta
@@ -47,7 +50,7 @@ url = "https://api.binance.us/api/v3/klines"
 
 ##! parameters -------------------
 # timeFrames = ["1d", "1w", "1M", "1h", "4h"]
-timeFrames = ["1d", "1w", "4h"]
+timeFrames = ["1d"]
 symbols = [
     "BTCUSDT",
     "ETHUSDT",
@@ -161,7 +164,6 @@ def asyncio_main():
 
     for i in range(0, len(results)):
         if len(results[i]) == 0:
-            print("continuing")
             continue
         out_dfs_dictionary[realTableNames[i]] = transformingDF(
             results[i], realTableNames[i][-2:]
@@ -187,4 +189,31 @@ if __name__ == "__main__":
     end = time.time()
     print(f"Finished in: {end-start} sec")
     print(f"length of results: {len(futures_results)}")
-    print(futures_results)
+    out_results = []
+
+    for f in futures_results:
+        try:
+            out_results.append(f.result())
+        except Exception as e:
+            print(e)
+
+    df_table = pd.DataFrame(out_results)
+    print(df_table)
+
+    # !inserting into database -------------------
+    
+    engine = create_engine(
+    "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
+    )  
+
+    df_table.to_sql("dailytable", con=engine, if_exists="replace", chunksize=1000)
+
+    # for using with my external railway db
+
+    # engine = create_engine(
+    #     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
+    #     echo=True,
+    # )
+
+
+

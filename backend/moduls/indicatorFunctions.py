@@ -184,7 +184,15 @@ def highsForSupplyZones(df):
     # defining valid highs, only the ones that haven't been broken----------------------------------------------
 
     highs_df = df[df["actual_high"] == 1]
-    highest_index = highs_df["High"].idxmax()
+
+    ##! working on
+    try:
+        highest_index = highs_df["High"].idxmax()
+    except Exception as e:
+        print(e)
+        
+
+
     highest_df2 = df.loc[highest_index:]
     df["protected_highs_and_lows"] = 0
     # this is basically the same as the valid_high, just that this is in the real df
