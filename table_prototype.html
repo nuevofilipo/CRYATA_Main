@@ -52,17 +52,19 @@
 
 <table id="cryptoTable">
     <tr>
+        <th>Index</th>
         <th>Coin</th>
         <th>Price (USD)</th>
-        <th>Market Cap (USD)</th>
-        <th>Volume (24h)</th>
-        <th>Change (24h)</th>
+        <th>Four Line Indicator</th>
+        <th>Varv Indicator</th>
+        <th>Momentum</th>
+        <th>Volatility</th>
     </tr>
 </table>
 
 <script>
     // Function to add a new row to the table
-    function addRow(coin, price, marketCap, volume, change) {
+    function addRow(index, coin, price, fourLineIndicator, varvIndicator, momentum, volatility) {
         var table = document.getElementById("cryptoTable");
         var row = table.insertRow(-1); // Insert row at the end of the table
 
@@ -71,27 +73,38 @@
         var cell3 = row.insertCell(2);
         var cell4 = row.insertCell(3);
         var cell5 = row.insertCell(4);
+        var cell6 = row.insertCell(5);
+        var cell7 = row.insertCell(6);
 
-        cell1.innerHTML = coin;
-        cell2.innerHTML = price;
-        cell3.innerHTML = marketCap;
-        cell4.innerHTML = volume;
-        cell5.innerHTML = change;
+        cell1.innerHTML = index;
+        cell2.innerHTML = coin;
+        cell3.innerHTML = price;
+        cell4.innerHTML = fourLineIndicator;
+        cell5.innerHTML = varvIndicator;
+        cell6.innerHTML = momentum;
+        cell7.innerHTML = volatility;
+        
     }
 
-    // Example data from API response
-    var apiResponse = [
-        { coin: "Bitcoin (BTC)", price: "$50,000", marketCap: "$950 billion", volume: "$50 billion", change: "+2.5%" },
-        { coin: "Ethereum (ETH)", price: "$2,000", marketCap: "$230 billion", volume: "$20 billion", change: "+3.2%" },
-        { coin: "Ripple (XRP)", price: "$1.20", marketCap: "$60 billion", volume: "$5 billion", change: "+1.8%" },
-        { coin: "Litecoin (LTC)", price: "$200", marketCap: "$12 billion", volume: "$1 billion", change: "+0.5%" },
-        { coin: "Cardano (ADA)", price: "$1.50", marketCap: "$40 billion", volume: "$3 billion", change: "+2.0%" }
-    ];
+    //Actual API call
+
+    async function getTableViewData(tableName){
+        const response = await fetch(`http://127.0.0.1:5000/?name=${tableName}`);
+        const data = await response.json();
+        console.log(data);
+        return data;
+    }
 
     // Loop through API response and add rows to the table
-    apiResponse.forEach(function(entry) {
-        addRow(entry.coin, entry.price, entry.marketCap, entry.volume, entry.change);
-    });
+    async function main(){
+        const data = await getTableViewData('dailytable');
+        console.log(data);
+        data.forEach(function(entry) {
+            addRow(entry.index, entry.coin, entry.price, entry.fourLineIndicator, entry.varvIndicator, entry.momentumIndicator, entry.volatilityIndicator);
+        });
+    }
+
+    main();
 </script>
 
 </body>

@@ -43,7 +43,7 @@ columns = [
 ## ! different urls-------------------
 url = "https://api.binance.us/api/v3/klines"
 # url = "https://api.binance.com/api/v3/klines"
-# urlfull = "https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1000"
+# urlfull = "https://api.binance.us/api/v3/klines?symbol=XMRUSDT&interval=1d&limit=1000"
 # url = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1000"
 # url2 =" https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1000"
 
@@ -115,7 +115,7 @@ symbols = [
 ]
 
 
-def transformingDF(df, timeFrame):
+def transformingDF(df, time_frame):
     try:
         df["time"] = pd.to_datetime(df["Open time"], unit="ms")
         df = df[["time", "Open", "High", "Low", "Close", "Volume"]]
@@ -127,7 +127,7 @@ def transformingDF(df, timeFrame):
         print(e)
 
 
-# this is helper function for get_data() function
+# this is helper function for get_entire_data() function
 async def request_data_pair(session, semaphore, symbol, time_frame):
     async with semaphore:
         response = await session.get(
@@ -135,7 +135,11 @@ async def request_data_pair(session, semaphore, symbol, time_frame):
             params={"symbol": symbol, "interval": time_frame, "limit": 1000},
             ssl=False,
         )
-        data = await response.json()
+        try:
+            data = await response.json()
+        except Exception as e:
+            print(f"exception occured while feching {symbol, time_frame}")
+            data = []
         return data
 
 
@@ -144,8 +148,8 @@ async def get_entire_data():
     realTableNames = []
 
     async with aiohttp.ClientSession() as session:
-        semaphore = asyncio.Semaphore(50)  # Limit to 10 concurrent requests
         tasks = []
+        semaphore = asyncio.Semaphore(50)  # Limit to 10 concurrent requests
         for symbol in symbols:
             for time_frame in timeFrames:
                 realTableNames.append((symbol + time_frame).lower())
@@ -158,18 +162,27 @@ async def get_entire_data():
     return results, realTableNames
 
 
-def asyncio_main():
+def asyncio_main(retries_left=3):
     out_dfs_dictionary = {}
     results, realTableNames = asyncio.run(get_entire_data())
 
+    empty_list_counter = 0
     for i in range(0, len(results)):
         if len(results[i]) == 0:
+            empty_list_counter += 1
             continue
         out_dfs_dictionary[realTableNames[i]] = transformingDF(
             results[i], realTableNames[i][-2:]
         )
 
-    return out_dfs_dictionary
+    # base case data failed
+    if empty_list_counter == len(results) and retries_left == 0:
+        print(f"Exception, data failed loading!")
+    elif empty_list_counter == len(results):
+        time.sleep(60)
+        return asyncio_main(retries_left - 1)
+    else:
+        return out_dfs_dictionary
 
 
 # # using concurrent futures -------------------
@@ -188,7 +201,7 @@ if __name__ == "__main__":
 
     end = time.time()
     print(f"Finished in: {end-start} sec")
-    print(f"length of results: {len(futures_results)}")
+    # print(f"length of results: {len(futures_results)}")
     out_results = []
 
     for f in futures_results:
@@ -198,22 +211,19 @@ if __name__ == "__main__":
             print(e)
 
     df_table = pd.DataFrame(out_results)
-    print(df_table)
+    # print(df_table)
 
     # !inserting into database -------------------
-    
-    engine = create_engine(
-    "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
-    )  
-
-    df_table.to_sql("dailytable", con=engine, if_exists="replace", chunksize=1000)
-
-    # for using with my external railway db
+    #! different engine urls for local and remote database
 
     # engine = create_engine(
-    #     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
-    #     echo=True,
+    #     "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
     # )
 
+    # ? remote, railway database
+    engine = create_engine(
+        "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
+        echo=True,
+    )
 
-
+    df_table.to_sql("dailytable", con=engine, if_exists="replace", chunksize=1000)
