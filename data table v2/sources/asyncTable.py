@@ -43,7 +43,7 @@ columns = [
 ## ! different urls-------------------
 url = "https://api.binance.us/api/v3/klines"
 # url = "https://api.binance.com/api/v3/klines"
-# urlfull = "https://api.binance.us/api/v3/klines?symbol=XMRUSDT&interval=1d&limit=1000"
+# urlfull = "https://api.binance.us/api/v3/klines?symbol=HNTUSDT&interval=1d&limit=1000"
 # url = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1000"
 # url2 =" https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1000"
 
@@ -93,7 +93,7 @@ symbols = [
     "WAVESUSDT",
     "RUNEUSDT",
     "NEARUSDT",
-    "HNTUSDT",
+    # "HNTUSDT", very weird, they don't have the official hntusdt pair
     "DASHUSDT",
     "ZECUSDT",
     "MANAUSDT",
@@ -211,19 +211,20 @@ if __name__ == "__main__":
             print(e)
 
     df_table = pd.DataFrame(out_results)
-    # print(df_table)
+    df_table.index = df_table.index + 1
+    print(df_table)
 
     # !inserting into database -------------------
     #! different engine urls for local and remote database
 
-    # engine = create_engine(
-    #     "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
-    # )
+    engine = create_engine(
+        "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
+    )
 
     # ? remote, railway database
-    engine = create_engine(
-        "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
-        echo=True,
-    )
+    # engine = create_engine(
+    #     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
+    #     echo=True,
+    # )
 
     df_table.to_sql("dailytable", con=engine, if_exists="replace", chunksize=1000)

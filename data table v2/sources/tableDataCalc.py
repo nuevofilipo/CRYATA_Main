@@ -76,7 +76,9 @@ def momentumIndicatorMetric(df):
 def volatilityIndicatorMetric(df):
     last100Df = df.iloc[-100:]
 
-    standardDeviation = last100Df["Close"].rolling(100).std()
+    standardDeviation = (
+        last100Df["Close"].rolling(100).std()
+    )  # change from std to mad, check whether it works
     mean = last100Df["Close"].rolling(100).mean()
     volatility = standardDeviation / mean
     return volatility.iloc[-1] * 100
@@ -86,6 +88,8 @@ def createTableRow(df, coin):
     # print(f"Creating table row for {coin}")
     lastRow = df.iloc[-1]
     price = lastRow["Close"]
+
+    coin = coin[: len(coin) - 6].upper()
 
     dict_entry = {
         "coin": coin,

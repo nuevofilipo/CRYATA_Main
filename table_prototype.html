@@ -7,43 +7,65 @@
 <style>
     body {
         font-family: Arial, sans-serif;
-        background-color: #f0f0f0;
+        background-color: black;
+        color: white;
         margin: 0;
         padding: 0;
     }
 
+
+
     h2 {
         text-align: center;
         padding: 20px 0;
-        color: #333;
+        color: violet;
     }
 
     table {
         width: 90%;
         margin: 0 auto;
         border-collapse: collapse;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        background-color: #fff;
+        /* box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); */
+        background-color: #1f1f1f;
+        overflow:hidden;
+        border-radius: 10px;
     }
 
+    tbody {
+        border: none;
+        border-collapse: collapse;
+    }
+
+
     th, td {
-        border: 1px solid #ddd;
-        padding: 10px;
+        border: 1px solid #666;
+        padding:  10px;
+        height: 45px;
         text-align: left;
+        font-size: 18px;
+        border-right: none;
+        border-left:none;
+        border-top: none;
+        
     }
 
     th {
-        background-color: #f2f2f2;
+        background-color: violet;
         font-weight: bold;
+        color: black;
+        height: 50px;
+        font-size: 22px;
+        
     }
 
-    tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
+    /* tr:nth-child(even) {
+        background-color: #444;
+    } */
 
     tr:hover {
-        background-color: #f2f2f2;
+        background-color: #353535;
     }
+
 </style>
 </head>
 <body>
@@ -52,13 +74,13 @@
 
 <table id="cryptoTable">
     <tr>
-        <th>Index</th>
-        <th>Coin</th>
-        <th>Price (USD)</th>
-        <th>Four Line Indicator</th>
-        <th>Varv Indicator</th>
-        <th>Momentum</th>
-        <th>Volatility</th>
+        <th onclick="sortTable(0)">#</th>
+        <th onclick="sortTable(1)">Coin</th>
+        <th onclick="sortTable(2)">Price (USD)</th>
+        <th onclick="sortTable(3)">Four Line Indicator</th>
+        <th onclick="sortTable(4)">Varv Indicator</th>
+        <th onclick="sortTable(5)">Momentum</th>
+        <th onclick="sortTable(6)">Volatility</th>
     </tr>
 </table>
 
@@ -81,9 +103,55 @@
         cell3.innerHTML = price;
         cell4.innerHTML = fourLineIndicator;
         cell5.innerHTML = varvIndicator;
-        cell6.innerHTML = momentum;
+
+        if (momentum === 1) {
+            cell6.innerHTML = '<span style="font-size:30px; color: green;">&#8593;</span>'; // Upward arrow
+
+        } else if (momentum === -1) {
+            cell6.innerHTML = '<span style="font-size:30px; color: red;">&#8595;</span>'; // Downward arrow
+        } else {
+            cell6.innerHTML = '<span style="font-size:30px; color: orange;">&#8594;</span>'; // No arrow if momentumIndicator is neither 1 nor -1
+        }
         cell7.innerHTML = volatility;
         
+    }
+
+    function sortTable(columnIndex) {
+        var table, rows, switching, i, x, y, shouldSwitch;
+        table = document.getElementById("cryptoTable");
+        switching = true;
+
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("td")[columnIndex];
+                y = rows[i + 1].getElementsByTagName("td")[columnIndex];
+
+                // Check if the cells contain numbers
+                var numX = parseFloat(x.innerHTML);
+                var numY = parseFloat(y.innerHTML);
+
+                // If the cell content is a number, compare numerically
+                if (!isNaN(numX) && !isNaN(numY)) {
+                    if (numX > numY) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else { // If not a number, compare as strings
+                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
     }
 
     //Actual API call
