@@ -84,6 +84,23 @@ def volatilityIndicatorMetric(df):
     return volatility.iloc[-1] * 100
 
 
+def meanAbsoluteDeviation(df):
+
+    mean = df["Close"].mean()
+    deviation = abs(df["Close"] - mean).mean()
+    return deviation
+
+
+def volatilityMeanAbsolute(df):
+    last100Df = df.iloc[-100:]
+
+    meanAbsoluteDev = meanAbsoluteDeviation(last100Df)
+
+    mean = last100Df["Close"].rolling(100).mean()
+    volatility = meanAbsoluteDev / mean
+    return volatility.iloc[-1] * 100
+
+
 def createTableRow(df, coin):
     # print(f"Creating table row for {coin}")
     lastRow = df.iloc[-1]
@@ -123,3 +140,14 @@ def createEntireTable():
 
     print(f"Total time: {totalTime}")
     return allEntries
+
+
+def main():
+    df = getResponse("BTC/USD", "1day", 1000)
+    volatility = volatilityIndicatorMetric(df)
+    meanAbsoluteVol = volatilityMeanAbsolute(df)
+    print(volatility)
+    print(f"Mean absolute deviation: {meanAbsoluteVol}")
+
+
+# main()
