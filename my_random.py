@@ -1,5 +1,6 @@
-Str = "btcusdt1d"
+import statistics
 
-Str = Str[: len(Str) - 6].upper()
+dataset = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-print(Str)
+median = statistics.median(dataset)
+print(median)

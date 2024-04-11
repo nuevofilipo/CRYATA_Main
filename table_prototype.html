@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href='https://fonts.googleapis.com/css?family=Inter' rel='stylesheet'>
 <title>Crypto Market Overview</title>
 <style>
     body {
-        font-family: Arial, sans-serif;
+        /* font-family: Arial, sans-serif; */
+        font-family: 'Inter';
         background-color: black;
         color: white;
         margin: 0;
@@ -43,6 +45,7 @@
         height: 45px;
         text-align: left;
         font-size: 18px;
+        font-weight: lighter;
         border-right: none;
         border-left:none;
         border-top: none;
@@ -51,7 +54,7 @@
 
     th {
         background-color: violet;
-        font-weight: bold;
+        font-weight: bolder;
         color: black;
         height: 50px;
         font-size: 22px;
@@ -77,16 +80,17 @@
         <th onclick="sortTable(0)">#</th>
         <th onclick="sortTable(1)">Coin</th>
         <th onclick="sortTable(2)">Price (USD)</th>
-        <th onclick="sortTable(3)">Four Line Indicator</th>
-        <th onclick="sortTable(4)">Varv Indicator</th>
+        <th onclick="sortTable(3)">Context Bands</th>
+        <th onclick="sortTable(4)">Varv</th>
         <th onclick="sortTable(5)">Momentum</th>
-        <th onclick="sortTable(6)">Volatility</th>
+        <th onclick="sortTable(6)">VolatilityMean</th>
+        <th onclick="sortTable(7)">VolatilityMedian</th>
     </tr>
 </table>
 
 <script>
     // Function to add a new row to the table
-    function addRow(index, coin, price, fourLineIndicator, varvIndicator, momentum, volatility) {
+    function addRow(index, coin, price, fourLineIndicator, varvIndicator, momentum, volatilityMean, volatilityMedian) {
         var table = document.getElementById("cryptoTable");
         var row = table.insertRow(-1); // Insert row at the end of the table
 
@@ -97,62 +101,119 @@
         var cell5 = row.insertCell(4);
         var cell6 = row.insertCell(5);
         var cell7 = row.insertCell(6);
+        var cell8 = row.insertCell(7);
 
         cell1.innerHTML = index;
         cell2.innerHTML = coin;
         cell3.innerHTML = price;
         cell4.innerHTML = fourLineIndicator;
+        cell4.style.color = "black";
+
+        if (fourLineIndicator === 2) {
+            cell4.style.color = "#e61220";
+            cell4.textContent = "massive short potential";
+        } else if (fourLineIndicator === 1) {
+            cell4.style.color = "#e66a12";
+            cell4.textContent = "short potential";
+        } else if (fourLineIndicator === 0) {
+            cell4.style.color = "#e6bf12";
+            cell4.textContent = "ranging";
+        } else if (fourLineIndicator === -1) {
+            cell4.style.color = "#cbff30";
+            cell4.textContent = "long potential";
+        } else if (fourLineIndicator === -2){
+            cell4.style.color = "#00de60";
+            cell4.textContent = "massive long potential";
+        }
+
+
+
+
         cell5.innerHTML = varvIndicator;
 
+        // adding arrows for momentum
         if (momentum === 1) {
-            cell6.innerHTML = '<span style="font-size:30px; color: green;">&#8593;</span>'; // Upward arrow
+            cell6.innerHTML = '<span style="font-size:30px; color: #33ff77;">&#8593;</span>'; // Upward arrow
 
         } else if (momentum === -1) {
             cell6.innerHTML = '<span style="font-size:30px; color: red;">&#8595;</span>'; // Downward arrow
         } else {
             cell6.innerHTML = '<span style="font-size:30px; color: orange;">&#8594;</span>'; // No arrow if momentumIndicator is neither 1 nor -1
         }
-        cell7.innerHTML = volatility;
+
+
+
+
+        cell7.innerHTML = volatilityMean;
+        cell8.innerHTML = volatilityMedian;
         
     }
 
-    function sortTable(columnIndex) {
-        var table, rows, switching, i, x, y, shouldSwitch;
-        table = document.getElementById("cryptoTable");
-        switching = true;
+// Object to keep track of sorting state for the current column
+var sortingState = {
+    columnIndex: null,
+    order: null
+};
 
-        while (switching) {
-            switching = false;
-            rows = table.rows;
+function sortTable(columnIndex) {
+    var table, rows, switching, i, x, y, shouldSwitch;
+    table = document.getElementById("cryptoTable");
+    switching = true;
 
-            for (i = 1; i < (rows.length - 1); i++) {
-                shouldSwitch = false;
-                x = rows[i].getElementsByTagName("td")[columnIndex];
-                y = rows[i + 1].getElementsByTagName("td")[columnIndex];
+    // Reset sorting state for other columns if a new column is clicked
+    if (sortingState.columnIndex !== columnIndex) {
+        sortingState.columnIndex = columnIndex;
+        sortingState.order = 'asc'; // Default to ascending order
+    } else {
+        // Toggle sorting order if the same column is clicked again
+        sortingState.order = sortingState.order === 'asc' ? 'desc' : 'asc';
+    }
 
-                // Check if the cells contain numbers
-                var numX = parseFloat(x.innerHTML);
-                var numY = parseFloat(y.innerHTML);
+    while (switching) {
+        switching = false;
+        rows = table.rows;
 
-                // If the cell content is a number, compare numerically
-                if (!isNaN(numX) && !isNaN(numY)) {
-                    if (numX > numY) {
-                        shouldSwitch = true;
-                        break;
-                    }
-                } else { // If not a number, compare as strings
-                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                        shouldSwitch = true;
-                        break;
-                    }
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("td")[columnIndex];
+            y = rows[i + 1].getElementsByTagName("td")[columnIndex];
+
+            // Compare content based on sorting state for the column
+            if (sortingState.order === 'asc') {
+                if (compareCells(x, y) > 0) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else {
+                if (compareCells(x, y) < 0) {
+                    shouldSwitch = true;
+                    break;
                 }
             }
-            if (shouldSwitch) {
-                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                switching = true;
-            }
+        }
+
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
         }
     }
+}
+
+// Function to compare cell content
+function compareCells(cellX, cellY) {
+    var contentX = cellX.innerHTML.toLowerCase();
+    var contentY = cellY.innerHTML.toLowerCase();
+
+    if (!isNaN(parseFloat(contentX)) && !isNaN(parseFloat(contentY))) {
+        // If content is numeric, compare numerically
+        return parseFloat(contentX) - parseFloat(contentY);
+    } else {
+        // If content is non-numeric, compare as strings
+        return contentX.localeCompare(contentY);
+    }
+}
+
+
 
     //Actual API call
 
@@ -168,7 +229,7 @@
         const data = await getTableViewData('dailytable');
         console.log(data);
         data.forEach(function(entry) {
-            addRow(entry.index, entry.coin, entry.price, entry.fourLineIndicator, entry.varvIndicator, entry.momentumIndicator, entry.volatilityIndicator);
+            addRow(entry.index, entry.coin, entry.price, entry.fourLineIndicator, entry.varvIndicator, entry.momentumIndicator, entry.volatilityMeanAbsolute, entry.volatilityMedianAbsolute);
         });
     }
 

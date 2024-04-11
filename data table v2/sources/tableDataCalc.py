@@ -21,18 +21,18 @@ def fourLineIndicatorMetric(df):
     upperEMA = dfLastRow["EMA"] * 1.21
     lowerEMA = dfLastRow["EMA"] * 0.79
 
-    marketCondition = "neutral"  # default value
+    marketCondition = 0  # default value
 
     if dfLastRow["Close"] > upperMA:
-        marketCondition = "extremely overvalued"
+        marketCondition = 2
     elif dfLastRow["Close"] <= upperMA and dfLastRow["Close"] > upperEMA:
-        marketCondition = "overvalued"
+        marketCondition = 1
     elif dfLastRow["Close"] <= upperEMA and dfLastRow["Close"] > lowerEMA:
-        marketCondition = "neutral"
+        marketCondition = 0
     elif dfLastRow["Close"] <= lowerEMA and dfLastRow["Close"] > lowerMA:
-        marketCondition = "undervalued"
+        marketCondition = -1
     elif dfLastRow["Close"] <= lowerMA:
-        marketCondition = "extremely undervalued"
+        marketCondition = -2
 
     return marketCondition  # return a string from 5 possible values
 
@@ -44,7 +44,7 @@ def varvIndicatorMetric(df):
     try:
         dfLastRow = dfVarv.iloc[-1]
     except:
-        return "error: not enough data"
+        return "not sufficient data"
 
     zone = 1
 
@@ -84,7 +84,7 @@ def volatilityIndicatorMetric(df):
     return volatility.iloc[-1] * 100
 
 
-def meanAbsoluteDeviation(df):
+def meanAbsoluteDeviation(df):  # helper function
 
     mean = df["Close"].mean()
     deviation = abs(df["Close"] - mean).mean()
@@ -101,6 +101,16 @@ def volatilityMeanAbsolute(df):
     return volatility.iloc[-1] * 100
 
 
+def volatilityMedianAbsolute(df):
+    last100Df = df.iloc[-100:]
+
+    medianAbsoluteDev = abs(df["Close"] - df["Close"].median()).median()
+
+    mean = last100Df["Close"].rolling(100).mean()
+    volatility = medianAbsoluteDev / mean
+    return volatility.iloc[-1] * 100
+
+
 def createTableRow(df, coin):
     # print(f"Creating table row for {coin}")
     lastRow = df.iloc[-1]
@@ -114,7 +124,8 @@ def createTableRow(df, coin):
         "fourLineIndicator": fourLineIndicatorMetric(df),
         "varvIndicator": varvIndicatorMetric(df),
         "momentumIndicator": momentumIndicatorMetric(df),
-        "volatilityIndicator": volatilityIndicatorMetric(df),
+        "volatilityMeanAbsolute": volatilityMeanAbsolute(df),
+        "volatilityMedianAbsolute": volatilityMedianAbsolute(df),
     }
 
     return dict_entry
@@ -145,9 +156,11 @@ def createEntireTable():
 def main():
     df = getResponse("BTC/USD", "1day", 1000)
     volatility = volatilityIndicatorMetric(df)
-    meanAbsoluteVol = volatilityMeanAbsolute(df)
-    print(volatility)
-    print(f"Mean absolute deviation: {meanAbsoluteVol}")
+    print(f" standard deviation Volatility: {volatility}")
+    medianAbs = volatilityMedianAbsolute(df)
+    print(f"Median absolute volatility: {medianAbs}")
+    meanAbs = volatilityMeanAbsolute(df)
+    print(f"Mean absolute volatility: {meanAbs}")
 
 
 # main()
