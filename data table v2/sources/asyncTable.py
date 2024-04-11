@@ -50,69 +50,7 @@ url = "https://api.binance.us/api/v3/klines"
 
 ##! parameters -------------------
 # timeFrames = ["1d", "1w", "1M", "1h", "4h"]
-timeFrames = ["1d"]
-symbols = [
-    "BTCUSDT",
-    "ETHUSDT",
-    "BNBUSDT",
-    "ADAUSDT",
-    "XRPUSDT",
-    "DOGEUSDT",
-    "DOTUSDT",
-    "UNIUSDT",
-    "BCHUSDT",
-    "LTCUSDT",
-    "LINKUSDT",
-    "SOLUSDT",
-    "MATICUSDT",
-    "XLMUSDT",
-    "ETCUSDT",
-    "THETAUSDT",
-    "ICPUSDT",
-    "VETUSDT",
-    "FILUSDT",
-    "TRXUSDT",
-    "EOSUSDT",
-    "XMRUSDT",
-    "AAVEUSDT",
-    "NEOUSDT",
-    "XTZUSDT",
-    "MKRUSDT",
-    "ALGOUSDT",
-    "ATOMUSDT",
-    "KSMUSDT",
-    "BTTUSDT",
-    "CAKEUSDT",
-    "AVAXUSDT",
-    "LUNAUSDT",
-    "COMPUSDT",
-    "HBARUSDT",
-    "GRTUSDT",
-    "EGLDUSDT",
-    "CHZUSDT",
-    "WAVESUSDT",
-    "RUNEUSDT",
-    "NEARUSDT",
-    # "HNTUSDT", very weird, they don't have the official hntusdt pair
-    "DASHUSDT",
-    "ZECUSDT",
-    "MANAUSDT",
-    "ENJUSDT",
-    "ZILUSDT",
-    "SNXUSDT",
-    "BATUSDT",
-    "QTUMUSDT",
-    "ONTUSDT",
-    "FTTUSDT",
-    "YFIUSDT",
-    "ZRXUSDT",
-    "SUSHIUSDT",
-    "ICXUSDT",
-    "BTGUSDT",
-    "IOSTUSDT",
-    "DGBUSDT",
-    "STXUSDT",
-]
+# timeFrames = ["1d"]
 
 
 def transformingDF(df, time_frame):
@@ -143,7 +81,7 @@ async def request_data_pair(session, semaphore, symbol, time_frame):
         return data
 
 
-async def get_entire_data():
+async def get_entire_data(timeFrame, symbols):
     results = []
     realTableNames = []
 
@@ -151,9 +89,8 @@ async def get_entire_data():
         tasks = []
         semaphore = asyncio.Semaphore(50)  # Limit to 10 concurrent requests
         for symbol in symbols:
-            for time_frame in timeFrames:
-                realTableNames.append((symbol + time_frame).lower())
-                tasks.append(request_data_pair(session, semaphore, symbol, time_frame))
+            realTableNames.append((symbol + timeFrame).lower())
+            tasks.append(request_data_pair(session, semaphore, symbol, timeFrame))
         responses = await asyncio.gather(*tasks)
         for data in responses:
             df = pd.DataFrame(data, columns=columns)
@@ -162,9 +99,9 @@ async def get_entire_data():
     return results, realTableNames
 
 
-def asyncio_main(retries_left=3):
+def asyncio_main(timeFrame, symbols, retries_left=3):
     out_dfs_dictionary = {}
-    results, realTableNames = asyncio.run(get_entire_data())
+    results, realTableNames = asyncio.run(get_entire_data(timeFrame, symbols))
 
     empty_list_counter = 0
     for i in range(0, len(results)):
@@ -188,7 +125,70 @@ def asyncio_main(retries_left=3):
 # # using concurrent futures -------------------
 
 if __name__ == "__main__":
-    dfs_dictionary = asyncio_main()
+    symbols = [
+        "BTCUSDT",
+        "ETHUSDT",
+        "BNBUSDT",
+        "ADAUSDT",
+        "XRPUSDT",
+        "DOGEUSDT",
+        "DOTUSDT",
+        "UNIUSDT",
+        "BCHUSDT",
+        "LTCUSDT",
+        "LINKUSDT",
+        "SOLUSDT",
+        "MATICUSDT",
+        "XLMUSDT",
+        "ETCUSDT",
+        "THETAUSDT",
+        "ICPUSDT",
+        "VETUSDT",
+        "FILUSDT",
+        "TRXUSDT",
+        "EOSUSDT",
+        "XMRUSDT",
+        "AAVEUSDT",
+        "NEOUSDT",
+        "XTZUSDT",
+        "MKRUSDT",
+        "ALGOUSDT",
+        "ATOMUSDT",
+        "KSMUSDT",
+        "BTTUSDT",
+        "CAKEUSDT",
+        "AVAXUSDT",
+        "LUNAUSDT",
+        "COMPUSDT",
+        "HBARUSDT",
+        "GRTUSDT",
+        "EGLDUSDT",
+        "CHZUSDT",
+        "WAVESUSDT",
+        "RUNEUSDT",
+        "NEARUSDT",
+        # "HNTUSDT", very weird, they don't have the official hntusdt pair
+        "DASHUSDT",
+        "ZECUSDT",
+        "MANAUSDT",
+        "ENJUSDT",
+        "ZILUSDT",
+        "SNXUSDT",
+        "BATUSDT",
+        "QTUMUSDT",
+        "ONTUSDT",
+        "FTTUSDT",
+        "YFIUSDT",
+        "ZRXUSDT",
+        "SUSHIUSDT",
+        "ICXUSDT",
+        "BTGUSDT",
+        "IOSTUSDT",
+        "DGBUSDT",
+        "STXUSDT",
+    ]
+
+    dfs_dictionary = asyncio_main("1d", symbols)
     start = time.time()
 
     with concurrent.futures.ProcessPoolExecutor(
