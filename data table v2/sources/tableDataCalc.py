@@ -98,7 +98,7 @@ def volatilityMeanAbsolute(df):
 
     mean = last100Df["Close"].rolling(100).mean()
     volatility = meanAbsoluteDev / mean
-    return volatility.iloc[-1] * 100
+    return round(volatility.iloc[-1] * 100, 1)  # rounding to one number after comma
 
 
 def volatilityMedianAbsolute(df):
@@ -108,7 +108,7 @@ def volatilityMedianAbsolute(df):
 
     mean = last100Df["Close"].rolling(100).mean()
     volatility = medianAbsoluteDev / mean
-    return volatility.iloc[-1] * 100
+    return round(volatility.iloc[-1] * 100, 1)  # rounding to one number after comma
 
 
 def createTableRow(df, coin):
@@ -124,8 +124,8 @@ def createTableRow(df, coin):
         "fourLineIndicator": fourLineIndicatorMetric(df),
         "varvIndicator": varvIndicatorMetric(df),
         "momentumIndicator": momentumIndicatorMetric(df),
-        "volatilityMeanAbsolute": volatilityMeanAbsolute(df),
-        "volatilityMedianAbsolute": volatilityMedianAbsolute(df),
+        "volatilityMeanAbsolute": str(volatilityMeanAbsolute(df)) + " %",
+        "volatilityMedianAbsolute": str(volatilityMedianAbsolute(df)) + " %",
     }
 
     return dict_entry
@@ -161,6 +161,12 @@ def main():
     print(f"Median absolute volatility: {medianAbs}")
     meanAbs = volatilityMeanAbsolute(df)
     print(f"Mean absolute volatility: {meanAbs}")
+    print(round(1.234, 1))
 
 
-# main()
+def main2():
+    df = getResponse("BTC/USD", "1day", 1000)
+    print(createTableRow(df, "BTC/USD"))
+
+
+# main2()

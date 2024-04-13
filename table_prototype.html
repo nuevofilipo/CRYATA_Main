@@ -61,6 +61,27 @@
         
     }
 
+    .header-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        margin-bottom: 20px;
+    }
+
+    .button-container button {
+        padding: 8px 12px;
+        margin-right: 10px;
+        background-color: violet;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .button-container button:hover {
+        background-color: darkviolet;
+    }
     /* tr:nth-child(even) {
         background-color: #444;
     } */
@@ -73,7 +94,16 @@
 </head>
 <body>
 
-<h2>Crypto Market Overview</h2>
+    <div class="header-container">
+        <h2>Crypto Market Overview</h2>
+        <div class="button-container">
+            <button onclick="changeTimeFrame('1d')">Daily</button>
+            <button onclick="changeTimeFrame('1h')">Hourly</button>
+            <button onclick="changeTimeFrame('1w')">Weekly</button>
+            <button onclick="changeTimeFrame('4h')">4 Hours</button>
+        </div>
+    </div>
+    
 
 <table id="cryptoTable">
     <tr>
@@ -225,15 +255,23 @@ function compareCells(cellX, cellY) {
     }
 
     // Loop through API response and add rows to the table
-    async function main(){
-        const data = await getTableViewData('dailytable');
+    async function main(timeframe){
+        const data = await getTableViewData("table"+timeframe);
         console.log(data);
         data.forEach(function(entry) {
             addRow(entry.index, entry.coin, entry.price, entry.fourLineIndicator, entry.varvIndicator, entry.momentumIndicator, entry.volatilityMeanAbsolute, entry.volatilityMedianAbsolute);
         });
     }
 
-    main();
+    main("1d");
+
+    async function changeTimeFrame(timeframe){
+        // reset table
+        var table = document.getElementById("cryptoTable");
+        table.innerHTML = "<tr><th onclick='sortTable(0)'>#</th><th onclick='sortTable(1)'>Coin</th><th onclick='sortTable(2)'>Price (USD)</th><th onclick='sortTable(3)'>Context Bands</th><th onclick='sortTable(4)'>Varv</th><th onclick='sortTable(5)'>Momentum</th><th onclick='sortTable(6)'>VolatilityMean</th><th onclick='sortTable(7)'>VolatilityMedian</th></tr>";
+        main(timeframe);
+        console.log("Timeframe changed to: " + timeframe);
+    }
 </script>
 
 </body>

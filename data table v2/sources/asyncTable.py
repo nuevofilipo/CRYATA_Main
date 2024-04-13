@@ -187,44 +187,41 @@ if __name__ == "__main__":
         "DGBUSDT",
         "STXUSDT",
     ]
+    timeframes = ["1d", "1h", "4h", "1w"]
 
-    dfs_dictionary = asyncio_main("1d", symbols)
-    start = time.time()
+    for timeframe in timeframes:
+        dfs_dictionary = asyncio_main(timeframe, symbols)
 
-    with concurrent.futures.ProcessPoolExecutor(
-        max_workers=mp.cpu_count()
-    ) as executor:  # 4 is current best
-        futures_results = [
-            executor.submit(createTableRow, df, df_name)
-            for df_name, df in dfs_dictionary.items()
-        ]
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=mp.cpu_count()
+        ) as executor:  # 4 is current best
+            futures_results = [
+                executor.submit(createTableRow, df, df_name)
+                for df_name, df in dfs_dictionary.items()
+            ]
 
-    end = time.time()
-    print(f"Finished in: {end-start} sec")
-    # print(f"length of results: {len(futures_results)}")
-    out_results = []
+        out_results = []
 
-    for f in futures_results:
-        try:
-            out_results.append(f.result())
-        except Exception as e:
-            print(e)
+        for f in futures_results:
+            try:
+                out_results.append(f.result())
+            except Exception as e:
+                print(e)
 
-    df_table = pd.DataFrame(out_results)
-    df_table.index = df_table.index + 1
-    print(df_table)
+        df_table = pd.DataFrame(out_results)
+        df_table.index = df_table.index + 1
+        print(df_table)
 
-    # !inserting into database -------------------
-    #! different engine urls for local and remote database
-
-    engine = create_engine(
-        "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
-    )
-
-    # ? remote, railway database
-    # engine = create_engine(
-    #     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
-    #     echo=True,
-    # )
-
-    df_table.to_sql("dailytable", con=engine, if_exists="replace", chunksize=1000)
+        # !inserting into database -------------------
+        #! different engine urls for local and remote database
+        engine = create_engine(
+            "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
+        )
+        # ? remote, railway database
+        # engine = create_engine(
+        #     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
+        #     echo=True,
+        # )
+        df_table.to_sql(
+            "table" + timeframe, con=engine, if_exists="replace", chunksize=1000
+        )
