@@ -13,7 +13,7 @@ def dbdataLoading():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(dbdataLoading, "interval", seconds=30)
+scheduler.add_job(dbdataLoading, "interval", seconds=60)
 scheduler.start()
 
 if __name__ == "__main__":

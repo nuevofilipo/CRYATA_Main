@@ -196,7 +196,7 @@ if __name__ == "__main__":
             max_workers=mp.cpu_count()
         ) as executor:  # 4 is current best
             futures_results = [
-                executor.submit(createTableRow, df, df_name)
+                executor.submit(createTableRow, df, df_name, timeframe)
                 for df_name, df in dfs_dictionary.items()
             ]
 

@@ -10,9 +10,6 @@ import plotly.graph_objects as go
 from scipy.signal import savgol_filter
 from scipy.signal import find_peaks
 
-# from moduls.getTwelveData import (
-#     getResponse,
-# )  # so stupid needs to be changed to moduls. whne calling from other file
 
 
 def intToTime(integer, dataframe):

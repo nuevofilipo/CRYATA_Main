@@ -111,16 +111,27 @@ def volatilityMedianAbsolute(df):
     return round(volatility.iloc[-1] * 100, 1)  # rounding to one number after comma
 
 
-def createTableRow(df, coin):
+def priceChangePercent(df):
+    oneDayAgo = df.iloc[-24]
+    priceChangePercent = df.iloc[-1]["Close"] / oneDayAgo["Open"]
+    return round((priceChangePercent - 1) * 100, 1)
+
+
+def createTableRow(df, coin, timeframe="1d"):
     # print(f"Creating table row for {coin}")
     lastRow = df.iloc[-1]
     price = lastRow["Close"]
 
     coin = coin[: len(coin) - 6].upper()
 
+    priceChange = "no data"
+    if timeframe == "1h":
+        priceChange = priceChangePercent(df)
+
     dict_entry = {
         "coin": coin,
         "price": price,
+        "priceChange": priceChange,
         "fourLineIndicator": fourLineIndicatorMetric(df),
         "varvIndicator": varvIndicatorMetric(df),
         "momentumIndicator": momentumIndicatorMetric(df),
@@ -154,19 +165,5 @@ def createEntireTable():
 
 
 def main():
-    df = getResponse("BTC/USD", "1day", 1000)
-    volatility = volatilityIndicatorMetric(df)
-    print(f" standard deviation Volatility: {volatility}")
-    medianAbs = volatilityMedianAbsolute(df)
-    print(f"Median absolute volatility: {medianAbs}")
-    meanAbs = volatilityMeanAbsolute(df)
-    print(f"Mean absolute volatility: {meanAbs}")
-    print(round(1.234, 1))
-
-
-def main2():
-    df = getResponse("BTC/USD", "1day", 1000)
-    print(createTableRow(df, "BTC/USD"))
-
-
-# main2()
+    df = getResponse("BTC/USD", "1h", 1000)
+    print(createTableRow(df, "BTC/USD", "1h"))
