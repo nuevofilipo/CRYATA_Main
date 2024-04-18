@@ -1,5 +1,5 @@
 import time
-import ccxt
+import ccxt.async_support as ccxt
 
 # importing for database connection
 from sqlalchemy import create_engine
@@ -25,20 +25,7 @@ pd.options.mode.chained_assignment = None
 # importing own functions
 from tableDataCalc import createTableRow
 
-columns = [
-    "Open time",
-    "Open",
-    "High",
-    "Low",
-    "Close",
-    "Volume",
-    "Close_time",
-    "quote_asset_volume",
-    "number_of_trades",
-    "taker_buy_base_asset_volume",
-    "taker_buy_quote_asset_volume",
-    "ignore",
-]
+columns = ["timestamp", "open", "high", "low", "close", "volume"]
 
 
 ## ! different urls-------------------
@@ -56,10 +43,10 @@ url = "https://api.binance.us/api/v3/klines"
 
 def transformingDF(df, time_frame):
     try:
-        df["time"] = pd.to_datetime(df["Open time"], unit="ms")
-        df = df[["time", "Open", "High", "Low", "Close", "Volume"]]
-        df[["Open", "High", "Low", "Close", "Volume"]] = df[
-            ["Open", "High", "Low", "Close", "Volume"]
+        df["time"] = pd.to_datetime(df["timestamp"], unit="ms")
+        df = df[["time", "open", "high", "low", "close", "volume"]]
+        df[["open", "high", "low", "close", "volume"]] = df[
+            ["open", "high", "low", "close", "volume"]
         ].astype(float)
         return df
     except Exception as e:
@@ -67,42 +54,37 @@ def transformingDF(df, time_frame):
 
 
 # this is helper function for get_entire_data() function
-async def request_data_pair(session, semaphore, symbol, time_frame):
+async def request_data_pair(exchange, semaphore, symbol, time_frame):
     async with semaphore:
-        response = await session.get(
-            url,
-            params={"symbol": symbol, "interval": time_frame, "limit": 1000},
-            ssl=False,
-        )
         try:
-            data = await response.json()
+            data = await exchange.fetchOHLCV(symbol, time_frame, limit=1000)
         except Exception as e:
-            print(f"exception occured while feching {symbol, time_frame}")
+            print(f"exception occured while fetching {symbol, time_frame}")
+            print(e)
             data = []
         return data
 
 
-async def get_entire_data(timeFrame, symbols):
+async def get_entire_data(exchange, timeFrame, symbols):
+    exchange = ccxt.binance()
     results = []
     realTableNames = []
-
-    async with aiohttp.ClientSession() as session:
-        tasks = []
-        semaphore = asyncio.Semaphore(50)  # Limit to 10 concurrent requests
-        for symbol in symbols:
-            realTableNames.append((symbol + timeFrame).lower())
-            tasks.append(request_data_pair(session, semaphore, symbol, timeFrame))
-        responses = await asyncio.gather(*tasks)
-        for data in responses:
-            df = pd.DataFrame(data, columns=columns)
-            results.append(df)
-
+    tasks = []
+    semaphore = asyncio.Semaphore(50)  # Limit to 10 concurrent requests
+    for symbol in symbols:
+        realTableNames.append((symbol + timeFrame).lower())
+        tasks.append(request_data_pair(exchange, semaphore, symbol, timeFrame))
+    responses = await asyncio.gather(*tasks)
+    for data in responses:
+        df = pd.DataFrame(data, columns=columns)
+        results.append(df)
+    await exchange.close()
     return results, realTableNames
 
 
-def asyncio_main(timeFrame, symbols, retries_left=3):
+def asyncio_main(exchange, timeFrame, symbols, retries_left=3):
     out_dfs_dictionary = {}
-    results, realTableNames = asyncio.run(get_entire_data(timeFrame, symbols))
+    results, realTableNames = asyncio.run(get_entire_data(exchange, timeFrame, symbols))
 
     empty_list_counter = 0
     for i in range(0, len(results)):
@@ -191,38 +173,40 @@ if __name__ == "__main__":
     timeframes = ["1d", "1h", "4h", "1w"]
 
     for timeframe in timeframes:
-        dfs_dictionary = asyncio_main(timeframe, symbols)
+        exchange = ccxt.binance()
+        dfs_dictionary = asyncio_main(exchange, timeframe, symbols)
+        print(dfs_dictionary)
 
-        with concurrent.futures.ProcessPoolExecutor(
-            max_workers=mp.cpu_count()
-        ) as executor:  # 4 is current best
-            futures_results = [
-                executor.submit(createTableRow, df, df_name, timeframe)
-                for df_name, df in dfs_dictionary.items()
-            ]
+        # with concurrent.futures.ProcessPoolExecutor(
+        #     max_workers=mp.cpu_count()
+        # ) as executor:  # 4 is current best
+        #     futures_results = [
+        #         executor.submit(createTableRow, df, df_name, timeframe)
+        #         for df_name, df in dfs_dictionary.items()
+        #     ]
 
-        out_results = []
+        # out_results = []
 
-        for f in futures_results:
-            try:
-                out_results.append(f.result())
-            except Exception as e:
-                print(e)
+        # for f in futures_results:
+        #     try:
+        #         out_results.append(f.result())
+        #     except Exception as e:
+        #         print(e)
 
-        df_table = pd.DataFrame(out_results)
-        df_table.index = df_table.index + 1
-        print(df_table)
+        # df_table = pd.DataFrame(out_results)
+        # df_table.index = df_table.index + 1
+        # print(df_table)
 
-        # !inserting into database -------------------
-        #! different engine urls for local and remote database
-        engine = create_engine(
-            "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
-        )
-        # ? remote, railway database
+        # # !inserting into database -------------------
+        # #! different engine urls for local and remote database
         # engine = create_engine(
-        #     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
-        #     echo=True,
+        #     "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
         # )
-        df_table.to_sql(
-            "table" + timeframe, con=engine, if_exists="replace", chunksize=1000
-        )
+        # # ? remote, railway database
+        # # engine = create_engine(
+        # #     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
+        # #     echo=True,
+        # # )
+        # df_table.to_sql(
+        #     "table" + timeframe, con=engine, if_exists="replace", chunksize=1000
+        # )
