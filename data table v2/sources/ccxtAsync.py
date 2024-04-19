@@ -9,8 +9,8 @@ import pandas as pd
 import talib as ta
 
 # for async requests
-import aiohttp
 import asyncio
+import aiohttp
 
 # for multiprocessing
 import multiprocessing as mp
@@ -25,32 +25,50 @@ pd.options.mode.chained_assignment = None
 # importing own functions
 from tableDataCalc import createTableRow
 
-columns = ["timestamp", "open", "high", "low", "close", "volume"]
-
-
-## ! different urls-------------------
 url = "https://api.binance.us/api/v3/klines"
-# url = "https://api.binance.com/api/v3/klines"
-# urlfull = "https://api.binance.us/api/v3/klines?symbol=HNTUSDT&interval=1d&limit=1000"
-# url = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1000"
-# url2 =" https://api.binance.us/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1000"
-
-
-##! parameters -------------------
-# timeFrames = ["1d", "1w", "1M", "1h", "4h"]
-# timeFrames = ["1d"]
+columns = ["timestamp", "Open", "High", "Low", "Close", "Volume"]
 
 
 def transformingDF(df, time_frame):
     try:
         df["time"] = pd.to_datetime(df["timestamp"], unit="ms")
-        df = df[["time", "open", "high", "low", "close", "volume"]]
-        df[["open", "high", "low", "close", "volume"]] = df[
-            ["open", "high", "low", "close", "volume"]
+        df = df[["time", "Open", "High", "Low", "Close", "Volume"]]
+        df[["Open", "High", "Low", "Close", "Volume"]] = df[
+            ["Open", "High", "Low", "Close", "Volume"]
         ].astype(float)
         return df
     except Exception as e:
         print(e)
+
+
+# this function is a helper function for the protection layer
+def transformData2(data):
+    columns = columns = [
+        "Open time",
+        "Open",
+        "High",
+        "Low",
+        "Close",
+        "Volume",
+        "Close_time",
+        "quote_asset_volume",
+        "number_of_trades",
+        "taker_buy_base_asset_volume",
+        "taker_buy_quote_asset_volume",
+        "ignore",
+    ]
+    df = pd.DataFrame(data, columns=columns)
+    df = df.drop(
+        columns=[
+            "Close_time",
+            "quote_asset_volume",
+            "number_of_trades",
+            "taker_buy_base_asset_volume",
+            "taker_buy_quote_asset_volume",
+            "ignore",
+        ]
+    )
+    return df.values.tolist()
 
 
 # this is helper function for get_entire_data() function
@@ -59,9 +77,21 @@ async def request_data_pair(exchange, semaphore, symbol, time_frame):
         try:
             data = await exchange.fetchOHLCV(symbol, time_frame, limit=1000)
         except Exception as e:
-            print(f"exception occured while fetching {symbol, time_frame}")
-            print(e)
-            data = []
+            # protection layer
+            try:
+                session = aiohttp.ClientSession()
+                response = await session.get(
+                    url,
+                    params={"symbol": symbol, "interval": time_frame, "limit": 1000},
+                    ssl=False,
+                )
+                data = await response.json()
+                data = transformData2(data)
+                await session.close()
+            except Exception as e:
+                print(f"exception occured while fetching {symbol, time_frame}")
+                print(e)
+                data = []
         return data
 
 
@@ -150,7 +180,7 @@ if __name__ == "__main__":
         "WAVESUSDT",
         "RUNEUSDT",
         "NEARUSDT",
-        # "HNTUSDT", very weird, they don't have the official hntusdt pair
+        # "HNTUSDT",  # very weird, they don't have the official hntusdt pair
         "DASHUSDT",
         "ZECUSDT",
         "MANAUSDT",
@@ -175,38 +205,37 @@ if __name__ == "__main__":
     for timeframe in timeframes:
         exchange = ccxt.binance()
         dfs_dictionary = asyncio_main(exchange, timeframe, symbols)
-        print(dfs_dictionary)
 
-        # with concurrent.futures.ProcessPoolExecutor(
-        #     max_workers=mp.cpu_count()
-        # ) as executor:  # 4 is current best
-        #     futures_results = [
-        #         executor.submit(createTableRow, df, df_name, timeframe)
-        #         for df_name, df in dfs_dictionary.items()
-        #     ]
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=mp.cpu_count()
+        ) as executor:  # 4 is current best
+            futures_results = [
+                executor.submit(createTableRow, df, df_name, timeframe)
+                for df_name, df in dfs_dictionary.items()
+            ]
 
-        # out_results = []
+        out_results = []
 
-        # for f in futures_results:
-        #     try:
-        #         out_results.append(f.result())
-        #     except Exception as e:
-        #         print(e)
+        for f in futures_results:
+            try:
+                out_results.append(f.result())
+            except Exception as e:
+                print(e)
 
-        # df_table = pd.DataFrame(out_results)
-        # df_table.index = df_table.index + 1
-        # print(df_table)
+        df_table = pd.DataFrame(out_results)
+        df_table.index = df_table.index + 1
+        print(df_table)
 
-        # # !inserting into database -------------------
-        # #! different engine urls for local and remote database
+        # !inserting into database -------------------
+        #! different engine urls for local and remote database
+        engine = create_engine(
+            "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
+        )
+        # ? remote, railway database
         # engine = create_engine(
-        #     "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
+        #     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
+        #     echo=True,
         # )
-        # # ? remote, railway database
-        # # engine = create_engine(
-        # #     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
-        # #     echo=True,
-        # # )
-        # df_table.to_sql(
-        #     "table" + timeframe, con=engine, if_exists="replace", chunksize=1000
-        # )
+        df_table.to_sql(
+            "table" + timeframe, con=engine, if_exists="replace", chunksize=1000
+        )

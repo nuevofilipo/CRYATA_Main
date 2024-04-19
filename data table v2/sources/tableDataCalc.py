@@ -1,6 +1,7 @@
 import pandas as pd
 import sys
 import time
+import ccxt
 
 
 sys.path.append("../../")
@@ -84,31 +85,40 @@ def volatilityIndicatorMetric(df):
     return volatility.iloc[-1] * 100
 
 
-def meanAbsoluteDeviation(df):  # helper function
+# def meanAbsoluteDeviation(df):  # helper function
+#     mean = df["Close"].mean()
+#     deviation = abs(df["Close"] - mean).mean()
+#     return deviation
 
-    mean = df["Close"].mean()
-    deviation = abs(df["Close"] - mean).mean()
-    return deviation
+
+# def volatilityMeanAbsolute(df):
+#     last100Df = df.iloc[-100:]
+
+#     meanAbsoluteDev = meanAbsoluteDeviation(last100Df)
+
+#     mean = last100Df["Close"].mean()
+#     volatility = meanAbsoluteDev / mean
+#     return round(volatility * 100, 1)  # rounding to one number after comma
 
 
-def volatilityMeanAbsolute(df):
+# def volatilityMedianAbsolute(df):
+#     last100Df = df.iloc[-100:]
+
+#     medianAbsoluteDev = abs(last100Df["Close"] - last100Df["Close"].mean()).median()
+
+#     mean = last100Df["Close"].mean()
+#     volatility = medianAbsoluteDev / mean
+#     return round(volatility * 100, 1)  # rounding to one number after comma
+
+
+def volatilities(df):
     last100Df = df.iloc[-100:]
 
-    meanAbsoluteDev = meanAbsoluteDeviation(last100Df)
-
-    mean = last100Df["Close"].rolling(100).mean()
-    volatility = meanAbsoluteDev / mean
-    return round(volatility.iloc[-1] * 100, 1)  # rounding to one number after comma
-
-
-def volatilityMedianAbsolute(df):
-    last100Df = df.iloc[-100:]
-
-    medianAbsoluteDev = abs(df["Close"] - df["Close"].median()).median()
-
-    mean = last100Df["Close"].rolling(100).mean()
-    volatility = medianAbsoluteDev / mean
-    return round(volatility.iloc[-1] * 100, 1)  # rounding to one number after comma
+    mean = last100Df["Close"].mean()
+    deviation = abs(last100Df["Close"] - mean)
+    meanAbsoluteDeviation = round((deviation.mean() / mean) * 100, 1)
+    medianAbsoluteDeviation = round((deviation.median() / mean) * 100, 1)
+    return meanAbsoluteDeviation, medianAbsoluteDeviation
 
 
 def priceChangePercent(df):
@@ -135,8 +145,8 @@ def createTableRow(df, coin, timeframe="1d"):
         "fourLineIndicator": fourLineIndicatorMetric(df),
         "varvIndicator": varvIndicatorMetric(df),
         "momentumIndicator": momentumIndicatorMetric(df),
-        "volatilityMeanAbsolute": str(volatilityMeanAbsolute(df)) + " %",
-        "volatilityMedianAbsolute": str(volatilityMedianAbsolute(df)) + " %",
+        "volatilityMeanAbsolute": str(volatilities(df)[0]) + " %",
+        "volatilityMedianAbsolute": str(volatilities(df)[1]) + " %",
     }
 
     return dict_entry
@@ -164,6 +174,22 @@ def createEntireTable():
     return allEntries
 
 
+def transformingDF(df):
+    try:
+        df["time"] = pd.to_datetime(df["timestamp"], unit="ms")
+        df = df[["time", "open", "high", "low", "close", "volume"]]
+        df[["open", "high", "low", "close", "volume"]] = df[
+            ["open", "high", "low", "close", "volume"]
+        ].astype(float)
+        return df
+    except Exception as e:
+        print(e)
+
+
 def main():
-    df = getResponse("BTC/USD", "1h", 1000)
-    print(createTableRow(df, "BTC/USD", "1h"))
+    df = getResponse("BTC/USD", "1day", 1000)
+
+    print(createTableRow(df, "BTC/USD"))
+
+
+# main()
