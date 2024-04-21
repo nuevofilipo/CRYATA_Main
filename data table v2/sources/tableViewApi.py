@@ -8,19 +8,29 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-#! creating connection to database
+# ? creating connection to remote database
 engine = create_engine(
-    "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=False
+    "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
+    echo=True,
+    isolation_level="READ COMMITTED",
 )
-conn = engine.connect()
+
+#! creating connection to local database
+# engine = create_engine(
+#     "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=False
+# )
 
 
 def getTableViewData(name):
+    conn = engine.connect()
     try:
+
         df = pd.read_sql(name, conn)
         return df
     except Exception as e:
         print(e)
+    finally:
+        conn.close()
 
 
 @app.route("/", methods=["GET"])

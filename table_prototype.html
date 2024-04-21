@@ -277,9 +277,15 @@ function compareCells(cellX, cellY) {
             varvDailyData = await getTableViewData("table1d");
         }
         const varvIndicator = (timeframe === "1d") ? data.map(entry => entry.varvIndicator) : varvDailyData.map(entry => entry.varvIndicator);
-        console.log(data);
+
+        var priceChangeData = null;
+        if (timeframe !== "1h"){
+            priceChangeData = await getTableViewData("table1h");
+        }
+        const priceChange = (timeframe === "1h") ? data.map(entry => entry.priceChange) : priceChangeData.map(entry => entry.priceChange);
+        // console.log(data);
         data.forEach(function(entry, index) {
-            addRow(entry.index, entry.coin, entry.price, entry.priceChange, entry.fourLineIndicator, varvIndicator[index], entry.momentumIndicator, entry.volatilityMeanAbsolute, entry.volatilityMedianAbsolute);
+            addRow(entry.index, entry.coin, entry.price, priceChange[index], entry.fourLineIndicator, varvIndicator[index], entry.momentumIndicator, entry.volatilityMeanAbsolute, entry.volatilityMedianAbsolute);
         });
     }
 

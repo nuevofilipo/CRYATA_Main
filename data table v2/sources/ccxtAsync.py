@@ -142,63 +142,27 @@ if __name__ == "__main__":
         "BTCUSDT",
         "ETHUSDT",
         "BNBUSDT",
-        "ADAUSDT",
+        "SOLUSDT",
         "XRPUSDT",
         "DOGEUSDT",
-        "DOTUSDT",
-        "UNIUSDT",
-        "BCHUSDT",
-        "LTCUSDT",
-        "LINKUSDT",
-        "SOLUSDT",
-        "MATICUSDT",
-        "XLMUSDT",
-        "ETCUSDT",
-        "THETAUSDT",
-        "ICPUSDT",
-        "VETUSDT",
-        "FILUSDT",
-        "TRXUSDT",
-        "EOSUSDT",
-        "XMRUSDT",
-        "AAVEUSDT",
-        "NEOUSDT",
-        "XTZUSDT",
-        "MKRUSDT",
-        "ALGOUSDT",
-        "ATOMUSDT",
-        "KSMUSDT",
-        "BTTUSDT",
-        "CAKEUSDT",
+        "TONUSDT",
+        "ADAUSDT",
+        "SHIBUSDT",
         "AVAXUSDT",
-        "LUNAUSDT",
-        "COMPUSDT",
-        "HBARUSDT",
-        "GRTUSDT",
-        "EGLDUSDT",
-        "CHZUSDT",
-        "WAVESUSDT",
-        "RUNEUSDT",
+        "DOTUSDT",
+        "BCHUSDT",
+        "TRXUSDT",
+        "LINKSUSDT",
+        "MATICUSDT",
+        "ICPUSDT",
         "NEARUSDT",
-        # "HNTUSDT",  # very weird, they don't have the official hntusdt pair
-        "DASHUSDT",
-        "ZECUSDT",
-        "MANAUSDT",
-        "ENJUSDT",
-        "ZILUSDT",
-        "SNXUSDT",
-        "BATUSDT",
-        "QTUMUSDT",
-        "ONTUSDT",
-        "FTTUSDT",
-        "YFIUSDT",
-        "ZRXUSDT",
-        "SUSHIUSDT",
-        "ICXUSDT",
-        "BTGUSDT",
-        "IOSTUSDT",
-        "DGBUSDT",
+        "LTCUSDT",
+        "DAIUSDT",
+        "LEOUSDT",
+        "UNIUSDT",
+        "APTUSDT",
         "STXUSDT",
+        "ETCUSDT",
     ]
     timeframes = ["1d", "1h", "4h", "1w"]
 
@@ -228,14 +192,14 @@ if __name__ == "__main__":
 
         # !inserting into database -------------------
         #! different engine urls for local and remote database
-        engine = create_engine(
-            "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
-        )
-        # ? remote, railway database
         # engine = create_engine(
-        #     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
-        #     echo=True,
+        #     "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
         # )
+        # ? remote, railway database
+        engine = create_engine(
+            "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
+            echo=True,
+        )
         df_table.to_sql(
             "table" + timeframe, con=engine, if_exists="replace", chunksize=1000
         )
