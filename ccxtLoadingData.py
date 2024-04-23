@@ -6,7 +6,6 @@ from sqlalchemy import create_engine
 
 # for data manipulation
 import pandas as pd
-import talib as ta
 
 # for async requests
 import asyncio
@@ -20,10 +19,11 @@ import concurrent.futures
 import logging
 
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 pd.options.mode.chained_assignment = None
 
 # importing own functions
-from tableDataCalc import createTableRow
+from moduls.tableDataCalc import createTableRow
 
 url = "https://api.binance.us/api/v3/klines"
 columns = ["timestamp", "Open", "High", "Low", "Close", "Volume"]
@@ -38,7 +38,7 @@ def transformingDF(df, time_frame):
         ].astype(float)
         return df
     except Exception as e:
-        print(e)
+        print(f"exception while transformingDF function: {e}")
 
 
 # this function is a helper function for the protection layer
@@ -137,59 +137,19 @@ def asyncio_main(exchange, timeFrame, symbols, retries_left=3):
 
 # # using concurrent futures -------------------
 
-if __name__ == "__main__":
+
+def loadTableData():
+    logging.info("logger: before data loading")
     symbols = [
         "BTCUSDT",
         "ETHUSDT",
-        "BNBUSDT",
-        "SOLUSDT",
-        "XRPUSDT",
-        "DOGEUSDT",
-        "TONUSDT",
-        "ADAUSDT",
-        "SHIBUSDT",
-        "AVAXUSDT",
-        "DOTUSDT",
-        "BCHUSDT",
-        "TRXUSDT",
-        "LINKSUSDT",
-        "MATICUSDT",
-        "ICPUSDT",
-        "NEARUSDT",
-        "LTCUSDT",
-        "DAIUSDT",
-        "LEOUSDT",
-        "UNIUSDT",
-        "APTUSDT",
-        "STXUSDT",
-        "ETCUSDT",
-        "MNTUSDT",
-        "FILUSDT",
-        "CROUSDT",
-        "RNDRUSDT",
-        "ATOMUSDT",
-        "XLMUSDT",
-        "OKBUSDT",
-        "HBARUSDT",
-        "ARBUSDT",
-        "IMXUSDT",
-        "TAOUSDT",
-        "VETUSDT",
-        "WIFUSDT",
-        "MKRUSDT",
-        "KASUSDT",
-        "GRTUSDT",
-        "GRTUSDT",
-        "INJUSDT",
-        "OPUSDT",
-        "PEPEUSDT",
-        "THETAUSDT",
     ]
     timeframes = ["1d", "1h", "4h", "1w"]
 
     for timeframe in timeframes:
         exchange = ccxt.binance()
         dfs_dictionary = asyncio_main(exchange, timeframe, symbols)
+        logging.info(f"logger: fetched data for {timeframe}")
 
         with concurrent.futures.ProcessPoolExecutor(
             max_workers=mp.cpu_count()
@@ -209,7 +169,7 @@ if __name__ == "__main__":
 
         df_table = pd.DataFrame(out_results)
         df_table.index = df_table.index + 1
-        print(df_table)
+        logging.info(f"logger: calculated table for {timeframe}")
 
         # !inserting into database -------------------
         #! different engine urls for local and remote database
@@ -220,7 +180,9 @@ if __name__ == "__main__":
         engine = create_engine(
             "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
             echo=False,
+            isolation_level="READ COMMITTED",
         )
         df_table.to_sql(
             "table" + timeframe, con=engine, if_exists="replace", chunksize=1000
         )
+        logging.info(f"logger: inserted data for {timeframe}")
