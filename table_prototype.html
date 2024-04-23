@@ -263,7 +263,7 @@ function compareCells(cellX, cellY) {
     //Actual API call
 
     async function getTableViewData(tableName){
-        const response = await fetch(`http://127.0.0.1:5000/?name=${tableName}`);
+        const response = await fetch(`https://table-view-api-production.up.railway.app/?name=${tableName}`);
         const data = await response.json();
         console.log(data);
         return data;
