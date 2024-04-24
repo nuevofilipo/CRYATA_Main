@@ -116,14 +116,23 @@ def asyncio_main(exchange, timeFrame, symbols, retries_left=3):
     out_dfs_dictionary = {}
     results, realTableNames = asyncio.run(get_entire_data(exchange, timeFrame, symbols))
 
+    binance_not_found = []
+
     empty_list_counter = 0
     for i in range(0, len(results)):
         if len(results[i]) == 0:
             empty_list_counter += 1
+            binance_not_found.append(
+                realTableNames[i]
+            )  #! figuring out which coins binance doesn't have
             continue
         out_dfs_dictionary[realTableNames[i]] = transformingDF(
             results[i], realTableNames[i][-2:]
         )
+
+    print(
+        f"binance_not_found: {binance_not_found}"
+    )  #! printing out the coins that binance doesn't have
 
     # base case data failed
     if empty_list_counter == len(results) and retries_left == 0:
