@@ -6,7 +6,6 @@ from sqlalchemy import create_engine
 
 # for data manipulation
 import pandas as pd
-import talib as ta
 
 # for async requests
 import asyncio
@@ -20,6 +19,7 @@ import concurrent.futures
 import logging
 
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 pd.options.mode.chained_assignment = None
 
 # importing own functions
@@ -38,7 +38,7 @@ def transformingDF(df, time_frame):
         ].astype(float)
         return df
     except Exception as e:
-        print(e)
+        print(f"exception while transformingDF function: {e}")
 
 
 # this function is a helper function for the protection layer
@@ -72,17 +72,19 @@ def transformData2(data):
 
 
 # this is helper function for get_entire_data() function
-async def request_data_pair(exchange, semaphore, symbol, time_frame):
+async def request_data_pair(exchange, semaphore, symbol, time_frame, limit, since):
     async with semaphore:
         try:
-            data = await exchange.fetchOHLCV(symbol, time_frame, limit=1000)
+            data = await exchange.fetchOHLCV(
+                symbol, time_frame, limit=limit, since=since
+            )
         except Exception as e:
             # protection layer
             try:
                 session = aiohttp.ClientSession()
                 response = await session.get(
                     url,
-                    params={"symbol": symbol, "interval": time_frame, "limit": 1000},
+                    params={"symbol": symbol, "interval": time_frame, "limit": limit},
                     ssl=False,
                 )
                 data = await response.json()
@@ -95,7 +97,7 @@ async def request_data_pair(exchange, semaphore, symbol, time_frame):
         return data
 
 
-async def get_entire_data(exchange, timeFrame, symbols):
+async def get_entire_data(exchange, timeFrame, symbols, limit, since):
     exchange = ccxt.binance()
     results = []
     realTableNames = []
@@ -103,7 +105,9 @@ async def get_entire_data(exchange, timeFrame, symbols):
     semaphore = asyncio.Semaphore(50)  # Limit to 10 concurrent requests
     for symbol in symbols:
         realTableNames.append((symbol + timeFrame).lower())
-        tasks.append(request_data_pair(exchange, semaphore, symbol, timeFrame))
+        tasks.append(
+            request_data_pair(exchange, semaphore, symbol, timeFrame, limit, since)
+        )
     responses = await asyncio.gather(*tasks)
     for data in responses:
         df = pd.DataFrame(data, columns=columns)
@@ -112,27 +116,20 @@ async def get_entire_data(exchange, timeFrame, symbols):
     return results, realTableNames
 
 
-def asyncio_main(exchange, timeFrame, symbols, retries_left=3):
+def asyncio_main(exchange, timeFrame, symbols, retries_left=3, limit=1000, since=None):
     out_dfs_dictionary = {}
-    results, realTableNames = asyncio.run(get_entire_data(exchange, timeFrame, symbols))
-
-    binance_not_found = []
+    results, realTableNames = asyncio.run(
+        get_entire_data(exchange, timeFrame, symbols, limit, since)
+    )
 
     empty_list_counter = 0
     for i in range(0, len(results)):
         if len(results[i]) == 0:
             empty_list_counter += 1
-            binance_not_found.append(
-                realTableNames[i]
-            )  #! figuring out which coins binance doesn't have
             continue
         out_dfs_dictionary[realTableNames[i]] = transformingDF(
             results[i], realTableNames[i][-2:]
         )
-
-    print(
-        f"binance_not_found: {binance_not_found}"
-    )  #! printing out the coins that binance doesn't have
 
     # base case data failed
     if empty_list_counter == len(results) and retries_left == 0:
@@ -146,7 +143,9 @@ def asyncio_main(exchange, timeFrame, symbols, retries_left=3):
 
 # # using concurrent futures -------------------
 
+
 if __name__ == "__main__":
+    logging.info("logger: before data loading")
     symbols = [
         "BTCUSDT",
         "ETHUSDT",
@@ -198,13 +197,35 @@ if __name__ == "__main__":
 
     for timeframe in timeframes:
         exchange = ccxt.binance()
+        sinceTimestamp = None
+        currentTimeInMs = exchange.milliseconds()
+        if timeframe == "1d":
+            sinceTimestamp = currentTimeInMs - 1000 * 60 * 60 * 24
+        elif timeframe == "1w":
+            sinceTimestamp = currentTimeInMs - 1000 * 60 * 60 * 24 * 7
+        elif timeframe == "1h":
+            sinceTimestamp = currentTimeInMs - 1000 * 60 * 60
+        elif timeframe == "4h":
+            sinceTimestamp = currentTimeInMs - 1000 * 60 * 60 * 4
+
+        priceChange_dictionary = asyncio_main(
+            exchange,
+            "1m",
+            symbols,
+            limit=1,
+            since=sinceTimestamp,
+        )
+
         dfs_dictionary = asyncio_main(exchange, timeframe, symbols)
+        logging.info(f"logger: fetched data for {timeframe}")
 
         with concurrent.futures.ProcessPoolExecutor(
             max_workers=mp.cpu_count()
         ) as executor:  # 4 is current best
             futures_results = [
-                executor.submit(createTableRow, df, df_name, timeframe)
+                executor.submit(
+                    createTableRow, df, df_name, timeframe, priceChange_dictionary
+                )
                 for df_name, df in dfs_dictionary.items()
             ]
 
@@ -218,18 +239,20 @@ if __name__ == "__main__":
 
         df_table = pd.DataFrame(out_results)
         df_table.index = df_table.index + 1
-        print(df_table)
+        logging.info(f"logger: calculated table for {timeframe}")
 
         # !inserting into database -------------------
         #! different engine urls for local and remote database
-        # engine = create_engine(
-        #     "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
-        # )
-        # ? remote, railway database
         engine = create_engine(
-            "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
-            echo=False,
+            "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
         )
+        # ? remote, railway database
+        # engine = create_engine(
+        #     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
+        #     echo=False,
+        #     isolation_level="READ COMMITTED",
+        # )
         df_table.to_sql(
             "table" + timeframe, con=engine, if_exists="replace", chunksize=1000
         )
+        logging.info(f"logger: inserted data for {timeframe}")

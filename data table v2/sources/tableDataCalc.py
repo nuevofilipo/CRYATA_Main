@@ -14,7 +14,7 @@ from backend.moduls.indicatorFunctions import (
 )
 
 
-def fourLineIndicatorMetric(df):
+def contextBandsCalculation(df):
     df4Lines = create4Lines(df, "1day")
     dfLastRow = df4Lines.iloc[-1]
     upperMA = dfLastRow["MA"] * 1.62
@@ -35,7 +35,7 @@ def fourLineIndicatorMetric(df):
     elif dfLastRow["Close"] <= lowerMA:
         marketCondition = -2
 
-    return marketCondition  # return a string from 5 possible values
+    return marketCondition  # return a int from 5 possible values
 
 
 def varvIndicatorMetric(df):
@@ -54,7 +54,7 @@ def varvIndicatorMetric(df):
             break
         else:
             zone += 1
-    return zone  # return an integer from 1 to 12
+    return zone - 1  # return an integer from 1 to 12
 
 
 def momentumIndicatorMetric(df):
@@ -85,40 +85,31 @@ def volatilityIndicatorMetric(df):
     return volatility.iloc[-1] * 100
 
 
-# def meanAbsoluteDeviation(df):  # helper function
-#     mean = df["Close"].mean()
-#     deviation = abs(df["Close"] - mean).mean()
-#     return deviation
+def meanAbsoluteDeviation(df):  # helper function
+
+    mean = df["Close"].mean()
+    deviation = abs(df["Close"] - mean).mean()
+    return deviation
 
 
-# def volatilityMeanAbsolute(df):
-#     last100Df = df.iloc[-100:]
-
-#     meanAbsoluteDev = meanAbsoluteDeviation(last100Df)
-
-#     mean = last100Df["Close"].mean()
-#     volatility = meanAbsoluteDev / mean
-#     return round(volatility * 100, 1)  # rounding to one number after comma
-
-
-# def volatilityMedianAbsolute(df):
-#     last100Df = df.iloc[-100:]
-
-#     medianAbsoluteDev = abs(last100Df["Close"] - last100Df["Close"].mean()).median()
-
-#     mean = last100Df["Close"].mean()
-#     volatility = medianAbsoluteDev / mean
-#     return round(volatility * 100, 1)  # rounding to one number after comma
-
-
-def volatilities(df):
+def volatilityMeanAbsolute(df):
     last100Df = df.iloc[-100:]
 
-    mean = last100Df["Close"].mean()
-    deviation = abs(last100Df["Close"] - mean)
-    meanAbsoluteDeviation = round((deviation.mean() / mean) * 100, 1)
-    medianAbsoluteDeviation = round((deviation.median() / mean) * 100, 1)
-    return meanAbsoluteDeviation, medianAbsoluteDeviation
+    meanAbsoluteDev = meanAbsoluteDeviation(last100Df)
+
+    mean = last100Df["Close"].rolling(100).mean()
+    volatility = meanAbsoluteDev / mean
+    return round(volatility.iloc[-1] * 100, 1)  # rounding to one number after comma
+
+
+def volatilityMedianAbsolute(df):
+    last100Df = df.iloc[-100:]
+
+    medianAbsoluteDev = abs(df["Close"] - df["Close"].median()).median()
+
+    mean = last100Df["Close"].rolling(100).mean()
+    volatility = medianAbsoluteDev / mean
+    return round(volatility.iloc[-1] * 100, 1)  # rounding to one number after comma
 
 
 def priceChangePercent(df):
@@ -127,26 +118,30 @@ def priceChangePercent(df):
     return round((priceChangePercent - 1) * 100, 1)
 
 
-def createTableRow(df, coin, timeframe="1d"):
-    # print(f"Creating table row for {coin}")
+def createTableRow(df, coin, timeframe="1d", priceChangeDict={}):
+    pastCoinName = coin[: len(coin) - 2] + "1m"
+
     lastRow = df.iloc[-1]
     price = lastRow["Close"]
 
+    pastDataValue = price
+    if pastCoinName in priceChangeDict:
+        pastDataValue = priceChangeDict[pastCoinName].iloc[0]["Open"]
+        print(f"changing pastDataValue: {pastDataValue} for {coin} at {timeframe}")
+
     coin = coin[: len(coin) - 6].upper()
 
-    priceChange = "no data"
-    if timeframe == "1h":
-        priceChange = priceChangePercent(df)
+    priceChange = round((price - pastDataValue) / pastDataValue * 100, 1)
 
     dict_entry = {
         "coin": coin,
         "price": price,
         "priceChange": priceChange,
-        "fourLineIndicator": fourLineIndicatorMetric(df),
+        "fourLineIndicator": contextBandsCalculation(df),
         "varvIndicator": varvIndicatorMetric(df),
         "momentumIndicator": momentumIndicatorMetric(df),
-        "volatilityMeanAbsolute": str(volatilities(df)[0]) + " %",
-        "volatilityMedianAbsolute": str(volatilities(df)[1]) + " %",
+        "volatilityMeanAbsolute": str(volatilityMeanAbsolute(df)) + " %",
+        "volatilityMedianAbsolute": str(volatilityMedianAbsolute(df)) + " %",
     }
 
     return dict_entry
@@ -174,22 +169,6 @@ def createEntireTable():
     return allEntries
 
 
-def transformingDF(df):
-    try:
-        df["time"] = pd.to_datetime(df["timestamp"], unit="ms")
-        df = df[["time", "open", "high", "low", "close", "volume"]]
-        df[["open", "high", "low", "close", "volume"]] = df[
-            ["open", "high", "low", "close", "volume"]
-        ].astype(float)
-        return df
-    except Exception as e:
-        print(e)
-
-
 def main():
-    df = getResponse("BTC/USD", "1day", 1000)
-
-    print(createTableRow(df, "BTC/USD"))
-
-
-# main()
+    df = getResponse("BTC/USD", "1h", 1000)
+    print(createTableRow(df, "BTC/USD", "1h"))
