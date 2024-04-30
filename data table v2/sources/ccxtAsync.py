@@ -216,6 +216,8 @@ if __name__ == "__main__":
             since=sinceTimestamp,
         )
 
+        print(priceChange_dictionary)
+
         dfs_dictionary = asyncio_main(exchange, timeframe, symbols)
         logging.info(f"logger: fetched data for {timeframe}")
 

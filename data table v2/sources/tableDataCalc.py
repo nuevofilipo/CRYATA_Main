@@ -38,7 +38,10 @@ def contextBandsCalculation(df):
     return marketCondition  # return a int from 5 possible values
 
 
-def varvIndicatorMetric(df):
+def varvIndicatorMetric(df, timeframe):
+    if timeframe != "1d":
+        return -1
+
     price = df.iloc[-1]["Close"]
     dfVarv = createVarv(df)
 
@@ -74,17 +77,6 @@ def momentumIndicatorMetric(df):
         return -1
 
 
-def volatilityIndicatorMetric(df):
-    last100Df = df.iloc[-100:]
-
-    standardDeviation = (
-        last100Df["Close"].rolling(100).std()
-    )  # change from std to mad, check whether it works
-    mean = last100Df["Close"].rolling(100).mean()
-    volatility = standardDeviation / mean
-    return volatility.iloc[-1] * 100
-
-
 def meanAbsoluteDeviation(df):  # helper function
 
     mean = df["Close"].mean()
@@ -92,14 +84,26 @@ def meanAbsoluteDeviation(df):  # helper function
     return deviation
 
 
-def volatilityMeanAbsolute(df):
-    last100Df = df.iloc[-100:]
+def volatilityMeanAbsolute(df, pastCandles=100):
+    last100Df = df.iloc[-pastCandles:]
 
     meanAbsoluteDev = meanAbsoluteDeviation(last100Df)
 
-    mean = last100Df["Close"].rolling(100).mean()
+    mean = last100Df["Close"].rolling(pastCandles).mean()
     volatility = meanAbsoluteDev / mean
     return round(volatility.iloc[-1] * 100, 1)  # rounding to one number after comma
+
+
+def meanPerformance(df):
+    last100Df = df.iloc[-100:]
+    mean = ((last100Df["Close"] - last100Df["Open"]) / last100Df["Open"]).mean()
+    return mean
+
+
+def medianPerformance(df):
+    last100Df = df.iloc[-100:]
+    median = ((last100Df["Close"] - last100Df["Open"]) / last100Df["Open"]).median()
+    return median
 
 
 def volatilityMedianAbsolute(df):
@@ -127,27 +131,44 @@ def createTableRow(df, coin, timeframe="1d", priceChangeDict={}):
     pastDataValue = price
     if pastCoinName in priceChangeDict:
         pastDataValue = priceChangeDict[pastCoinName].iloc[0]["Open"]
-        print(f"changing pastDataValue: {pastDataValue} for {coin} at {timeframe}")
 
     coin = coin[: len(coin) - 6].upper()
 
     priceChange = round((price - pastDataValue) / pastDataValue * 100, 1)
 
-    dict_entry = {
-        "coin": coin,
-        "price": price,
-        "priceChange": priceChange,
-        "fourLineIndicator": contextBandsCalculation(df),
-        "varvIndicator": varvIndicatorMetric(df),
-        "momentumIndicator": momentumIndicatorMetric(df),
-        "volatilityMeanAbsolute": str(volatilityMeanAbsolute(df)) + " %",
-        "volatilityMedianAbsolute": str(volatilityMedianAbsolute(df)) + " %",
-    }
-
+    dict_entry = {}
+    if timeframe == "1d":
+        dict_entry = {
+            "coin": coin,
+            "price": price,
+            "priceChange": priceChange,
+            "fourLineIndicator": contextBandsCalculation(df),
+            "varvIndicator": varvIndicatorMetric(df, timeframe),
+            "momentumIndicator": momentumIndicatorMetric(df),
+            "volatilityMean1d": str(volatilityMeanAbsolute(df, 200)) + " %",
+            "volatilityMean4h": str(volatilityMeanAbsolute(df, 100)) + " %",
+            "volatilityMean1h": str(volatilityMeanAbsolute(df, 22)) + " %",
+            "volatilityMean1w": str(volatilityMeanAbsolute(df, 400)) + " %",
+            "volatilityMedianAbsolute": str(volatilityMedianAbsolute(df)) + " %",
+            "meanPerformance": str(meanPerformance(df)) + " %",
+            "medianPerformance": str(medianPerformance(df)) + " %",
+        }
+    else:
+        dict_entry = {
+            "coin": coin,
+            "price": price,
+            "priceChange": priceChange,
+            "fourLineIndicator": contextBandsCalculation(df),
+            "varvIndicator": varvIndicatorMetric(df, timeframe),
+            "momentumIndicator": momentumIndicatorMetric(df),
+            "volatilityMedianAbsolute": str(volatilityMedianAbsolute(df)) + " %",
+            "meanPerformance": str(meanPerformance(df)) + " %",
+            "medianPerformance": str(medianPerformance(df)) + " %",
+        }
     return dict_entry
 
 
-def createEntireTable():
+def createEntireTable():  # for experimenting -- not used for any calculations
     allEntries = []
     coins = ["BTC/USD", "ETH/USD", "ADA/USD", "XRP/USD", "DOGE/USD"]
     totalTime = 0
@@ -169,6 +190,10 @@ def createEntireTable():
     return allEntries
 
 
-def main():
-    df = getResponse("BTC/USD", "1h", 1000)
-    print(createTableRow(df, "BTC/USD", "1h"))
+def main():  # for experimenting -- not used for any calculations
+    df = getResponse("BTC/USD", "1day", 1000)
+    # print(createTableRow(df, "BTC/USD", "1d"))
+    print(meanPerformance(df))
+
+
+main()
