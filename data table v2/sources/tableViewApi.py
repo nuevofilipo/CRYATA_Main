@@ -9,16 +9,16 @@ app = Flask(__name__)
 CORS(app)
 
 # ? creating connection to remote database
-engine = create_engine(
-    "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
-    echo=True,
-    isolation_level="READ COMMITTED",
-)
+# engine = create_engine(
+#     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
+#     echo=True,
+#     isolation_level="READ COMMITTED",
+# )
 
 #! creating connection to local database
-# engine = create_engine(
-#     "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=False
-# )
+engine = create_engine(
+    "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=False
+)
 
 
 def getTableViewData(name):
