@@ -188,7 +188,7 @@ if __name__ == "__main__":
         "DGBUSDT",
         "STXUSDT",
     ]
-    timeframes = ["1d", "1h", "4h", "1w"]
+    timeframes = ["1m"]
 
     for timeframe in timeframes:
         dfs_dictionary = asyncio_main(timeframe, symbols)

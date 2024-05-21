@@ -151,15 +151,17 @@ def addRanges(x0, y0, x1, y1):
 
 
 def createRanges(df, range_df):
-    penultimateCandle = range_df.iloc[-2]
-    if penultimateCandle.name < df.index[0]:
-        penultimateCandle.name = df.index[0]
+    if len(range_df.index) < 2:
+        penultimateCandle = range_df.iloc[0]
+    else:
+        penultimateCandle = range_df.iloc[-2]
     rangeList = addRanges(
         penultimateCandle.name,
         penultimateCandle["Open"],
         df.index[-1],
         penultimateCandle["Close"],
     )
+
     df_out = pd.DataFrame(rangeList)
     return df_out
 
@@ -170,18 +172,20 @@ def transformDf(df):
 
 
 # from here on API FUNCTIONALITY ------------------------------
-
-
-# this is a function used for making keys for caching
-def make_cache_key(*args, **kwargs):
-    return request.url
+def make_cache_key(coin, timeframe, limits):
+    return f"{coin}_{timeframe}_{limits}"
 
 
 # this is the main function for getting data and then caching it
-@cache.cached(timeout=60, key_prefix=make_cache_key)
 def main_data_fetch(coin, timeframe, limits=mainLimit):
-    data = gettingData(coin, timeframe, limits)
-    return data
+    @cache.cached(
+        timeout=60, key_prefix=lambda: make_cache_key(coin, timeframe, limits)
+    )
+    def fetchDataInside():
+        data = gettingData(coin, timeframe, limits)
+        return data
+
+    return fetchDataInside()
 
 
 @app.route("/api/query/", methods=["GET"])  # regular endpoint for simply getting data
@@ -189,7 +193,6 @@ def query_nodb():
     user_query = str(request.args.get("coin"))  # /user/?user=USER_NAME
     timeframe_query = str(request.args.get("timeframe"))
     df = main_data_fetch(user_query, timeframe_query)
-    print(df)
     return df.to_json(orient="records")
 
 
@@ -199,8 +202,11 @@ def query_nodb():
 def query_nodbzones():
     user_query = str(request.args.get("coin"))
     timeframe_query = str(request.args.get("timeframe"))
+    indicator_query = str(request.args.get("indicatorTimeframe"))
+    df2 = main_data_fetch(user_query, indicator_query)
     df = main_data_fetch(user_query, timeframe_query)
-    zones_df = supplyDemandZones(df)  # working on
+    zones_df = supplyDemandZones(df2, chartDf=df)
+
     json_data = zones_df.to_json(orient="records")
     return json_data
 
@@ -239,24 +245,21 @@ def query_varv():
 
 @app.route("/api/ranges/", methods=["GET"])
 def query_ranges():
-    user_query = str(request.args.get("coin"))
+    coin_name = str(request.args.get("coin"))
     timeframe_query = str(request.args.get("timeframe"))
-    ranges_query = str(
-        request.args.get("ranges")
-    )  # here we get which range we want to see
+    ranges_query = str(request.args.get("ranges"))
+
     if ranges_query == "1y":
-        df = transformDf(
-            main_data_fetch(user_query, "1month", 100)
-        )  # I need to change the syntax here, however don't know exactly what it is
+        df = transformDf(main_data_fetch(coin_name, "1month", 100))
         df2 = create_yearly_candles(df)
     elif ranges_query == "3m":
-        df = transformDf(main_data_fetch(user_query, "1month", 1000))
+        df = transformDf(main_data_fetch(coin_name, "1month", 1000))
         df2 = createQuarterlyCandles(create_yearly_candles(df), df)
     elif ranges_query == "1m":
-        df2 = transformDf(main_data_fetch(user_query, "1month", 1000))
+        df2 = transformDf(main_data_fetch(coin_name, "1month", 1000))
     else:
-        df2 = transformDf(main_data_fetch(user_query, ranges_query, 1000))
-    df = transformDf(main_data_fetch(user_query, timeframe_query, 1000))
+        df2 = transformDf(main_data_fetch(coin_name, ranges_query, 1000))
+    df = transformDf(main_data_fetch(coin_name, timeframe_query, 1000))
     df3 = createRanges(df, df2)
     return df3.to_json(orient="records")
 

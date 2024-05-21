@@ -1,13 +1,19 @@
-import ccxt
-import pandas as pd
+import requests
 
-ex = ccxt.binance()
-ms = ex.milliseconds()
-msOneHour = ms - 60 * 60 * 1000
+url = "https://vercel-proxy-api-cyan.vercel.app"
 
 
-data = ex.fetchOHLCV("TRX/USDT", "1m", limit=100, since=msOneHour)
+params = {
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "limit": 100,
+    "since": 1651846814000,
+}
 
-df = pd.DataFrame(data, columns=["timestamp", "open", "high", "low", "close", "volume"])
+response = requests.get(url, params=params)
 
-print(df)
+if response.status_code == 200:
+    data = response.json()
+    print(data)
+else:
+    print("Error:", response.status_code)

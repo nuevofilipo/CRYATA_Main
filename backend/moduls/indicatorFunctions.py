@@ -11,7 +11,6 @@ from scipy.signal import savgol_filter
 from scipy.signal import find_peaks
 
 
-
 def intToTime(integer, dataframe):
     if integer > 0:
         timestamp = dataframe.loc[integer, "time"]
@@ -40,7 +39,7 @@ def findLastRedCandle(intIndex, df):
     return 0
 
 
-def supplyDemandZones(df):
+def supplyDemandZones(df, chartDf):
     df = highsForSupplyZones(df)[0]
     lowest_df2 = highsForSupplyZones(df)[1]
 
@@ -111,6 +110,12 @@ def supplyDemandZones(df):
             )
             last_low_zone = lowest_df2.loc[index, "Low"]
             last_index_zone1 = index
+
+    # checking if zones go beyond the chart and adjusting accordingly
+    earliest_time = chartDf["time"].iloc[0]
+    for zone in zones:
+        if zone["x0"] < earliest_time:
+            zone["x0"] = earliest_time
 
     zones_df = pd.DataFrame(zones)
     return zones_df
@@ -187,8 +192,6 @@ def highsForSupplyZones(df):
         highest_index = highs_df["High"].idxmax()
     except Exception as e:
         print(e)
-        
-
 
     highest_df2 = df.loc[highest_index:]
     df["protected_highs_and_lows"] = 0

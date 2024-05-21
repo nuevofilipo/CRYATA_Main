@@ -2,6 +2,7 @@ import pandas as pd
 import sys
 import time
 import ccxt
+import logging
 
 
 sys.path.append("../../")
@@ -94,36 +95,21 @@ def volatilityMeanAbsolute(df, pastCandles=100):
     return round(volatility.iloc[-1] * 100, 1)  # rounding to one number after comma
 
 
+# Performances --------------------------------------------
 def meanPerformance(df):
     last100Df = df.iloc[-100:]
     mean = ((last100Df["Close"] - last100Df["Open"]) / last100Df["Open"]).mean()
-    return mean
+    return round(mean * 100, 3)
 
 
 def medianPerformance(df):
     last100Df = df.iloc[-100:]
     median = ((last100Df["Close"] - last100Df["Open"]) / last100Df["Open"]).median()
-    return median
-
-
-def volatilityMedianAbsolute(df):
-    last100Df = df.iloc[-100:]
-
-    medianAbsoluteDev = abs(df["Close"] - df["Close"].median()).median()
-
-    mean = last100Df["Close"].rolling(100).mean()
-    volatility = medianAbsoluteDev / mean
-    return round(volatility.iloc[-1] * 100, 1)  # rounding to one number after comma
-
-
-def priceChangePercent(df):
-    oneDayAgo = df.iloc[-24]
-    priceChangePercent = df.iloc[-1]["Close"] / oneDayAgo["Open"]
-    return round((priceChangePercent - 1) * 100, 1)
+    return round(median * 100, 3)
 
 
 def createTableRow(df, coin, timeframe="1d", priceChangeDict={}):
-    pastCoinName = coin[: len(coin) - 2] + "1m"
+    pastCoinName = coin[: len(coin) - 2] + "1m"  # btcusdt1m, for every timeframe
 
     lastRow = df.iloc[-1]
     price = lastRow["Close"]
@@ -142,14 +128,13 @@ def createTableRow(df, coin, timeframe="1d", priceChangeDict={}):
             "coin": coin,
             "price": price,
             "priceChange": priceChange,
-            "fourLineIndicator": contextBandsCalculation(df),
+            "contextBands": contextBandsCalculation(df),
             "varvIndicator": varvIndicatorMetric(df, timeframe),
             "momentumIndicator": momentumIndicatorMetric(df),
             "volatilityMean1d": str(volatilityMeanAbsolute(df, 200)) + " %",
             "volatilityMean4h": str(volatilityMeanAbsolute(df, 100)) + " %",
             "volatilityMean1h": str(volatilityMeanAbsolute(df, 22)) + " %",
             "volatilityMean1w": str(volatilityMeanAbsolute(df, 400)) + " %",
-            "volatilityMedianAbsolute": str(volatilityMedianAbsolute(df)) + " %",
             "meanPerformance": str(meanPerformance(df)) + " %",
             "medianPerformance": str(medianPerformance(df)) + " %",
         }
@@ -158,10 +143,9 @@ def createTableRow(df, coin, timeframe="1d", priceChangeDict={}):
             "coin": coin,
             "price": price,
             "priceChange": priceChange,
-            "fourLineIndicator": contextBandsCalculation(df),
+            # "fourLineIndicator": contextBandsCalculation(df),
             "varvIndicator": varvIndicatorMetric(df, timeframe),
             "momentumIndicator": momentumIndicatorMetric(df),
-            "volatilityMedianAbsolute": str(volatilityMedianAbsolute(df)) + " %",
             "meanPerformance": str(meanPerformance(df)) + " %",
             "medianPerformance": str(medianPerformance(df)) + " %",
         }
@@ -194,6 +178,3 @@ def main():  # for experimenting -- not used for any calculations
     df = getResponse("BTC/USD", "1day", 1000)
     # print(createTableRow(df, "BTC/USD", "1d"))
     print(meanPerformance(df))
-
-
-main()

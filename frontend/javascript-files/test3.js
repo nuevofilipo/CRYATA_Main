@@ -1,5 +1,5 @@
 // defining the chart and other chart elements ----------------------------------------------
-const mainSection = document.getElementById("main");
+const mainSection = document.getElementById("tvchart");
 
 
 function getMainHeight() {
@@ -87,8 +87,19 @@ async function getRangesData(range_value){
 
 }
 
+async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
+  const chartTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
+  const response = await fetch(
+    `http://127.0.0.1:5000/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
+  )
 
-// // for use with external hosted data
+  const data = await response.json();
+  return data;
+    
+}
+
+
+// for use with external hosted data
 // async function getData(route){
   
 //   const selectedBtn = document.querySelector(".active");
@@ -226,8 +237,6 @@ async function setData(){
   chart.timeScale().applyOptions({
     timeVisible: true,
   })
-  
-
 }
 
 
@@ -366,11 +375,12 @@ function setRanges(range_value, list, color){
   }
 }
 
+
 function setAll(){
   setData();
   setLineData();
   setVarvData();
-  setBoxes();
+  // setBoxes();
   setBoxes2();
   setMomentum();
   setRanges("1y", addedRanges, '#e02bd4');
@@ -378,16 +388,14 @@ function setAll(){
   setRanges("1m", addedRanges1m, '#03c4ff');
   setRanges("1week", addedRanges1w, '#ff03a3');
   setRanges("1day", addedRanges1d, '#03ff81');
+  updateIndividualIndicatorsTimeframe();
 }
 
 
 
 
 setData(); // changed this because otherwise api calls get wasted, each time
-
-// although then after a refresh you have to set your stuff again
-
-// setAll();
+updateIndividualIndicatorsTimeframe();
 
 
 
@@ -403,8 +411,35 @@ function updateTimeframe(event, timeframe) {
   }
   event.currentTarget.className += " active";
   setAll();
-
   
+}
+
+
+function updateIndividualIndicatorsTimeframe(){
+  const individualTimeframeButtons = document.querySelectorAll('.timeframe-btn');
+  const timeframeRanks = {
+    '1h': 1,
+    '4h': 2,
+    '1day': 3,
+    '1week': 4
+  };
+  const selectedTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
+  console.log(selectedTimeframe);
+  const selectedRank = timeframeRanks[selectedTimeframe];
+
+  individualTimeframeButtons.forEach(button => {
+    const buttonTimeframe = button.getAttribute('data-timeframe');
+    const buttonRank = timeframeRanks[buttonTimeframe];
+
+    if (buttonRank < selectedRank) {
+      button.disabled = true;
+      button.classList.add('disabled');
+    } else {
+      button.disabled = false;
+      button.classList.remove('disabled');
+    }
+  });
+
 }
 
 function updateCoin(){
@@ -417,16 +452,17 @@ function updateCoin(){
 
 // element listeners ----------------------------------------------
 
+
 const switchElement = document.getElementById("indicator-switch");
 switchElement.addEventListener("change", function(){
   setLineData();
 })
 
 
-const zonesSwitchElement = document.getElementById("zones-indicator-switch");
-zonesSwitchElement.addEventListener("change", function(){
-  setBoxes();
-});
+// const zonesSwitchElement = document.getElementById("zones-indicator-switch");
+// zonesSwitchElement.addEventListener("change", function(){
+//   setBoxes();
+// });
 
 const zonesSwitchElement2 = document.getElementById("zones2-indicator-switch");
 zonesSwitchElement2.addEventListener("change", function(){
@@ -476,6 +512,21 @@ switchElement1d.addEventListener("change", function(){
   console.log("switched")
 });
 
+// small individual timeframe buttons
+const Buttons = document.querySelectorAll('.timeframe-btn');
+Buttons.forEach(button => {
+    button.addEventListener('click', function() {
+        this.classList.toggle('active');
+        if (button.classList.contains('active')) {
+          const indTime = button.getAttribute('data-timeframe');
+          createBoxesData(addedBoxes, getDataIndividualTimeframe("zones", "indicatorTimeframe",  indTime), '#e82ec0');
+        } else {
+          // Optionally handle the case when the button is not active
+          removeBoxes(addedBoxes);
+        }
+        console.log("clicked");
+    });
+});
 
 
 // state functions ----------------------------------------------
@@ -554,4 +605,5 @@ function rangeIndicatorState(range_indicator_id){
 //   axisLabelVisible: false,
 //   title: 'My box',
 // };
+
 

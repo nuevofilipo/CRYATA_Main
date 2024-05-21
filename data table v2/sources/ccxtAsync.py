@@ -25,7 +25,7 @@ pd.options.mode.chained_assignment = None
 # importing own functions
 from tableDataCalc import createTableRow
 
-url = "https://api.binance.us/api/v3/klines"
+backupUrl = "https://api.binance.us/api/v3/klines"
 columns = ["timestamp", "Open", "High", "Low", "Close", "Volume"]
 
 
@@ -72,24 +72,43 @@ def transformData2(data):
 
 
 # this is helper function for get_entire_data() function
-async def request_data_pair(exchange, semaphore, symbol, time_frame, limit, since):
+async def request_data_pair(
+    session, exchange, semaphore, symbol, time_frame, limit, since
+):
     async with semaphore:
         try:
-            data = await exchange.fetchOHLCV(
-                symbol, time_frame, limit=limit, since=since
-            )
+            if time_frame == "1m":
+                proxyUrl = "https://vercel-proxy-api-cyan.vercel.app"
+                response = await session.get(
+                    proxyUrl,
+                    params={
+                        "symbol": symbol,
+                        "timeframe": time_frame,
+                        "limit": limit,
+                        "since": since,
+                    },
+                    ssl=False,
+                )
+                data = await response.json()
+            else:
+                data = await exchange.fetchOHLCV(
+                    symbol, time_frame, limit=limit, since=since
+                )
         except Exception as e:
             # protection layer
             try:
-                session = aiohttp.ClientSession()
                 response = await session.get(
-                    url,
-                    params={"symbol": symbol, "interval": time_frame, "limit": limit},
+                    backupUrl,
+                    params={
+                        "symbol": symbol,
+                        "interval": time_frame,
+                        "limit": limit,
+                        "startTime": since,
+                    },
                     ssl=False,
                 )
                 data = await response.json()
                 data = transformData2(data)
-                await session.close()
             except Exception as e:
                 print(f"exception occured while fetching {symbol, time_frame}")
                 print(e)
@@ -98,20 +117,25 @@ async def request_data_pair(exchange, semaphore, symbol, time_frame, limit, sinc
 
 
 async def get_entire_data(exchange, timeFrame, symbols, limit, since):
-    exchange = ccxt.binance()
+    exchange = (
+        ccxt.binance()
+    )  # ! why do I provide it prior, if the ex instance is created here
     results = []
     realTableNames = []
     tasks = []
-    semaphore = asyncio.Semaphore(50)  # Limit to 10 concurrent requests
-    for symbol in symbols:
-        realTableNames.append((symbol + timeFrame).lower())
-        tasks.append(
-            request_data_pair(exchange, semaphore, symbol, timeFrame, limit, since)
-        )
-    responses = await asyncio.gather(*tasks)
-    for data in responses:
-        df = pd.DataFrame(data, columns=columns)
-        results.append(df)
+    async with aiohttp.ClientSession() as session:
+        semaphore = asyncio.Semaphore(50)  # Limit to 10 concurrent requests
+        for symbol in symbols:
+            realTableNames.append((symbol + timeFrame).lower())
+            tasks.append(
+                request_data_pair(
+                    session, exchange, semaphore, symbol, timeFrame, limit, since
+                )
+            )
+        responses = await asyncio.gather(*tasks)
+        for data in responses:
+            df = pd.DataFrame(data, columns=columns)
+            results.append(df)
     await exchange.close()
     return results, realTableNames
 
@@ -141,7 +165,7 @@ def asyncio_main(exchange, timeFrame, symbols, retries_left=3, limit=1000, since
         return out_dfs_dictionary
 
 
-# # using concurrent futures -------------------
+# !using concurrent futures -------------------
 
 
 if __name__ == "__main__":
@@ -192,6 +216,57 @@ if __name__ == "__main__":
         "OPUSDT",
         "PEPEUSDT",
         "THETAUSDT",
+        "RUNEUSDT",
+        "FTMUSDT",
+        "FETUSDT",
+        "TIAUSDT",
+        "LDOUSDT",
+        "FLOKIUSDT",
+        "BGBUSDT",
+        "ALGOUSDT",
+        "COREUSDT",
+        "BONKUSDT",
+        "SEIUSDT",
+        "JUPUSDT",
+        "FLOWUSDT",
+        "ENAUSDT",
+        "GALAUSDT",
+        "AAVEUSDT",
+        "BSVUSDT",
+        "BEAMUSDT",
+        "DYDXUSDT",
+        "QNTUSDT",
+        "AKTUSDT",
+        "BTTUSDT",
+        "AGIXUSDT",
+        "SXPUSDT",
+        "WLDUSDT",
+        "FLRUSDT",
+        "WUSDT",
+        "CHZUSDT",
+        "PENDLEUSDT",
+        "ONDOUSDT",
+        "EGLDUSDT",
+        "NEOUSDT",
+        "AXSUSDT",
+        "KCSUSDT",
+        "SANDUSDT",
+        "XECUSDT",
+        "AIOZUSDT",
+        "EOSUSDT",
+        "XTZUSDT",
+        "STRKUSDT",
+        "JASMYUSDT",
+        "MINAUSDT",
+        "RONUSDT",
+        "CFXUSDT",
+        "SNXUSDT",
+        "MANAUSDT",
+        "ORDIUSDT",
+        "GNOUSDT",
+        "GTUSDT",
+        "CKBUSDT",
+        "APEUSDT",
     ]
     timeframes = ["1d", "1h", "4h", "1w"]
 
@@ -215,8 +290,9 @@ if __name__ == "__main__":
             limit=1,
             since=sinceTimestamp,
         )
+        logging.info(f"logger: fetched priceChangeDictionary {timeframe}")
 
-        print(priceChange_dictionary)
+        # print(priceChange_dictionary)
 
         dfs_dictionary = asyncio_main(exchange, timeframe, symbols)
         logging.info(f"logger: fetched data for {timeframe}")
@@ -245,15 +321,15 @@ if __name__ == "__main__":
 
         # !inserting into database -------------------
         #! different engine urls for local and remote database
-        engine = create_engine(
-            "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
-        )
-        # ? remote, railway database
         # engine = create_engine(
-        #     "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
-        #     echo=False,
-        #     isolation_level="READ COMMITTED",
+        #     "mysql+mysqlconnector://root:Hallo123@localhost/nc_coffee", echo=True
         # )
+        # # ? remote, railway database
+        engine = create_engine(
+            "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
+            echo=False,
+            isolation_level="READ COMMITTED",
+        )
         df_table.to_sql(
             "table" + timeframe, con=engine, if_exists="replace", chunksize=1000
         )
