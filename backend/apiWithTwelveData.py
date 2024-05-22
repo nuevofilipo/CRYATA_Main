@@ -197,7 +197,7 @@ def query_nodb():
 
 
 @app.route(
-    "/api/zones/", methods=["GET"]
+    "/api/supplyDemand/", methods=["GET"]
 )  # endpoint for getting suply and demand zones
 def query_nodbzones():
     user_query = str(request.args.get("coin"))
@@ -211,11 +211,14 @@ def query_nodbzones():
     return json_data
 
 
-@app.route("/api/zones2/", methods=["GET"])  # !endpoint for getting imbalance zones
-def query_zones2():
+@app.route(
+    "/api/imbalanceZones/", methods=["GET"]
+)  # !endpoint for getting imbalance zones
+def query_imbalanceZones():
     user_query = str(request.args.get("coin"))
     timeframe_query = str(request.args.get("timeframe"))
-    df = main_data_fetch(user_query, timeframe_query)
+    indicator_query = str(request.args.get("indicatorTimeframe"))
+    df = main_data_fetch(user_query, indicator_query)
     df = transformDf(df)
     zones_df = imbalanceZones(df)
     json_data = zones_df.to_json(orient="records")

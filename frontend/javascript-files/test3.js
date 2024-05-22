@@ -53,6 +53,7 @@ const band10 = chart.addLineSeries({ color: "#e434f7", lineWidth: 1, priceLineVi
 const band11 = chart.addLineSeries({ color: "#f73472", lineWidth: 1, priceLineVisible: false });
 
 var addedBoxes = [];
+let addedSupplyZones = new Map();
 var addedBoxes2 = [];
 var addedBoxes3 = [];
 var addedRanges = [];
@@ -124,10 +125,9 @@ async function getDataIndividualTimeframe(endpoint, additionalParameter,  indica
 
 
 
-async function createBoxesData(list, functionToApply, color){
+async function createBoxesData(mapping, functionToApply, color, key){
+  list = [];
   const data = await functionToApply;
-  console.log(data);
- // for object in array, create a box with the respective values, bass music relaxes me a lot during coding, and just accepting life is also making things easier
   data.forEach(element => {
     const i = candleSeries.createBox({
         lowPrice: element["y0"],
@@ -145,9 +145,10 @@ async function createBoxesData(list, functionToApply, color){
       })
       list.push(i);
     });
+  mapping.set(key, list);
 }
 
-async function createBoxesData2(list, functionToApply){ // I think this is for momentum
+async function createBoxesData2(list, functionToApply){ // this is for momentum
   const data = await functionToApply;
   console.log(data);
 
@@ -170,7 +171,7 @@ async function createBoxesData2(list, functionToApply){ // I think this is for m
     });
   }
 async function createRangesData(list, functionToApply, color){
-    const data = await functionToApply;
+  const data = await functionToApply;
   console.log(data);
 
   data.forEach(element => {
@@ -187,7 +188,6 @@ async function createRangesData(list, functionToApply, color){
       })
       list.push(i);
     });
-
   }
 
 
@@ -197,6 +197,14 @@ function removeBoxes(list){
     candleSeries.removeBox(element);
   });
   list = [];
+}
+
+function removeBoxesMap(mapping, key){
+  boxes = mapping.get(key);
+  boxes.forEach(element => {
+    candleSeries.removeBox(element);
+  });
+  mapping.delete(key);
 }
 
 
@@ -381,7 +389,7 @@ function setAll(){
   setLineData();
   setVarvData();
   // setBoxes();
-  setBoxes2();
+  // setBoxes2();
   setMomentum();
   setRanges("1y", addedRanges, '#e02bd4');
   setRanges("3m", addedRanges3m, '#ffdd00');
@@ -430,10 +438,15 @@ function updateIndividualIndicatorsTimeframe(){
   individualTimeframeButtons.forEach(button => {
     const buttonTimeframe = button.getAttribute('data-timeframe');
     const buttonRank = timeframeRanks[buttonTimeframe];
+    const indicatorType = button.getAttribute('data-indicator');
 
     if (buttonRank < selectedRank) {
       button.disabled = true;
       button.classList.add('disabled');
+      if (button.classList.contains('active')) {
+        button.classList.remove('active');
+        removeBoxesMap(addedSupplyZones, indicatorType + buttonTimeframe);
+      }
     } else {
       button.disabled = false;
       button.classList.remove('disabled');
@@ -464,11 +477,11 @@ switchElement.addEventListener("change", function(){
 //   setBoxes();
 // });
 
-const zonesSwitchElement2 = document.getElementById("zones2-indicator-switch");
-zonesSwitchElement2.addEventListener("change", function(){
-  setBoxes2();
-  console.log("switched")
-});
+// const zonesSwitchElement2 = document.getElementById("zones2-indicator-switch");
+// zonesSwitchElement2.addEventListener("change", function(){
+//   setBoxes2();
+//   console.log("switched")
+// });
 
 const momentumSwitchElement = document.getElementById("momentum-indicator-switch");
 momentumSwitchElement.addEventListener("change", function(){
@@ -517,12 +530,14 @@ const Buttons = document.querySelectorAll('.timeframe-btn');
 Buttons.forEach(button => {
     button.addEventListener('click', function() {
         this.classList.toggle('active');
+        const indTime = button.getAttribute('data-timeframe');
+        const indicatorType = button.getAttribute('data-indicator');
+        const color = button.getAttribute('data-color');
         if (button.classList.contains('active')) {
-          const indTime = button.getAttribute('data-timeframe');
-          createBoxesData(addedBoxes, getDataIndividualTimeframe("zones", "indicatorTimeframe",  indTime), '#e82ec0');
+          createBoxesData(addedSupplyZones, getDataIndividualTimeframe( indicatorType, "indicatorTimeframe",  indTime), color, indicatorType + indTime );
         } else {
           // Optionally handle the case when the button is not active
-          removeBoxes(addedBoxes);
+          removeBoxesMap(addedSupplyZones, indicatorType + indTime);
         }
         console.log("clicked");
     });
