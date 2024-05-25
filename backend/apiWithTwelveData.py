@@ -227,13 +227,16 @@ def query_imbalanceZones():
 
 @app.route(
     "/api/momentum/", methods=["GET"]
-)  # http://127.0.0.1:5000/api/momentum/?coin=BTC/USD&timeframe=1day
+)  # http://127.0.0.1:5000/api/momentum/?coin=BTC/USD&timeframe=1day&indicatorTimeframe=1week
 def query_momentum():
     user_query = str(request.args.get("coin"))
     timeframe_query = str(request.args.get("timeframe"))
-    df = main_data_fetch(user_query, timeframe_query)
-    red_boxes, green_boxes = momentumIndicator(df)
-    df_combined = pd.concat([red_boxes, green_boxes])
+    indicator_query = str(request.args.get("indicatorTimeframe"))
+
+    chart_df = main_data_fetch(user_query, timeframe_query)
+    indicator_df = main_data_fetch(user_query, indicator_query)
+    df_combined = momentumIndicator(indicator_df, chart_df)
+    # df_combined = pd.concat([red_boxes, green_boxes])
     return df_combined.to_json(orient="records")
 
 
@@ -241,8 +244,8 @@ def query_momentum():
 def query_varv():
     user_query = str(request.args.get("coin"))
     timeframe_query = str(request.args.get("timeframe"))
-    df = main_data_fetch(user_query, timeframe_query)
-    df2 = createVarv(df)
+    df = main_data_fetch(user_query, "1day")
+    df2 = createVarv(df, timeframe_query)
     return df2.to_json(orient="records")
 
 
@@ -250,7 +253,7 @@ def query_varv():
 def query_ranges():
     coin_name = str(request.args.get("coin"))
     timeframe_query = str(request.args.get("timeframe"))
-    ranges_query = str(request.args.get("ranges"))
+    ranges_query = str(request.args.get("indicatorTimeframe"))
 
     if ranges_query == "1y":
         df = transformDf(main_data_fetch(coin_name, "1month", 100))

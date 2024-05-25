@@ -122,10 +122,10 @@
               <span class="slider round"></span>
             </label> -->
             <div class="timeframe-buttons">
-              <button class="timeframe-btn" data-indicator="supplyDemand" data-timeframe="1day" data-color="#e82ec0">1d</button>
-              <button class="timeframe-btn" data-indicator="supplyDemand" data-timeframe="1week" data-color="#e82ec0">1w</button>
-              <button class="timeframe-btn" data-indicator="supplyDemand" data-timeframe="1h" data-color="#e82ec0">1h</button>
-              <button class="timeframe-btn" data-indicator="supplyDemand" data-timeframe="4h" data-color="#e82ec0">4h</button>
+              <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1day" data-color="#e82ec0">1d</button>
+              <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1week" data-color="#e82ec0">1w</button>
+              <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1h" data-color="#e82ec0">1h</button>
+              <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="4h" data-color="#e82ec0">4h</button>
             </div>
           </div>
 
@@ -136,59 +136,40 @@
               <span class="slider round"></span>
             </label> -->
             <div class="timeframe-buttons">
-              <button class="timeframe-btn" data-indicator="imbalanceZones" data-timeframe="1day" data-color="#9e9e9e">1d</button>
-              <button class="timeframe-btn" data-indicator="imbalanceZones" data-timeframe="1week" data-color="#9e9e9e">1w</button>
-              <button class="timeframe-btn" data-indicator="imbalanceZones" data-timeframe="1h" data-color="#9e9e9e">1h</button>
-              <button class="timeframe-btn" data-indicator="imbalanceZones" data-timeframe="4h" data-color="#9e9e9e">4h</button>
+              <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1day" data-color="#9e9e9e">1d</button>
+              <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1week" data-color="#9e9e9e">1w</button>
+              <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1h" data-color="#9e9e9e">1h</button>
+              <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="4h" data-color="#9e9e9e">4h</button>
             </div>
           </div>
 
-          <div class="indicator-container">
+          <div class="indicator-container-tf">
             <p class="indicator-tag">Momentum</p>
-            <label class="switch">
+            <!-- <label class="switch">
               <input id="momentum-indicator-switch" type="checkbox" />
               <span class="slider round"></span>
-            </label>
+            </label> -->
+            <div class="timeframe-buttons">
+              <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1day" data-color="#9e9e9e">1d</button>
+              <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1week" data-color="#9e9e9e">1w</button>
+              <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1h" data-color="#9e9e9e">1h</button>
+              <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="4h" data-color="#9e9e9e">4h</button>
+            </div>
           </div>
 
-          <div class="indicator-container">
-            <p class="indicator-tag">1y Range</p>
-            <label class="switch">
+          <div class="indicator-container-tf">
+            <p class="indicator-tag">Ranges</p>
+            <!-- <label class="switch">
               <input id="1y" type="checkbox" />
               <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="indicator-container">
-            <p class="indicator-tag">3m Range</p>
-            <label class="switch">
-              <input id="3m" type="checkbox" />
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="indicator-container">
-            <p class="indicator-tag">1m Range</p>
-            <label class="switch">
-              <input id="1m" type="checkbox" />
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="indicator-container">
-            <p class="indicator-tag">1w Range</p>
-            <label class="switch">
-              <input id="1week" type="checkbox" />
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="indicator-container">
-            <p class="indicator-tag">1d Range</p>
-            <label class="switch">
-              <input id="1day" type="checkbox" />
-              <span class="slider round"></span>
-            </label>
+            </label> -->
+            <div class="timeframe-buttons">
+              <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1day" data-color="#e02bd4">1d</button>
+              <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1week" data-color="#ffdd00">1w</button>
+              <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1m" data-color="#03c4ff">1m</button>
+              <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="3m" data-color="#ff03a3">3m</button>
+              <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1y" data-color="#03ff81">1y</button>
+            </div>
           </div>
         </div>
       </section>
@@ -258,7 +239,7 @@
         margin: 10px;
         border: 3px solid rgb(58, 58, 58);
         border-radius: 10px;
-        height: 500px;
+        height: auto;
         /* width:  */
         background-color: #404040;
       }
@@ -271,6 +252,7 @@
         border: 1px solid #ccc;
         border-radius: 10px;
         padding: 10px 16px;
+        margin: 5px;
         font-size: 17px;
         cursor: pointer;
         width: 90%;
@@ -284,6 +266,7 @@
         flex-direction: row;
         align-items: center;
         width: 100%;
+        padding:5px;
       }
 
       /* styling for indicator container with individual timeframe selection */
@@ -293,13 +276,14 @@
         flex-direction: column;
         align-items: start;
         width: 100%;
+        padding:5px;
+
       }
 
       /* styling of small timeframe buttons ------*/
       .timeframe-buttons {
         display: flex;
         gap: 10px;
-        margin-top: 10px;
       }
 
       .timeframe-btn {
@@ -335,6 +319,8 @@
         border-radius: 10px;
         display: flex;
         justify-content: space-between;
+        /* padding:5px; */
+        margin:5px;
       }
 
       /* Style the buttons inside the tab */
@@ -426,6 +412,7 @@
         display: inline-block;
         margin: 0;
         margin-right: 10px;
+        padding-bottom: 2px;
       }
     </style>
     <script>

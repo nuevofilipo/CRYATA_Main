@@ -56,11 +56,8 @@ var addedBoxes = [];
 let addedSupplyZones = new Map();
 var addedBoxes2 = [];
 var addedBoxes3 = [];
-var addedRanges = [];
-var addedRanges3m = [];
-var addedRanges1m = [];
-var addedRanges1w = [];
-var addedRanges1d = [];
+let addedRanges = new Map();
+
 
 // functions for fetchng data asyncronously ----------------------------------------------
 
@@ -129,6 +126,7 @@ async function createBoxesData(mapping, functionToApply, color, key){
   list = [];
   const data = await functionToApply;
   data.forEach(element => {
+    color = element.hasOwnProperty("color") ? element["color"] : color;
     const i = candleSeries.createBox({
         lowPrice: element["y0"],
         highPrice: element["y1"],
@@ -170,10 +168,9 @@ async function createBoxesData2(list, functionToApply){ // this is for momentum
       list.push(i);
     });
   }
-async function createRangesData(list, functionToApply, color){
+async function createRangesData(mapping, functionToApply, color, key){
+  list = [];
   const data = await functionToApply;
-  console.log(data);
-
   data.forEach(element => {
     const i = candleSeries.createBox({
         corners: [{ time: element["x0"] / 1000, price: element["y0"] }, { time: element["x1"] / 1000, price: element["y1"] }],
@@ -188,6 +185,7 @@ async function createRangesData(list, functionToApply, color){
       })
       list.push(i);
     });
+  mapping.set(key, list);
   }
 
 
@@ -390,12 +388,12 @@ function setAll(){
   setVarvData();
   // setBoxes();
   // setBoxes2();
-  setMomentum();
-  setRanges("1y", addedRanges, '#e02bd4');
-  setRanges("3m", addedRanges3m, '#ffdd00');
-  setRanges("1m", addedRanges1m, '#03c4ff');
-  setRanges("1week", addedRanges1w, '#ff03a3');
-  setRanges("1day", addedRanges1d, '#03ff81');
+  // setMomentum();
+  // setRanges("1y", addedRanges, '#e02bd4');
+  // setRanges("3m", addedRanges3m, '#ffdd00');
+  // setRanges("1m", addedRanges1m, '#03c4ff');
+  // setRanges("1week", addedRanges1w, '#ff03a3');
+  // setRanges("1day", addedRanges1d, '#03ff81');
   updateIndividualIndicatorsTimeframe();
 }
 
@@ -429,7 +427,11 @@ function updateIndividualIndicatorsTimeframe(){
     '1h': 1,
     '4h': 2,
     '1day': 3,
-    '1week': 4
+    '1week': 4,
+    '1m': 5,
+    '3m': 6,
+    '1y': 7,
+
   };
   const selectedTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
   console.log(selectedTimeframe);
@@ -483,11 +485,11 @@ switchElement.addEventListener("change", function(){
 //   console.log("switched")
 // });
 
-const momentumSwitchElement = document.getElementById("momentum-indicator-switch");
-momentumSwitchElement.addEventListener("change", function(){
-  setMomentum();
-  console.log("switched")
-});
+// const momentumSwitchElement = document.getElementById("momentum-indicator-switch");
+// momentumSwitchElement.addEventListener("change", function(){
+//   setMomentum();
+//   console.log("switched")
+// });
 
 const varvSwitchElement = document.getElementById("varv-indicator-switch");
 varvSwitchElement.addEventListener("change", function(){
@@ -495,35 +497,35 @@ varvSwitchElement.addEventListener("change", function(){
   console.log("switched")
 });
 
-const rangeSwitchElement = document.getElementById("1y");
-rangeSwitchElement.addEventListener("change", function(){
-  setRanges("1y", addedRanges, '#e02bd4');
-  console.log("switched")
-});
+// const rangeSwitchElement = document.getElementById("1y");
+// rangeSwitchElement.addEventListener("change", function(){
+//   setRanges("1y", addedRanges, '#e02bd4');
+//   console.log("switched")
+// });
 
-const switchElement3m = document.getElementById("3m");
-switchElement3m.addEventListener("change", function(){
-  setRanges("3m", addedRanges3m, '#ffdd00');
-  console.log("switched")
-});
+// const switchElement3m = document.getElementById("3m");
+// switchElement3m.addEventListener("change", function(){
+//   setRanges("3m", addedRanges3m, '#ffdd00');
+//   console.log("switched")
+// });
 
-const switchElement1m = document.getElementById("1m");
-switchElement1m.addEventListener("change", function(){
-  setRanges("1m", addedRanges1m, '#03c4ff');
-  console.log("switched")
-});
+// const switchElement1m = document.getElementById("1m");
+// switchElement1m.addEventListener("change", function(){
+//   setRanges("1m", addedRanges1m, '#03c4ff');
+//   console.log("switched")
+// });
 
-const switchElement1w = document.getElementById("1week");
-switchElement1w.addEventListener("change", function(){
-  setRanges("1week", addedRanges1w, '#ff03a3');
-  console.log("switched")
-});
+// const switchElement1w = document.getElementById("1week");
+// switchElement1w.addEventListener("change", function(){
+//   setRanges("1week", addedRanges1w, '#ff03a3');
+//   console.log("switched")
+// });
 
-const switchElement1d = document.getElementById("1day");
-switchElement1d.addEventListener("change", function(){
-  setRanges("1day", addedRanges1d, '#03ff81');
-  console.log("switched")
-});
+// const switchElement1d = document.getElementById("1day");
+// switchElement1d.addEventListener("change", function(){
+//   setRanges("1day", addedRanges1d, '#03ff81');
+//   console.log("switched")
+// });
 
 // small individual timeframe buttons
 const Buttons = document.querySelectorAll('.timeframe-btn');
@@ -531,15 +533,23 @@ Buttons.forEach(button => {
     button.addEventListener('click', function() {
         this.classList.toggle('active');
         const indTime = button.getAttribute('data-timeframe');
-        const indicatorType = button.getAttribute('data-indicator');
+        const indicator = button.getAttribute('data-indicator');
+        const type = button.getAttribute('data-type');
         const color = button.getAttribute('data-color');
         if (button.classList.contains('active')) {
-          createBoxesData(addedSupplyZones, getDataIndividualTimeframe( indicatorType, "indicatorTimeframe",  indTime), color, indicatorType + indTime );
+          if (type  == "boxes"){
+            createBoxesData(addedSupplyZones, getDataIndividualTimeframe( indicator, "indicatorTimeframe",  indTime), color, indicator + indTime );
+          } else if (type == "lineSeries"){
+            createRangesData(addedRanges, getDataIndividualTimeframe( indicator, "indicatorTimeframe",  indTime), color, indicator + indTime);
+          }
+          
         } else {
-          // Optionally handle the case when the button is not active
-          removeBoxesMap(addedSupplyZones, indicatorType + indTime);
+          if (type == "boxes"){
+            removeBoxesMap(addedSupplyZones, indicator + indTime);
+          } else if (type == "lineSeries"){
+            removeBoxesMap(addedRanges, indicator + indTime);
+          }
         }
-        console.log("clicked");
     });
 });
 

@@ -2,6 +2,7 @@ import pandas as pd
 
 pd.options.mode.chained_assignment = None
 import numpy as np
+import time
 
 import pandas_ta as tan
 import plotly.graph_objects as go
@@ -307,8 +308,9 @@ def momentumIndicatorPrep(df):
     return df
 
 
-def momentumIndicator(df):  # takes df with integer indices
+def momentumIndicator(df, chart_df):  # takes df with integer indices
     df = momentumIndicatorPrep(highsForSupplyZones(df)[0])
+    timeNow = chart_df["time"].iloc[-1]
 
     red_boxes = []
     green_boxes = []
@@ -340,7 +342,7 @@ def momentumIndicator(df):  # takes df with integer indices
                 {
                     "x0": intToTime(red_box_start, df),
                     "y0": low_y,
-                    "x1": intToTime(red_box_end, df),
+                    "x1": timeNow,
                     "y1": high_y,
                     "color": "#f52a45",
                 }
@@ -368,20 +370,21 @@ def momentumIndicator(df):  # takes df with integer indices
                 {
                     "x0": intToTime(green_box_start, df),
                     "y0": low_y,
-                    "x1": intToTime(green_box_end, df),
+                    "x1": timeNow,
                     "y1": high_y,
                     "color": "#2af5c2",
                 }
             )
             green_box_open = False
 
-    red_df = pd.DataFrame(red_boxes)
-    green_df = pd.DataFrame(green_boxes)
+    combined_zones = red_boxes + green_boxes
+    combined_df = pd.DataFrame(combined_zones)
 
-    return red_df, green_df
+    return combined_df
 
 
-def createVarv(df):
+def createVarv(df, timeframe):
+
     df["standard_deviation"] = df["Close"].rolling(window=200).std() * 100
     df["moving_average"] = df["Close"].rolling(window=200).mean()
 
@@ -433,6 +436,9 @@ def createVarv(df):
         ]
     ]
     df = df.dropna(subset=["out1"])
+    if timeframe == "1week":
+        df.set_index("time", inplace=True)
+        df = df.resample("W-MON").last().dropna().reset_index()
     return df
 
 
@@ -440,7 +446,7 @@ def create4Lines(df, timeFrame):
     if timeFrame == "1week":
         df["MA"] = tan.sma(df["Close"], length=9)
         df["EMA"] = tan.ema(df["Close"], length=12)
-    elif timeFrame == "1day":
+    else:
         # df["MA"] = ta.SMA(df["Close"], timeperiod=63)
         # df["EMA"] = ta.EMA(df["Close"], timeperiod=84) # using talib you have to give timeperiod, and using pandas_ta you have to give length
         df["MA"] = tan.sma(df["Close"], length=63)
