@@ -78,8 +78,7 @@
             ,
             id="coin-selector"
             ,
-            onchange="setData(), setLineData(), setBoxes(), setBoxes2(), setMomentum(), setVarvData(), setRanges('1y', addedRanges, '#e02bd4'), setRanges('3m', addedRanges3m, '#ffdd00'), 
-        setRanges('1m', addedRanges1m, '#03c4ff'), setRanges('1week', addedRanges1w, '#ff03a3'), setRanges('1day', addedRanges1d, '#03ff81')"
+            onchange="setData(), setLineData(), setVarvData(), updateSmallIndicatorCoin()"
           >
             <option value="BTC/USD">bitcoin</option>
             <option value="ETH/USD">ethereum</option>
@@ -211,7 +210,7 @@
         align-items: center;
         height: calc(95%);
         width: calc(95%);
-        border: 3px solid rgb(58, 58, 58);
+        border: 0.5px solid rgb(165, 165, 165);
         border-radius: 10px;
         padding: 10px;
       }
@@ -237,7 +236,7 @@
         align-items: center;
         padding: 10px;
         margin: 10px;
-        border: 3px solid rgb(58, 58, 58);
+        border: 0.5px solid rgb(148, 148, 148);
         border-radius: 10px;
         height: auto;
         /* width:  */
@@ -248,7 +247,8 @@
         appearance: none;
         -webkit-appearance: none;
         -moz-appearance: none;
-        background-color: #f1f1f1;
+        background-color: #131313;
+        color: white;
         border: 1px solid #ccc;
         border-radius: 10px;
         padding: 10px 16px;
@@ -288,21 +288,22 @@
 
       .timeframe-btn {
         padding: 5px 10px;
-        border: 1px solid #ccc;
-        background-color: #f9f9f9;
+        color: rgb(235, 235, 235);
+        border: 1px solid #838383;
+        background-color: rgb(29, 29, 29);
         cursor: pointer;
         border-radius: 3px;
         transition: background-color 0.3s, border-color 0.3s;
       }
 
       .timeframe-btn:hover {
-        background-color: #e6e6e6;
+        background-color: rgb(104, 104, 104);
       }
 
       .timeframe-btn.active {
-        background-color: #007bff;
-        color: white;
-        border-color: #007bff;
+        background-color: #4E23E0;
+        color:rgb(235, 235, 235);
+        border-color:#838383;
       }
 
       .timeframe-btn.disabled {

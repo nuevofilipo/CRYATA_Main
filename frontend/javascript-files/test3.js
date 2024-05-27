@@ -63,11 +63,46 @@ let addedRanges = new Map();
 
 
 // for use with local data
-async function getData(route){
+// async function getData(route){
   
+//   const selectedBtn = document.querySelector(".active");
+//   const response = await fetch(
+//     `http://127.0.0.1:5000/api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
+//   )
+  
+//   const data = await response.json();
+//   return data;
+// }
+
+// async function getRangesData(range_value){
+//   const selectedBtn = document.querySelector(".active");
+//   const response = await fetch(
+//     `http://127.0.0.1:5000/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
+//   )
+  
+//   const data = await response.json();
+//   return data;
+
+// }
+
+// async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
+//   const chartTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
+//   const response = await fetch(
+//     `http://127.0.0.1:5000/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
+//   )
+
+//   const data = await response.json();
+//   return data;
+    
+// }
+
+
+
+// for use with external hosted data
+async function getData(route){
   const selectedBtn = document.querySelector(".active");
   const response = await fetch(
-    `http://127.0.0.1:5000/api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
+    `https://new-cryata-backend-production.up.railway.app//api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
   )
   
   const data = await response.json();
@@ -77,7 +112,7 @@ async function getData(route){
 async function getRangesData(range_value){
   const selectedBtn = document.querySelector(".active");
   const response = await fetch(
-    `http://127.0.0.1:5000/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
+    `https://new-cryata-backend-production.up.railway.app/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
   )
   
   const data = await response.json();
@@ -88,7 +123,7 @@ async function getRangesData(range_value){
 async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
   const chartTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
   const response = await fetch(
-    `http://127.0.0.1:5000/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
+    `https://new-cryata-backend-production.up.railway.app/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
   )
 
   const data = await response.json();
@@ -96,29 +131,6 @@ async function getDataIndividualTimeframe(endpoint, additionalParameter,  indica
     
 }
 
-
-// for use with external hosted data
-// async function getData(route){
-  
-//   const selectedBtn = document.querySelector(".active");
-//   const response = await fetch(
-//     `https://cryatabackendv2-production.up.railway.app/api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
-//   )
-  
-//   const data = await response.json();
-//   return data;
-// }
-
-// async function getRangesData(range_value){
-//   const selectedBtn = document.querySelector(".active");
-//   const response = await fetch(
-//     `https://cryatabackendv2-production.up.railway.app/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
-//   )
-  
-//   const data = await response.json();
-//   return data;
-
-// }
 
 
 
@@ -146,28 +158,7 @@ async function createBoxesData(mapping, functionToApply, color, key){
   mapping.set(key, list);
 }
 
-async function createBoxesData2(list, functionToApply){ // this is for momentum
-  const data = await functionToApply;
-  console.log(data);
 
-  data.forEach(element => {
-    const i = candleSeries.createBox({
-        lowPrice: element["y0"],
-        highPrice: element["y1"],
-        earlyTime: element["x0"] / 1000,
-        lateTime: element["x1"] / 1000,
-        borderColor: '#00008B',
-        borderWidth: 2,
-        borderStyle: LightweightCharts.LineStyle.Solid,
-        fillColor: element["color"],
-        fillOpacity: 0.4,
-        borderVisible: false,
-        axisLabelVisible: false,
-        title: 'My box',
-      })
-      list.push(i);
-    });
-  }
 async function createRangesData(mapping, functionToApply, color, key){
   list = [];
   const data = await functionToApply;
@@ -209,6 +200,8 @@ function removeBoxesMap(mapping, key){
 
 
 // functions for setting data----------------------------------------------
+
+
 
 async function setData(){
   const data = await getData("query"); 
@@ -311,8 +304,6 @@ async function setVarvData(){
   });
 
 
-  
-
   if (varvIndicatorState() == true){
   band1.setData(band1Data);
   band2.setData(band2Data);
@@ -341,72 +332,34 @@ async function setVarvData(){
 }
 
 
-
-
-
-
-function setBoxes(){
-  removeBoxes(addedBoxes);
-  if (zonesIndicatorState() == true){
-    createBoxesData(addedBoxes, getData("zones"), '#e82ec0');
-  } else if (zonesIndicatorState() == false){
-    removeBoxes(addedBoxes);
-  }
-}
-
-function setBoxes2(){
-  removeBoxes(addedBoxes2);
-  if (zones2IndicatorState() == true){
-    createBoxesData(addedBoxes2, getData("zones2"), '#a7b4c9');
-  } else if (zones2IndicatorState() == false){
-    removeBoxes(addedBoxes2);
-  }
-}
-
-function setMomentum(){
-  removeBoxes(addedBoxes3);
-  if (momentumIndicatorState() == true){
-    createBoxesData2(addedBoxes3, getData("momentum"));
-  } else if (momentumIndicatorState() == false){
-    removeBoxes(addedBoxes3);
-  }
-}
-
-function setRanges(range_value, list, color){
-  removeBoxes(list);
-  if (rangeIndicatorState(range_value) == true){
-    createRangesData(list, getRangesData(range_value), color);
-  } else if (rangeIndicatorState(range_value) == false){
-    removeBoxes(list);
-  }
-}
-
-
 function setAll(){
   setData();
   setLineData();
   setVarvData();
-  // setBoxes();
-  // setBoxes2();
-  // setMomentum();
-  // setRanges("1y", addedRanges, '#e02bd4');
-  // setRanges("3m", addedRanges3m, '#ffdd00');
-  // setRanges("1m", addedRanges1m, '#03c4ff');
-  // setRanges("1week", addedRanges1w, '#ff03a3');
-  // setRanges("1day", addedRanges1d, '#03ff81');
   updateIndividualIndicatorsTimeframe();
 }
-
-
 
 
 setData(); // changed this because otherwise api calls get wasted, each time
 updateIndividualIndicatorsTimeframe();
 
-
-
-
 // updating queries (coin and timeframe) ----------------------------------------------
+
+// function to get the coin from the url
+function getUrlParameter() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const myParam = urlParams.get('coin');
+  return myParam;
+}
+
+function updateCoin(){
+  if (getUrlParameter() != null){
+    document.getElementById("coin-selector").value = getUrlParameter();
+    return getUrlParameter();    
+  }
+  const selectedCoin = document.getElementById("coin-selector").value;
+  return selectedCoin;
+}
 
 function updateTimeframe(event, timeframe) {
   var i, tablinks;
@@ -419,7 +372,6 @@ function updateTimeframe(event, timeframe) {
   setAll();
   
 }
-
 
 function updateIndividualIndicatorsTimeframe(){
   const individualTimeframeButtons = document.querySelectorAll('.timeframe-btn');
@@ -454,16 +406,27 @@ function updateIndividualIndicatorsTimeframe(){
       button.classList.remove('disabled');
     }
   });
-
 }
 
-function updateCoin(){
-  const selectedCoin = document.getElementById("coin-selector").value;
-  return selectedCoin;
+// this resets the button activated indicators, when the coin is changed
+function updateSmallIndicatorCoin(){
+  const buttons = document.querySelectorAll('.timeframe-btn');
+  buttons.forEach(button => {
+    const indTime = button.getAttribute('data-timeframe');
+    const indicator = button.getAttribute('data-indicator');
+    const type = button.getAttribute('data-type');
+    const color = button.getAttribute('data-color');
+    if (button.classList.contains('active')) {
+      if (type == "boxes"){
+        removeBoxesMap(addedSupplyZones, indicator + indTime);
+        createBoxesData(addedSupplyZones, getDataIndividualTimeframe( indicator, "indicatorTimeframe",  indTime), color, indicator + indTime );
+      } else if (type == "lineSeries"){
+        removeBoxesMap(addedRanges, indicator + indTime);
+        createRangesData(addedRanges, getDataIndividualTimeframe( indicator, "indicatorTimeframe",  indTime), color, indicator + indTime);
+      }
+    }
+  });
 }
-
-
-
 
 // element listeners ----------------------------------------------
 
@@ -474,58 +437,11 @@ switchElement.addEventListener("change", function(){
 })
 
 
-// const zonesSwitchElement = document.getElementById("zones-indicator-switch");
-// zonesSwitchElement.addEventListener("change", function(){
-//   setBoxes();
-// });
-
-// const zonesSwitchElement2 = document.getElementById("zones2-indicator-switch");
-// zonesSwitchElement2.addEventListener("change", function(){
-//   setBoxes2();
-//   console.log("switched")
-// });
-
-// const momentumSwitchElement = document.getElementById("momentum-indicator-switch");
-// momentumSwitchElement.addEventListener("change", function(){
-//   setMomentum();
-//   console.log("switched")
-// });
-
 const varvSwitchElement = document.getElementById("varv-indicator-switch");
 varvSwitchElement.addEventListener("change", function(){
   setVarvData();
   console.log("switched")
 });
-
-// const rangeSwitchElement = document.getElementById("1y");
-// rangeSwitchElement.addEventListener("change", function(){
-//   setRanges("1y", addedRanges, '#e02bd4');
-//   console.log("switched")
-// });
-
-// const switchElement3m = document.getElementById("3m");
-// switchElement3m.addEventListener("change", function(){
-//   setRanges("3m", addedRanges3m, '#ffdd00');
-//   console.log("switched")
-// });
-
-// const switchElement1m = document.getElementById("1m");
-// switchElement1m.addEventListener("change", function(){
-//   setRanges("1m", addedRanges1m, '#03c4ff');
-//   console.log("switched")
-// });
-
-// const switchElement1w = document.getElementById("1week");
-// switchElement1w.addEventListener("change", function(){
-//   setRanges("1week", addedRanges1w, '#ff03a3');
-//   console.log("switched")
-// });
-
-// const switchElement1d = document.getElementById("1day");
-// switchElement1d.addEventListener("change", function(){
-//   setRanges("1day", addedRanges1d, '#03ff81');
-//   console.log("switched")
-// });
 
 // small individual timeframe buttons
 const Buttons = document.querySelectorAll('.timeframe-btn');
@@ -566,36 +482,6 @@ function indicatorState(){
   }
 }
 
-function zonesIndicatorState(){
-  const zonesSwitch = document.getElementById("zones-indicator-switch");
-  if (zonesSwitch.checked){
-    return true;
-  }
-  else if (zonesSwitch.checked == false){
-    return false;
-  }
-}
-
-function zones2IndicatorState(){
-  const zonesSwitch2 = document.getElementById("zones2-indicator-switch");
-  if (zonesSwitch2.checked){
-    return true;
-  }
-  else if (zonesSwitch2.checked == false){
-    return false;
-  }
-}
-
-
-function momentumIndicatorState(){
-  const momentumSwitch = document.getElementById("momentum-indicator-switch");
-  if (momentumSwitch.checked){
-    return true;
-  }
-  else if (momentumSwitch.checked == false){
-    return false;
-  }
-}
 
 function varvIndicatorState(){
   const varvSwitch = document.getElementById("varv-indicator-switch");
@@ -606,29 +492,3 @@ function varvIndicatorState(){
     return false;
   }
 }
-
-function rangeIndicatorState(range_indicator_id){
-  const rangeSwitch = document.getElementById(range_indicator_id);
-  if (rangeSwitch.checked){
-    return true;
-  }
-  else if (rangeSwitch.checked == false){
-    return false;
-  }
-}
-
-
-
-// const horizontalBox = { 
-//   corners: [{ time: 1687708800, price: 24000 }, { time: 1693526400, price: 22000 }],
-//   borderColor: '#ededed',
-//   borderWidth: 2,
-//   borderStyle: LightweightCharts.LineStyle.Solid,
-//   fillColor: '#e82ec0',
-//   fillOpacity: 0.4,
-//   borderVisible: true,
-//   axisLabelVisible: false,
-//   title: 'My box',
-// };
-
-
