@@ -102,7 +102,7 @@
     </div>
 
     <table id="cryptoTable">
-      <tr>
+      <tr class="headerTr">
         <th onclick="sortTable(0)">#</th>
         <th onclick="sortTable(1)">Coin</th>
         <th onclick="sortTable(2)">Price (USD)</th>
@@ -132,6 +132,7 @@
       ) {
         var table = document.getElementById("cryptoTable");
         var row = table.insertRow(-1); // Insert row at the end of the table
+        row.setAttribute("data-coin", coin);
 
         var cell1 = row.insertCell(0);
         var cell2 = row.insertCell(1);
@@ -340,6 +341,17 @@
         main(timeframe);
         console.log("Timeframe changed to: " + timeframe);
       }
+
+      // Event delegation to handle clicks on dynamically added rows
+    document.getElementById('cryptoTable').addEventListener('click', function(event) {
+        // Find the closest tr element to the clicked target
+        const tr = event.target.closest('tr');
+        // Check if the tr element exists and does not have the headerTr class
+        if (tr && !tr.classList.contains('headerTr')) {
+            console.log("clicked tr");
+            console.log(tr.getAttribute('data-coin'));
+        }
+    });
     </script>
   </body>
 </html>

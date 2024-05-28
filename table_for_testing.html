@@ -91,6 +91,11 @@
         background-color: #353535;
     }
 
+    .headerTr{
+        background-color: #1f1f1f;
+    
+    }
+
 </style>
 </head>
 <body>
@@ -107,7 +112,7 @@
     
 
 <table id="cryptoTable">
-    <tr>
+    <tr class="headerTr">
         <th onclick="sortTable(0)">#</th>
         <th onclick="sortTable(1)">Coin</th>
         <th onclick="sortTable(2)">Price (USD)</th>
@@ -122,6 +127,18 @@
 
 <!-- here we use external javascript file with a cdn to get it to work -->
 <script  src="https://cdn.jsdelivr.net/gh/nuevofilipo/cryata-cdn-resources@latest/table view/main.js">
+</script>
+
+<script>
+    // Event delegation to handle clicks on dynamically added rows
+    document.getElementById('cryptoTable').addEventListener('click', function(event) {
+        // Find the closest tr element to the clicked target
+        const tr = event.target.closest('tr');
+        // Check if the tr element exists and does not have the headerTr class
+        if (tr && !tr.classList.contains('headerTr')) {
+            console.log("clicked tr");
+        }
+    });
 </script>
 
 
