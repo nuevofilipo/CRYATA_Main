@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Position Sizing Calculator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="calculator">
+        <h2>Position Sizing Calculator</h2>
+        <div class="input-group">
+          <div class="inputAndTag">
+            <label for="risk">risk</label>
+            <input type="text" id="risk" class="input" placeholder="input" />
+          </div>
+
+          <div class="inputAndTag">
+            <label for="reward">reward</label>
+            <input type="text" id="reward" class="input" placeholder="input" />
+          </div>
+        </div>
+        <div class="confidence-group">
+          <label for="confidence">Confidence Multiplier</label>
+          <div class="radio-group">
+            <input
+              type="radio"
+              id="confident"
+              name="confidence"
+              value=1
+            />
+            <label for="confident">avg. conviction</label>
+            <input
+              type="radio"
+              id="more_confident"
+              name="confidence"
+              value=1.25
+            />
+            <label for="more_confident">high conviction</label>
+            <input
+              type="radio"
+              id="very_confident"
+              name="confidence"
+              value=1.5
+            />
+            <label for="very_confident">very high conviction</label>
+          </div>
+        </div>
+        <button id="calculate">Calculate</button>
+        <div class="output" id="output">output</div>
+      </div>
+    </div>
+    <script>
+      document
+        .getElementById("calculate")
+        .addEventListener("click", function () {
+          // Add your functionality here
+          const risk = document.getElementById("risk").value;
+          const reward = document.getElementById("reward").value;
+          const confidenceMultiplier = document.querySelector(
+            'input[name="confidence"]:checked'
+          ).value;
+
+          // calculatig position size
+          // Validate inputs
+          if (isNaN(risk) || isNaN(reward) || risk <= 0 || reward <= 0) {
+            document.getElementById("output").innerText =
+              "Please enter valid risk and reward values.";
+            return;
+          }
+
+          const base = 1 - risk / (risk + reward);
+
+          // using change of base formula
+          const n = Math.log(0.01) / Math.log(base);
+
+
+          const result = (1 / n) * 100 * confidenceMultiplier;
+          console.log(result);
+
+          document.getElementById(
+            "output"
+          ).innerText = `Position Size: ${result.toFixed(2)}`;
+        });
+    </script>
+  </body>
+
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #333;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .calculator {
+      background-color: #444;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      color: white;
+    }
+
+    .calculator h2 {
+      margin-bottom: 20px;
+    }
+
+    .inputAndTag {
+      display: block;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .input-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .input-group,
+    .confidence-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label,
+    .confidence-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .input-group .input,
+    .confidence-group .radio-group input {
+      margin-bottom: 10px;
+    }
+
+    .input {
+      width: 100px;
+      padding: 5px;
+      margin: 0 10px;
+      text-align: center;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .radio-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .radio-group label {
+      margin: 0 10px;
+    }
+
+    button {
+      background-color: #6200ea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #3700b3;
+    }
+
+    .output {
+      background-color: #ccc;
+      color: black;
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</html>
