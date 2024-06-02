@@ -1,4 +1,6 @@
 // defining the chart and other chart elements ----------------------------------------------
+let urlParamsProcessedCoin = false;
+let urlParamsProcessedTf = false;
 const mainSection = document.getElementById("tvchart");
 
 
@@ -100,6 +102,7 @@ let addedRanges = new Map();
 
 // for use with external hosted data
 async function getData(route){
+  changeTimeFrameFromUrl();
   const selectedBtn = document.querySelector(".active");
   const response = await fetch(
     `https://new-cryata-backend-production.up.railway.app//api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
@@ -236,6 +239,7 @@ async function setData(){
   chart.timeScale().applyOptions({
     timeVisible: true,
   })
+  chart.resize(getMainWidth(), getMainHeight());
 }
 
 
@@ -346,19 +350,42 @@ updateIndividualIndicatorsTimeframe();
 // updating queries (coin and timeframe) ----------------------------------------------
 
 // function to get the coin from the url
-function getUrlParameter() {
+
+function getUrlParameterCoin() {
   const urlParams = new URLSearchParams(window.location.search);
   const myParam = urlParams.get('coin');
   return myParam;
 }
 
+function getUrlParameterTimeframe() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const myParam = urlParams.get('timeframe');
+  return myParam;
+}
+
 function updateCoin(){
-  if (getUrlParameter() != null){
-    document.getElementById("coin-selector").value = getUrlParameter();
-    return getUrlParameter();    
+  if (getUrlParameterCoin() != null && !urlParamsProcessedCoin){
+    document.getElementById("coin-selector").value = getUrlParameterCoin();
+    urlParamsProcessedCoin = true;
+    return getUrlParameterCoin();    
   }
   const selectedCoin = document.getElementById("coin-selector").value;
   return selectedCoin;
+}
+
+function changeTimeFrameFromUrl(){
+  if (getUrlParameterTimeframe() != null && !urlParamsProcessedTf){
+    const selectedTimeframe = getUrlParameterTimeframe();
+    const buttons = document.querySelectorAll('.tablinks');
+    buttons.forEach(button => {
+      if (button.getAttribute('data-timeframe') == selectedTimeframe){
+        button.click();
+      }
+    });
+    urlParamsProcessedTf = true;
+  }
+  const selectedBtn = document.querySelector(".active");
+  return selectedBtn.value;
 }
 
 function updateTimeframe(event, timeframe) {

@@ -7,19 +7,19 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="container">
+    <div class="container" id="positionSizingContainer">
       <div class="calculator">
         <h2>Position Sizing Calculator</h2>
         <div class="input-group">
           <div class="inputAndTag">
-            <label for="risk">risk</label>
-            <input type="text" id="risk" class="input" placeholder="input" />
-          </div>
-
-          <div class="inputAndTag">
             <label for="reward">reward</label>
             <input type="text" id="reward" class="input" placeholder="input" />
           </div>
+          <div class="inputAndTag">
+            <label for="risk">risk</label>
+            <input type="text" id="risk" class="input" placeholder="input" />
+          </div>
+          <!--not so sute yet whether this is the right way to set it -->
         </div>
         <div class="confidence-group">
           <label for="confidence">Confidence Multiplier</label>
@@ -81,8 +81,15 @@
 
           document.getElementById(
             "output"
-          ).innerText = `Position Size: ${result.toFixed(2)}`;
+          ).innerText = `Position Size: ${result.toFixed(2)} %`;
         });
+        document.getElementById("positionSizingContainer").addEventListener("keypress", function(e) {
+          if (e.key === "Enter") {
+            document.getElementById("calculate").click();
+          }
+        });
+
+
     </script>
   </body>
 

@@ -7,21 +7,42 @@
       href="https://fonts.googleapis.com/css?family=Inter"
       rel="stylesheet"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <title>Crypto Market Overview</title>
     <style>
       body {
         /* font-family: Arial, sans-serif; */
         font-family: "Inter";
-        background-color: black;
+        background-color: rgb(46, 46, 46);
         color: white;
         margin: 0;
         padding: 0;
       }
 
+      .table-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .header-container {
+        display: flex;
+        width: 90%;
+        align-items: center;
+        justify-content: left;
+        /* margin-bottom: 20px; */margin: 10px;
+      }
+
       h2 {
         text-align: center;
-        padding: 20px 0;
-        color: violet;
+        padding: 5px 0;
+        color: #ffffff;
+        margin: 0;
+        margin-right: 20px
       }
 
       table {
@@ -29,9 +50,10 @@
         margin: 0 auto;
         border-collapse: collapse;
         /* box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); */
-        background-color: #1f1f1f;
+        background-color: #0f0f0f;
         overflow: hidden;
         border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       }
 
       tbody {
@@ -41,63 +63,120 @@
 
       th,
       td {
-        border: 1px solid #666;
+        border: 1px solid #4e4e4e;
         padding: 10px;
         height: 45px;
         text-align: left;
         font-size: 18px;
-        font-weight: lighter;
+        font-weight: 300;
         border-right: none;
         border-left: none;
         border-top: none;
       }
 
       th {
-        background-color: violet;
+        background-color: #905dd6;
         font-weight: bolder;
         color: black;
         height: 50px;
         font-size: 22px;
       }
 
-      .header-container {
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-        margin-bottom: 20px;
-      }
-
-      .button-container button {
-        padding: 8px 12px;
-        margin-right: 10px;
-        background-color: violet;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
-
-      .button-container button:hover {
-        background-color: darkviolet;
-      }
-      /* tr:nth-child(even) {
-        background-color: #444;
-    } */
+      
 
       tr:hover {
         background-color: #353535;
+        cursor: pointer;
+      }
+
+      /* ------------ timeframe setting*/
+      .btn-group {
+        overflow: hidden;
+        background-color: rgb(27, 27, 27);
+        border-color: white;
+        border-width: 3px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        /* padding:5px; */
+        margin:5px;
+        width: 300px;
+        box-sizing: border-box;
+      }
+
+      /* Style the buttons inside the tab */
+      .btn-group button {
+        background-color: inherit;
+        width: 100%;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.35s;
+        font-size: 16px;
+        font-family: Inter;
+        font-weight: 400;
+        color: white;
+      }
+
+      /* Change background color of buttons on hover */
+      .btn-group button:hover {
+        background-color: #565656;
+      }
+
+      /* Create an active/current tablink class */
+      .btn-group button.active {
+        background-color: #6200ea;
+        color: white;
       }
     </style>
   </head>
   <body>
+    <div class="table-container">
     <div class="header-container">
-      <h2>Crypto Market Overview</h2>
-      <div class="button-container">
-        <button onclick="changeTimeFrame('1d')">Daily</button>
-        <button onclick="changeTimeFrame('1h')">Hourly</button>
-        <button onclick="changeTimeFrame('1w')">Weekly</button>
-        <button onclick="changeTimeFrame('4h')">4 Hours</button>
+      <h3>Settings:</h3>
+      <div class="btn-group">
+        <button
+          class="tablinks"
+          data-timeframe="1h"
+          ,
+          onclick="changeTimeFrame(event,'1h')"
+          ,
+          value="1h"
+        >
+          1h
+        </button>
+        <button
+          class="tablinks"
+          data-timeframe="4h"
+          ,
+          onclick="changeTimeFrame(event, '4h')"
+          ,
+          value="4h"
+        >
+          4h
+        </button>
+        <button
+          class="tablinks active"
+          data-timeframe="1day"
+          ,
+          onclick="changeTimeFrame(event, '1d')"
+          ,
+          value="1day"
+        >
+          1d
+        </button>
+        <button
+          class="tablinks"
+          data-timeframe="1week"
+          ,
+          onclick="changeTimeFrame(event, '1w')"
+          ,
+          value="1week"
+        >
+          1w
+        </button>
       </div>
     </div>
 
@@ -115,6 +194,7 @@
         <th onclick="sortTable(9)">Median Performance</th>
       </tr>
     </table>
+  </div>
 
     <script>
       // Function to add a new row to the table
@@ -313,8 +393,6 @@
           volatilityMean = data.map((entry) => entry.volatilityMean1d);
         }
 
-        console.log(DailyData);
-
         data.forEach(function (entry, index) {
           addRow(
             entry.index,
@@ -331,15 +409,21 @@
         });
       }
 
-      main("1d");
+      
 
-      async function changeTimeFrame(timeframe) {
+      async function changeTimeFrame(event, timeframe) {
         // reset table
         var table = document.getElementById("cryptoTable");
         table.innerHTML =
           "<tr><th onclick='sortTable(0)'>#</th><th onclick='sortTable(1)'>Coin</th><th onclick='sortTable(2)'>Price (USD)</th><th onclick='sortTable(3)'>Change %</th><th onclick='sortTable(4)'>Context Bands</th><th onclick='sortTable(5)'>Varv</th><th onclick='sortTable(6)'>Momentum</th><th onclick='sortTable(7)'>VolatilityMean</th><th onclick='sortTable(8)'>Mean Performance</th><th onclick='sortTable(9)'>median Performance</th></tr>";
         main(timeframe);
         console.log("Timeframe changed to: " + timeframe);
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+          tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        event.currentTarget.className += " active";
+
       }
 
       // Event delegation to handle clicks on dynamically added rows
@@ -347,11 +431,24 @@
         // Find the closest tr element to the clicked target
         const tr = event.target.closest('tr');
         // Check if the tr element exists and does not have the headerTr class
-        if (tr && !tr.classList.contains('headerTr')) {
-            console.log("clicked tr");
-            console.log(tr.getAttribute('data-coin'));
+        if (tr!= null) {
+          const coin = tr.getAttribute('data-coin');
+          const timeframe = document.querySelector('.active').getAttribute('data-timeframe');
+          const coinPair = coin + '/USD'; 
+          if (coin !== null) {
+            goToChartViewPage(coinPair);
+          } 
+          
         }
     });
+
+    function goToChartViewPage(coin) {
+      // for this to work, the local host of the chart view page has to be open
+        window.location.href = `http://127.0.0.1:5500/frontend/html-files/dashboardTwelve.html?coin=${coin}`;
+    }
+
+      // Initial call to populate the table
+      main("1d");
     </script>
   </body>
 </html>
