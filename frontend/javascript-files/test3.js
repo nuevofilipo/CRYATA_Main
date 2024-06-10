@@ -184,6 +184,7 @@ async function createRangesData(mapping, functionToApply, color, key){
 
 
 
+
 function removeBoxes(list){
   list.forEach(element => {
     candleSeries.removeBox(element);
@@ -203,7 +204,18 @@ function removeBoxesMap(mapping, key){
 
 
 // functions for setting data----------------------------------------------
+function turnOffLoader(){
+  var tvchartelems = document.querySelectorAll(".tvchartbeforeload");
+  [].forEach.call(tvchartelems, function(el) {
+    el.classList.remove("tvchartbeforeload");
+  });
 
+  var loader = document.querySelectorAll(".loader");
+  [].forEach.call(loader, function(el) {
+    el.classList.remove("loader");
+  });
+  
+}
 
 
 async function setData(){
@@ -231,6 +243,9 @@ async function setData(){
     return returnState;
     
   });
+
+  turnOffLoader();
+
   candleSeries.setData(cdata);
   chart.priceScale("right").applyOptions({
     autoScale: true,
@@ -240,6 +255,8 @@ async function setData(){
     timeVisible: true,
   })
   chart.resize(getMainWidth(), getMainHeight());
+
+
 }
 
 

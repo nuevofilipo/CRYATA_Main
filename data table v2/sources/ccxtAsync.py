@@ -92,8 +92,8 @@ async def request_data_pair(
                 data = await response.json()
             else:
                 data = await exchange.fetchOHLCV(
-                    symbol, time_frame, limit=limit, since=since
-                )
+                    symbol, time_frame, limit=limit
+                )  # removed since=since
         except Exception as e:
             # protection layer
             try:
@@ -326,7 +326,7 @@ if __name__ == "__main__":
         # )
         # # ? remote, railway database
         engine = create_engine(
-            "mysql+mysqlconnector://root:6544Dd5HFeh4acBeDCbg1cde2H4e6CgC@roundhouse.proxy.rlwy.net:34181/railway",
+            "mysql+mysqlconnector://root:zNnZbBPAcbSpNkoliyQForRNuuZLDyMW@roundhouse.proxy.rlwy.net:29401/railway",
             echo=False,
             isolation_level="READ COMMITTED",
         )

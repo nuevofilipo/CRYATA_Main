@@ -44,7 +44,7 @@ def varvIndicatorMetric(df, timeframe):
         return -1
 
     price = df.iloc[-1]["Close"]
-    dfVarv = createVarv(df)
+    dfVarv = createVarv(df, timeframe)
 
     try:
         dfLastRow = dfVarv.iloc[-1]
@@ -62,15 +62,13 @@ def varvIndicatorMetric(df, timeframe):
 
 
 def momentumIndicatorMetric(df):
-    redDf = momentumIndicator(df)[0]
-    greenDf = momentumIndicator(df)[1]
-    dataframes = [redDf, greenDf]
+    combinedDf = momentumIndicator(df, df)
 
     # case when there is not enough data
-    if redDf.empty or greenDf.empty:
+    if combinedDf.empty:
         return 0
 
-    combinedDf = pd.concat(dataframes).sort_values(by="x0")
+    combinedDf = combinedDf.sort_values(by="x0")
     dfLastRow = combinedDf.iloc[-1]
     if dfLastRow["color"] == "#2af5c2":
         return 1
@@ -108,19 +106,19 @@ def medianPerformance(df):
     return round(median * 100, 3)
 
 
-def createTableRow(df, coin, timeframe="1d", priceChangeDict={}):
+def createTableRow(df, coin, timeframe, priceChangeDict={}):
     pastCoinName = coin[: len(coin) - 2] + "1m"  # btcusdt1m, for every timeframe
 
     lastRow = df.iloc[-1]
     price = lastRow["Close"]
 
     pastDataValue = price
+    priceChange = "no data"
     if pastCoinName in priceChangeDict:
         pastDataValue = priceChangeDict[pastCoinName].iloc[0]["Open"]
+        priceChange = round((price - pastDataValue) / pastDataValue * 100, 1)
 
     coin = coin[: len(coin) - 6].upper()
-
-    priceChange = round((price - pastDataValue) / pastDataValue * 100, 1)
 
     dict_entry = {}
     if timeframe == "1d":

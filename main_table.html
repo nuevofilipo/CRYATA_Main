@@ -15,7 +15,7 @@
       body {
         /* font-family: Arial, sans-serif; */
         font-family: "Inter";
-        background-color: rgb(46, 46, 46);
+        background-color: #0F090E;
         color: white;
         margin: 0;
         padding: 0;
@@ -26,7 +26,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        margin-top: 20px;
+        margin-top: 0px;
       }
 
       .header-container {
@@ -50,51 +50,63 @@
         margin: 0 auto;
         border-collapse: collapse;
         /* box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); */
-        background-color: #0f0f0f;
+        background-color: transparent;
         overflow: hidden;
+        
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        
       }
 
-      tbody {
-        border: none;
-        border-collapse: collapse;
-      }
 
       th,
       td {
-        border: 1px solid #4e4e4e;
+        border: 1px solid #383838;
         padding: 10px;
         height: 45px;
         text-align: left;
         font-size: 18px;
-        font-weight: 300;
+        font-weight: 500;
         border-right: none;
         border-left: none;
         border-top: none;
       }
 
       th {
-        background-color: #905dd6;
+        /* background-color: #905dd6; */
         font-weight: bolder;
         color: black;
         height: 50px;
         font-size: 22px;
       }
 
-      
+      td{
+        text-align: center;
+      }
+
+      tr {
+        /* border: 1px solid #383838; */
+        box-sizing:border-box;
+      }
+
 
       tr:hover {
         background-color: #353535;
+        transition:cubic-bezier(0.55, 0.085, 0.68, 0.53) 0.1s;
         cursor: pointer;
+      }
+
+      .headerTr{
+        background: radial-gradient(circle at 30%,#cf65b8,#9758d3,  #6b5ee0, #9758d3, #cf65b8);
+        /* background-color: #6b5ee0; */
+        border-radius: 10px;
       }
 
       /* ------------ timeframe setting*/
       .btn-group {
         overflow: hidden;
         background-color: rgb(27, 27, 27);
-        border-color: white;
-        border-width: 3px;
+        border: 1px solid #383838;
         border-radius: 10px;
         display: flex;
         justify-content: space-between;
@@ -127,15 +139,19 @@
 
       /* Create an active/current tablink class */
       .btn-group button.active {
-        background-color: #6200ea;
+        background-color: #6b5ee0;
         color: white;
       }
     </style>
   </head>
   <body>
     <div class="table-container">
+      <div class="navbar">
+        <image src="cryata navbar.png" content="width=device-width, initial-scale=1.0">
+        </image>
+      </div>
     <div class="header-container">
-      <h3>Settings:</h3>
+      <!-- <h3>Settings:</h3> -->
       <div class="btn-group">
         <button
           class="tablinks"
@@ -216,19 +232,22 @@
 
         var cell1 = row.insertCell(0);
         var cell2 = row.insertCell(1);
+        cell2.style.textAlign = "left";
+
         var cell3 = row.insertCell(2);
         var cell3b = row.insertCell(3);
         if (priceChange > 0) {
-          cell3b.style.color = "#34eb67";
+          cell3b.style.color = "#26A69A"; // green
         } else if (priceChange === 0) {
-          cell3b.style.color = "yellow";
+          cell3b.style.color = "#fffb85"; // yellow
         } else if (priceChange < 0) {
-          cell3b.style.color = "red";
+          cell3b.style.color = "#EF5350"; // red
         } else {
           cell3b.style.color = "white";
         }
 
         var cell4 = row.insertCell(4);
+        cell4.style.textAlign = "right";
         var cell5 = row.insertCell(5);
         var cell6 = row.insertCell(6);
         var cell7 = row.insertCell(7);
@@ -244,13 +263,13 @@
         cell4.style.color = "black";
 
         if (contextBands === 2 || contextBands === 1) {
-          cell4.style.color = "#e61220";
+          cell4.style.color = "#EF5350";
           cell4.textContent = "short potential";
         } else if (contextBands === 0) {
-          cell4.style.color = "#e6bf12";
+          cell4.style.color = "#ffd073"; // orange
           cell4.textContent = "ranging";
         } else if (contextBands === -1 || contextBands === -2) {
-          cell4.style.color = "#00de60";
+          cell4.style.color = "#26A69A";
           cell4.textContent = "long potential";
         }
 
@@ -265,13 +284,13 @@
         // adding arrows for momentum
         if (momentum === 1) {
           cell6.innerHTML =
-            '<span style="font-size:30px; color: #33ff77;">&#8593;</span>'; // Upward arrow
+            '<span style="font-size:30px; color: #26A69A;">&#8593;</span>'; // Upward arrow
         } else if (momentum === -1) {
           cell6.innerHTML =
-            '<span style="font-size:30px; color: red;">&#8595;</span>'; // Downward arrow
+            '<span style="font-size:30px; color: #EF5350;">&#8595;</span>'; // Downward arrow
         } else {
           cell6.innerHTML =
-            '<span style="font-size:30px; color: orange;">&#8594;</span>'; // No arrow if momentumIndicator is neither 1 nor -1
+            '<span style="font-size:30px; color: #ffd073;">&#8594;</span>'; // No arrow if momentumIndicator is neither 1 nor -1
         }
 
         cell7.innerHTML = volatilityMean;
@@ -407,6 +426,8 @@
             entry.medianPerformance
           );
         });
+
+        headerTr = document.getElementsByClassName("headerTr");
       }
 
       
@@ -415,7 +436,7 @@
         // reset table
         var table = document.getElementById("cryptoTable");
         table.innerHTML =
-          "<tr><th onclick='sortTable(0)'>#</th><th onclick='sortTable(1)'>Coin</th><th onclick='sortTable(2)'>Price (USD)</th><th onclick='sortTable(3)'>Change %</th><th onclick='sortTable(4)'>Context Bands</th><th onclick='sortTable(5)'>Varv</th><th onclick='sortTable(6)'>Momentum</th><th onclick='sortTable(7)'>VolatilityMean</th><th onclick='sortTable(8)'>Mean Performance</th><th onclick='sortTable(9)'>median Performance</th></tr>";
+          "<tr class='headerTr'><th onclick='sortTable(0)'>#</th><th onclick='sortTable(1)'>Coin</th><th onclick='sortTable(2)'>Price (USD)</th><th onclick='sortTable(3)'>Change %</th><th onclick='sortTable(4)'>Context Bands</th><th onclick='sortTable(5)'>Varv</th><th onclick='sortTable(6)'>Momentum</th><th onclick='sortTable(7)'>VolatilityMean</th><th onclick='sortTable(8)'>Mean Performance</th><th onclick='sortTable(9)'>median Performance</th></tr>";
         main(timeframe);
         console.log("Timeframe changed to: " + timeframe);
         tablinks = document.getElementsByClassName("tablinks");
@@ -431,7 +452,7 @@
         // Find the closest tr element to the clicked target
         const tr = event.target.closest('tr');
         // Check if the tr element exists and does not have the headerTr class
-        if (tr!= null) {
+        if (tr!= null && !tr.classList.contains('headerTr')) {
           const coin = tr.getAttribute('data-coin');
           const timeframe = document.querySelector('.active').getAttribute('data-timeframe');
           const coinPair = coin + '/USD'; 
