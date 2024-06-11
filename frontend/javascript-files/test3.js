@@ -536,3 +536,28 @@ function varvIndicatorState(){
     return false;
   }
 }
+
+//html functionality
+
+var hidden = false;
+
+function hideSidebar(){
+  var sidebar = document.getElementById("sidebar");
+  var main = document.getElementById("main");
+  var sidebarToggle = document.getElementById("sidebar-toggle");
+  if (!hidden){
+  sidebar.classList.add("hidden");
+  main.style.width = "100%";
+  sidebarToggle.classList.add("on");
+  sidebarToggle.innerHTML = "<i class='fa fa-angle-double-right'>";
+  chart.resize(getMainWidth(), getMainHeight());
+  hidden = true;
+  } else {
+    sidebar.classList.remove("hidden");
+    main.style.width = "calc(100% - 270px)"
+    sidebarToggle.classList.remove("on");
+    sidebarToggle.innerHTML = "<i class='fa fa-angle-double-left'>";
+    chart.resize(getMainWidth(), getMainHeight());
+    hidden = false;
+  }
+}
