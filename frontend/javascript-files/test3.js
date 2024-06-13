@@ -554,7 +554,7 @@ function hideSidebar(){
   hidden = true;
   } else {
     sidebar.classList.remove("hidden");
-    main.style.width = "calc(100% - 270px)"
+    main.style.width = "100%"
     sidebarToggle.classList.remove("on");
     sidebarToggle.innerHTML = "<i class='fa fa-angle-double-left'>";
     chart.resize(getMainWidth(), getMainHeight());

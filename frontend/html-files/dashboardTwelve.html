@@ -29,159 +29,164 @@
       <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/CRYATA_Main/libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script>
         
       
-      <section class="sidebar" id="sidebar">
-        <div class="sidebar-box">
-        <div class="hide-sidebar-box">
-          
-        </div>
-        <div class="indicators-settings-box">
-          <div class="chartSettings">
-          <div class="btn-group">
-            <button
-              class="tablinks"
-              data-timeframe="1h"
-              ,
-              onclick="updateTimeframe(event, '1h')"
-              ,
-              value="1h"
-            >
-              1h
-            </button>
-            <button
-              class="tablinks"
-              data-timeframe="4h"
-              ,
-              onclick="updateTimeframe(event, '4h')"
-              ,
-              value="4h"
-            >
-              4h
-            </button>
-            <button
-              class="tablinks active"
-              data-timeframe="1day"
-              ,
-              onclick="updateTimeframe(event, '1day')"
-              ,
-              value="1day"
-            >
-              1d
-            </button>
-            <button
-              class="tablinks"
-              data-timeframe="1week"
-              ,
-              onclick="updateTimeframe(event, '1week')"
-              ,
-              value="1week"
-            >
-              1w
-            </button>
-          </div>
-
-          <select
-            name="coin-selector"
-            ,
-            id="coin-selector"
-            ,
-            onchange="setData(), setLineData(), setVarvData(), updateSmallIndicatorCoin()"
-          >
-            <option value="BTC/USD">bitcoin</option>
-            <option value="ETH/USD">ethereum</option>
-            <option value="BNB/USD">binance-coin</option>
-            <option value="XRP/USD">ripple</option>
-            <option value="ADA/USD">cardano</option>
-            <option value="DOGE/USD">dogecoin</option>
-            <option value="SOL/USD">solana</option>
-            <option value="TON/USD">ton</option>
-            <option value="SHIB/USD">shiba-inu</option>
-            <option value="AVAX/USD">avalanche</option>
-            <option value="DOT/USD">polkadot</option>
-            <option value="BCH/USD">bitcoin-cash</option>
-            <option value="TRX/USD">tron</option>
-            <option value="LINK/USD">chainlink</option>
-            <option value="MATIC/USD">polygon</option>
-            <option value="ICP/USD">internet-computer</option>
-          </select>
-        </div>
-
-          <div class="indicator-container">
-            <p class="indicator-tag">Context Bands</p>
-            <label class="switch">
-              <input id="indicator-switch" type="checkbox" />
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="indicator-container">
-            <p class="indicator-tag">Varv</p>
-            <label class="switch">
-              <input id="varv-indicator-switch" type="checkbox" />
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="indicator-container-tf">
-            <p class="indicator-tag">Supply/Demand</p>
-            <!-- <label class="switch">
-              <input id="zones-indicator-switch" type="checkbox" />
-              <span class="slider round"></span>
-            </label> -->
-            <div class="timeframe-buttons">
-              <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1day" data-color="#e82ec0">1d</button>
-              <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1week" data-color="#e82ec0">1w</button>
-              <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1h" data-color="#e82ec0">1h</button>
-              <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="4h" data-color="#e82ec0">4h</button>
-            </div>
-          </div>
-
-          <div class="indicator-container-tf">
-            <p class="indicator-tag">Imbalance Zones</p>
-            <!-- <label class="switch">
-              <input id="zones2-indicator-switch" type="checkbox" />
-              <span class="slider round"></span>
-            </label> -->
-            <div class="timeframe-buttons">
-              <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1day" data-color="#9e9e9e">1d</button>
-              <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1week" data-color="#9e9e9e">1w</button>
-              <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1h" data-color="#9e9e9e">1h</button>
-              <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="4h" data-color="#9e9e9e">4h</button>
-            </div>
-          </div>
-
-          <div class="indicator-container-tf">
-            <p class="indicator-tag">Momentum</p>
-            <!-- <label class="switch">
-              <input id="momentum-indicator-switch" type="checkbox" />
-              <span class="slider round"></span>
-            </label> -->
-            <div class="timeframe-buttons">
-              <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1day" data-color="#9e9e9e">1d</button>
-              <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1week" data-color="#9e9e9e">1w</button>
-              <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1h" data-color="#9e9e9e">1h</button>
-              <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="4h" data-color="#9e9e9e">4h</button>
-            </div>
-          </div>
-
-          <div class="indicator-container-tf">
-            <p class="indicator-tag">Ranges</p>
-            <!-- <label class="switch">
-              <input id="1y" type="checkbox" />
-              <span class="slider round"></span>
-            </label> -->
-            <div class="timeframe-buttons">
-              <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1day" data-color="#e02bd4">1d</button>
-              <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1week" data-color="#ffdd00">1w</button>
-              <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1m" data-color="#03c4ff">1m</button>
-              <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="3m" data-color="#ff03a3">3m</button>
-              <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1y" data-color="#03ff81">1y</button>
-            </div>
-          </div>
-        </div>
-        <div>
-      </section>
+      
 
       <main id="main" , class="main">
+        <section class="sidebar" id="sidebar">
+          <div class="sidebar-box">
+          <div class="indicators-settings-box">
+            <div class="chartSettings">
+            <div class="btn-group">
+              <button
+                class="tablinks"
+                data-timeframe="1h"
+                ,
+                onclick="updateTimeframe(event, '1h')"
+                ,
+                value="1h"
+              >
+                1h
+              </button>
+              <button
+                class="tablinks"
+                data-timeframe="4h"
+                ,
+                onclick="updateTimeframe(event, '4h')"
+                ,
+                value="4h"
+              >
+                4h
+              </button>
+              <button
+                class="tablinks active"
+                data-timeframe="1day"
+                ,
+                onclick="updateTimeframe(event, '1day')"
+                ,
+                value="1day"
+              >
+                1d
+              </button>
+              <button
+                class="tablinks"
+                data-timeframe="1week"
+                ,
+                onclick="updateTimeframe(event, '1week')"
+                ,
+                value="1week"
+              >
+                1w
+              </button>
+            </div>
+  
+            <select
+              name="coin-selector"
+              ,
+              id="coin-selector"
+              ,
+              onchange="setData(), setLineData(), setVarvData(), updateSmallIndicatorCoin()"
+            >
+              <option value="BTC/USD">bitcoin</option>
+              <option value="ETH/USD">ethereum</option>
+              <option value="BNB/USD">binance-coin</option>
+              <option value="XRP/USD">ripple</option>
+              <option value="ADA/USD">cardano</option>
+              <option value="DOGE/USD">dogecoin</option>
+              <option value="SOL/USD">solana</option>
+              <option value="TON/USD">ton</option>
+              <option value="SHIB/USD">shiba-inu</option>
+              <option value="AVAX/USD">avalanche</option>
+              <option value="DOT/USD">polkadot</option>
+              <option value="BCH/USD">bitcoin-cash</option>
+              <option value="TRX/USD">tron</option>
+              <option value="LINK/USD">chainlink</option>
+              <option value="MATIC/USD">polygon</option>
+              <option value="ICP/USD">internet-computer</option>
+            </select>
+          </div>
+
+            <div class="unified-indicator-box">
+
+            <div class="indicator-container">
+              <p class="indicator-tag">Context Bands</p>
+              <label class="switch">
+                <input id="indicator-switch" type="checkbox" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+  
+            <div class="indicator-container">
+              <p class="indicator-tag">Varv</p>
+              <label class="switch">
+                <input id="varv-indicator-switch" type="checkbox" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+  
+
+          <div class="tf-indicator-box">
+            <div class="indicator-container-tf">
+              <p class="indicator-tag">Supply/Demand</p>
+              <!-- <label class="switch">
+                <input id="zones-indicator-switch" type="checkbox" />
+                <span class="slider round"></span>
+              </label> -->
+              <div class="timeframe-buttons">
+                <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1day" data-color="#e82ec0">1d</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1week" data-color="#e82ec0">1w</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1h" data-color="#e82ec0">1h</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="4h" data-color="#e82ec0">4h</button>
+              </div>
+            </div>
+  
+            <div class="indicator-container-tf">
+              <p class="indicator-tag">Imbalance Zones</p>
+              <!-- <label class="switch">
+                <input id="zones2-indicator-switch" type="checkbox" />
+                <span class="slider round"></span>
+              </label> -->
+              <div class="timeframe-buttons">
+                <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1day" data-color="#9e9e9e">1d</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1week" data-color="#9e9e9e">1w</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1h" data-color="#9e9e9e">1h</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="4h" data-color="#9e9e9e">4h</button>
+              </div>
+            </div>
+  
+            <div class="indicator-container-tf">
+              <p class="indicator-tag">Momentum</p>
+              <!-- <label class="switch">
+                <input id="momentum-indicator-switch" type="checkbox" />
+                <span class="slider round"></span>
+              </label> -->
+              <div class="timeframe-buttons">
+                <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1day" data-color="#9e9e9e">1d</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1week" data-color="#9e9e9e">1w</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1h" data-color="#9e9e9e">1h</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="4h" data-color="#9e9e9e">4h</button>
+              </div>
+            </div>
+  
+            <div class="indicator-container-tf">
+              <p class="indicator-tag">Ranges</p>
+              <!-- <label class="switch">
+                <input id="1y" type="checkbox" />
+                <span class="slider round"></span>
+              </label> -->
+              <div class="timeframe-buttons">
+                <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1day" data-color="#e02bd4">1d</button>
+                <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1week" data-color="#ffdd00">1w</button>
+                <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1m" data-color="#03c4ff">1m</button>
+                <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="3m" data-color="#ff03a3">3m</button>
+                <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1y" data-color="#03ff81">1y</button>
+              </div>
+            </div>
+            </div>
+
+          </div>
+          <div>
+        </section>
         <button class="sidebar-toggle" id="sidebar-toggle" onclick="hideSidebar()"><i class="fa fa-angle-double-left"></i></button> 
         <div id="chartbox"> 
           <div id="tvchart" class="tvchartbeforeload"></div> <!-- loader class is used to display the loading animation -->
@@ -210,9 +215,9 @@
       
       .sidebar-toggle {
         position: absolute;
-        top: 10px;
-        left: -30px;
-        z-index: 10;
+        top: 30px;
+        left: 240px;
+        z-index: 11;
         background-color: transparent;
         color: white;
         border: none;
@@ -285,11 +290,11 @@
       .main {
         display: flex;
         height: calc(100vh - 69px);
-        width:calc(100% - 270px);
+        width:calc(100%);
         /* border-top: 1px solid #8076da;  */
         justify-content: center; 
         align-items: center;
-        padding: 5px;
+        /* padding: 5px; */
         box-sizing: border-box;
         position: relative;
       }
@@ -300,7 +305,7 @@
         align-items: center;
         height: calc(100%);
         width: calc(100%);
-        border: 1px solid #464646;
+        /* border: 1px solid #464646; */
         /* border-radius: 10px; */
         box-sizing: border-box;
         /* padding: 5px; */
@@ -323,8 +328,9 @@
         align-items: center;
         height: calc(100%);
         width: calc(100%);
-        background-color: #000000;
+        background-color: #ffffffd7;
         /* padding: 5px; */
+        border-radius: 10px;
         border: 1px solid #464646;
       }      
       
@@ -335,15 +341,19 @@
       }
 
       .sidebar {
+        position: absolute;
+        top: 10px;
+        left:10px;
+        z-index: 10;
         display: flex;
         flex-direction: column;
         justify-content: center;
         width: 270px;
-        /* border-right: 1px solid #8076da; */
-        /* border-top: 1px solid #8076da; */
+        height: calc(100% - 40px);
         align-items: center;
-        padding: 5px; 
-        padding-right: 0px;
+        padding-right: 1px; 
+        padding-top: 15px;
+        padding-bottom: 15px;
         box-sizing: border-box;
       }
 
@@ -356,16 +366,15 @@
         font-weight: 600;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: space-around;
         align-items: center;
         padding: 10px;
         margin: 10px;
         /* border-right: 0.5px solid rgb(148, 148, 148); */
-        height: 70%;
+        height: 90%;
         border-radius: 10px;
         /* width:  */
-        background-color: #000000;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); */
       }
 
       #coin-selector {
@@ -387,6 +396,26 @@
         font-family: Inter;
         font-weight: 500;
       }
+
+      .unified-indicator-box {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 5px;
+      }
+
+
+      .tf-indicator-box {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 5px;
+      }
+
       .indicator-container {
         display: flex;
         justify-content: space-between;
@@ -414,7 +443,7 @@
       .timeframe-buttons {
         display: flex;
         gap: 10px;
-        padding-top: 17px;
+        padding-top: 10px;
         padding-bottom: 10px;
       }
 
@@ -424,7 +453,7 @@
         /* border: 1px solid #838383; */
         margin-top: 5px;
         border:none;
-        background-color: rgb(219, 195, 195);
+        background-color: #dddbff;
         cursor: pointer;
         border-radius: 3px;
         transition: background-color 0.3s, border-color 0.3s;
@@ -452,7 +481,6 @@
       .btn-group {
         overflow: hidden;
         border: none;
-        background-color: rgb(29, 29, 29);
         border-radius: 10px;
         display: flex;
         justify-content: space-between;
@@ -463,7 +491,7 @@
 
       /* Style the buttons inside the tab */
       .btn-group button {
-        background-color: rgb(219, 195, 195);
+        background-color: #dddbff;
 
         width: 100%;
         float: left;
@@ -556,7 +584,7 @@
       }
 
       .indicator-tag {
-        color: white;
+        color: rgb(29, 28, 28);
         display: inline-block;
         margin: 0;
         margin-right: 10px;
