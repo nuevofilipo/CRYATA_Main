@@ -550,6 +550,7 @@ function hideSidebar(){
   main.style.width = "100%";
   sidebarToggle.classList.add("on");
   sidebarToggle.innerHTML = "<i class='fa fa-angle-double-right'>";
+  sidebarToggle.style.color = "white";
   chart.resize(getMainWidth(), getMainHeight());
   hidden = true;
   } else {
@@ -557,6 +558,7 @@ function hideSidebar(){
     main.style.width = "100%"
     sidebarToggle.classList.remove("on");
     sidebarToggle.innerHTML = "<i class='fa fa-angle-double-left'>";
+    sidebarToggle.style.color = "black";
     chart.resize(getMainWidth(), getMainHeight());
     hidden = false;
   }

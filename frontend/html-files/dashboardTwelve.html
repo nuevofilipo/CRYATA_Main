@@ -102,6 +102,7 @@
               <option value="LINK/USD">chainlink</option>
               <option value="MATIC/USD">polygon</option>
               <option value="ICP/USD">internet-computer</option>
+              <option value="ALGO/USD">Algorand</option>
             </select>
           </div>
 
@@ -219,7 +220,7 @@
         left: 240px;
         z-index: 11;
         background-color: transparent;
-        color: white;
+        color: rgb(0, 0, 0);
         border: none;
         padding: 5px;
         border-radius: 3px;
@@ -228,7 +229,7 @@
       }
 
       .sidebar-toggle:hover {
-        background-color: #2e2c2c;
+        background-color: #968c8c;
       }
 
       .sidebar-toggle.on {
@@ -331,7 +332,6 @@
         background-color: #ffffffd7;
         /* padding: 5px; */
         border-radius: 10px;
-        border: 1px solid #464646;
       }      
       
 
@@ -462,7 +462,7 @@
       }
 
       .timeframe-btn:hover {
-        background-color: rgb(104, 104, 104);
+        background-color: rgb(160, 159, 159);
       }
 
       .timeframe-btn.active {
@@ -474,6 +474,10 @@
       .timeframe-btn.disabled {
         cursor: not-allowed;
         opacity: 0.5;
+      }
+
+      .timeframe-btn.disabled:hover {
+        background-color: #dddbff;
       }
       /* styling of small timeframed buttons END!! */
 
