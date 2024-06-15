@@ -1,6 +1,7 @@
 // defining the chart and other chart elements ----------------------------------------------
 let urlParamsProcessedCoin = false;
 let urlParamsProcessedTf = false;
+populateSelect(); // need to call it in the beginning to populate the select element
 const mainSection = document.getElementById("tvchart");
 
 
@@ -65,47 +66,11 @@ let addedRanges = new Map();
 
 
 // for use with local data
-// async function getData(route){
-  
-//   const selectedBtn = document.querySelector(".active");
-//   const response = await fetch(
-//     `http://127.0.0.1:5000/api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
-//   )
-  
-//   const data = await response.json();
-//   return data;
-// }
-
-// async function getRangesData(range_value){
-//   const selectedBtn = document.querySelector(".active");
-//   const response = await fetch(
-//     `http://127.0.0.1:5000/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
-//   )
-  
-//   const data = await response.json();
-//   return data;
-
-// }
-
-// async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
-//   const chartTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
-//   const response = await fetch(
-//     `http://127.0.0.1:5000/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
-//   )
-
-//   const data = await response.json();
-//   return data;
-    
-// }
-
-
-
-// for use with external hosted data
 async function getData(route){
-  changeTimeFrameFromUrl();
+  
   const selectedBtn = document.querySelector(".active");
   const response = await fetch(
-    `https://new-cryata-backend-production.up.railway.app//api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
+    `http://127.0.0.1:5000/api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
   )
   
   const data = await response.json();
@@ -115,7 +80,7 @@ async function getData(route){
 async function getRangesData(range_value){
   const selectedBtn = document.querySelector(".active");
   const response = await fetch(
-    `https://new-cryata-backend-production.up.railway.app/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
+    `http://127.0.0.1:5000/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
   )
   
   const data = await response.json();
@@ -126,7 +91,7 @@ async function getRangesData(range_value){
 async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
   const chartTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
   const response = await fetch(
-    `https://new-cryata-backend-production.up.railway.app/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
+    `http://127.0.0.1:5000/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
   )
 
   const data = await response.json();
@@ -136,10 +101,43 @@ async function getDataIndividualTimeframe(endpoint, additionalParameter,  indica
 
 
 
+// for use with external hosted data
+// async function getData(route){
+//   changeTimeFrameFromUrl();
+//   const selectedBtn = document.querySelector(".active");
+//   const response = await fetch(
+//     `https://new-cryata-backend-production.up.railway.app//api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
+//   )
+  
+//   const data = await response.json();
+//   return data;
+// }
 
-async function createBoxesData(mapping, functionToApply, color, key){
+// async function getRangesData(range_value){
+//   const selectedBtn = document.querySelector(".active");
+//   const response = await fetch(
+//     `https://new-cryata-backend-production.up.railway.app/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
+//   )
+  
+//   const data = await response.json();
+//   return data;
+
+// }
+
+// async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
+//   const chartTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
+//   const response = await fetch(
+//     `https://new-cryata-backend-production.up.railway.app/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
+//   )
+
+//   const data = await response.json();
+//   return data;
+    
+// }
+
+async function createBoxesData(mapping, data, color, key){
   list = [];
-  const data = await functionToApply;
+  // const data = data;
   data.forEach(element => {
     color = element.hasOwnProperty("color") ? element["color"] : color;
     const i = candleSeries.createBox({
@@ -159,6 +157,7 @@ async function createBoxesData(mapping, functionToApply, color, key){
       list.push(i);
     });
   mapping.set(key, list);
+  return true;
 }
 
 
@@ -382,7 +381,9 @@ function getUrlParameterTimeframe() {
 
 function updateCoin(){
   if (getUrlParameterCoin() != null && !urlParamsProcessedCoin){
+    console.log(getUrlParameterCoin());
     document.getElementById("coin-selector").value = getUrlParameterCoin();
+    console.log(document.getElementById("coin-selector").value);
     urlParamsProcessedCoin = true;
     return getUrlParameterCoin();    
   }
@@ -487,10 +488,21 @@ varvSwitchElement.addEventListener("change", function(){
   console.log("switched")
 });
 
+// function to show that data is not available for a certain coin
+function showNotification(message) {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.classList.add('show');
+  setTimeout(() => {
+      notification.classList.remove('show');
+  }, 3000); // Hide after 3 seconds
+}
+
+
 // small individual timeframe buttons
 const Buttons = document.querySelectorAll('.timeframe-btn');
 Buttons.forEach(button => {
-    button.addEventListener('click', function() {
+    button.addEventListener('click', async function() {
         this.classList.toggle('active');
         const indTime = button.getAttribute('data-timeframe');
         const indicator = button.getAttribute('data-indicator');
@@ -498,7 +510,14 @@ Buttons.forEach(button => {
         const color = button.getAttribute('data-color');
         if (button.classList.contains('active')) {
           if (type  == "boxes"){
-            createBoxesData(addedSupplyZones, getDataIndividualTimeframe( indicator, "indicatorTimeframe",  indTime), color, indicator + indTime );
+            const data = await getDataIndividualTimeframe( indicator, "indicatorTimeframe",  indTime);
+            try {
+              if (data.length == 0) throw new Error("No data available");
+              createBoxesData(addedSupplyZones, data, color, indicator + indTime );  
+            } catch (error){
+              button.classList.remove('active');
+              showNotification('Data not available');
+            }       
           } else if (type == "lineSeries"){
             createRangesData(addedRanges, getDataIndividualTimeframe( indicator, "indicatorTimeframe",  indTime), color, indicator + indTime);
           }
@@ -562,4 +581,44 @@ function hideSidebar(){
     chart.resize(getMainWidth(), getMainHeight());
     hidden = false;
   }
+}
+
+// Function to format the symbols and add them to the select element
+function populateSelect() {
+  const symbols = [ "NEARUSDT", "LTCUSDT",
+    "DAIUSDT", "LEOUSDT", "UNIUSDT", "APTUSDT", "STXUSDT", "ETCUSDT",
+    "MNTUSDT", "FILUSDT", "CROUSDT", "RNDRUSDT", "ATOMUSDT", "XLMUSDT",
+    "OKBUSDT", "HBARUSDT", "ARUSDT", "IMXUSDT", "TAOUSDT", "VETUSDT",
+    "WIFUSDT", "MKRUSDT", "KASUSDT", "GRTUSDT", "INJUSDT", "OPUSDT",
+    "PEPEUSDT", "THETAUSDT", "RUNEUSDT", "FTMUSDT", "FETUSDT", "TIAUSDT",
+    "LDOUSDT", "FLOKIUSDT", "BGBUSDT", "ALGOUSDT", "COREUSDT", "BONKUSDT",
+    "SEIUSDT", "JUPUSDT", "FLOWUSDT", "ENAUSDT", "GALAUSDT", "AAVEUSDT",
+    "BSVUSDT", "BEAMUSDT", "DYDXUSDT", "QNTUSDT", "AKTUSDT", "BTTUSDT",
+    "AGIXUSDT", "SXPUSDT", "WLDUSDT", "FLRUSDT", "WUSDT", "CHZUSDT",
+    "PENDLEUSDT", "ONDOUSDT", "EGLDUSDT", "NEOUSDT", "AXSUSDT", "KCSUSDT",
+    "SANDUSDT", "XECUSDT", "AIOZUSDT", "EOSUSDT", "XTZUSDT", "STRKUSDT",
+    "JASMYUSDT", "MINAUSDT", "RONUSDT", "CFXUSDT", "SNXUSDT", "MANAUSDT",
+    "ORDIUSDT", "GNOUSDT", "GTUSDT", "CKBUSDT", "APEUSDT", "BOMEUSDT",
+    "DEXEUSDT", "BLURUSDT", "FRONTUSDT", "FXSUSDT", "DOGUSDT", "ROSEUSDT",
+    "SAFEUSDT", "LPTUSDT", "KLAYUSDT", "CAKEUSDT", "USDDUSDT", "AXLUSDT",
+    "HNTUSDT", "BTGUSDT", "WOOUSDT", "1INCHUSDT", "MANTAUSDT", "CRVUSDT",
+    "IOTXUSDT", "ASTRUSDT", "PRIMEUSDT", "FTTUSDT", "TUSDUSDT", "BICOUSDT",
+    "TWTUSDT", "MEMEUSDT", "OSMOUSDT", "ARKMUSDT", "BNXUSDT", "WEMIXUSDT",
+    "DYMUSDT", "COMPUSDT", "SUPERUSDT", "GLMUSDT", "NFTUSDT", "RAYUSDT",
+    "LUNAUSDT", "GMTUSDT", "OCEANUSDT", "PAXGUSDT", "RPLUSDT", "XRDUSDT",
+    "POLYXUSDT", "ANTUSDT", "JTOUSDT", "ZILUSDT", "MXUSDT", "PYUSDUSDT",
+    "ANKRUSDT", "HOTUSDT", "CELOUSDT", "ZRXUSDT", "ZECUSDT", "SSVUSDT",
+    "METISUSDT", "ENJUSDT", "GMXUSDT", "ILVUSDT", "GALUSDT", "IDUSDT",
+    "TRACUSDT", "RVNUSDT", "RSRUSDT", "SFPUSDT", "SKLUSDT", "ABTUSDT",
+    "ETHWUSDT", "SCUSDT", "ELFUSDT", "QTUMUSDT", "ALTUSDT", "BATUSDT",
+    "YGGUSDT", "CSPRUSDT", "PEOPLEUSDT", "LUNCUSDT", "SATSUSDT", "XAUTUSDT"
+  ];
+  const selectElement = document.getElementById('coin-selector');
+  symbols.forEach(symbol => {
+      const formattedSymbol = `${symbol.slice(0, -4)}/${symbol.slice(-3, -3)}USD`;
+      const option = document.createElement('option');
+      option.value = formattedSymbol;
+      option.textContent = formattedSymbol.replace("USDT", "");
+      selectElement.appendChild(option);
+  });
 }

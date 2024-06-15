@@ -23,7 +23,7 @@
     <div class="navbar">
       <img src="cryata small screen.png" alt="Logo">
   </div>
-
+  <div id="notification" class="notification"></div>
     <div class="chart-container">
       <!-- <link rel="stylesheet" href="../css-files/dashboard-style.css" />  -->
       <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/CRYATA_Main/libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script>
@@ -86,6 +86,7 @@
               ,
               onchange="setData(), setLineData(), setVarvData(), updateSmallIndicatorCoin()"
             >
+              <option value="RNDR/USD">rndr</option>
               <option value="BTC/USD">bitcoin</option>
               <option value="ETH/USD">ethereum</option>
               <option value="BNB/USD">binance-coin</option>
@@ -103,6 +104,8 @@
               <option value="MATIC/USD">polygon</option>
               <option value="ICP/USD">internet-computer</option>
               <option value="ALGO/USD">Algorand</option>
+              <option value="BOME/USD">Bome</option>
+              <option value="DEXE/USD">Dexe</option>
             </select>
           </div>
 
@@ -208,6 +211,23 @@
         margin: 0;
         padding: 0;
       }
+
+      .notification {
+        display: none;
+        position: fixed;
+        font-weight: 600;
+        bottom: 60px;
+        left: 60px;
+        padding: 10px;
+        background-color: #f44336;
+        color: rgb(255, 255, 255);
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+    .notification.show {
+        display: block;
+    }
 
       .fa {
         font-size: 28px;

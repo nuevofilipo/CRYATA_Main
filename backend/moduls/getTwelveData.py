@@ -115,8 +115,11 @@ def getCCXTData(coin, candleTimeFrame, limit):
 
     # timeframe mapping
     timeFrameMapping = {
+        "1h": "1h",
+        "4h": "4h",
         "1day": "1d",
         "1week": "1w",
+        "1month": "1M",
     }
 
     timeStampMapping = {
@@ -124,6 +127,7 @@ def getCCXTData(coin, candleTimeFrame, limit):
         "4h": 14400000,
         "1d": 86400000,
         "1w": 604800000,
+        "1M": 2592000000,
     }
 
     candleTimeFrame = timeFrameMapping[candleTimeFrame]
@@ -141,12 +145,16 @@ def getCCXTData(coin, candleTimeFrame, limit):
             "since": since_ms,
         },
     )
-    data = response.json()
-    df = pd.DataFrame(data, columns=columns)
-    # dropping volume column
-    df.drop(columns=["Volume"], inplace=True)
-    df["time"] = pd.to_datetime(df["time"], unit="ms")
-    return df
+
+    try:
+        data = response.json()
+        df = pd.DataFrame(data, columns=columns)
+        # dropping volume column
+        df.drop(columns=["Volume"], inplace=True)
+        df["time"] = pd.to_datetime(df["time"], unit="ms")
+        return df
+    except:
+        return pd.DataFrame(columns=columns)
 
 
 # output = getResponse("BTC/USD", "1day", 100)

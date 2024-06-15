@@ -77,6 +77,9 @@ def create_yearly_candles(monthly_candles):
 
 
 def createQuarterlyCandles(yearly_df, monthly_df):
+    if yearly_df.empty or monthly_df.empty:
+        return pd.DataFrame()
+
     secondLastCandle = yearly_df.iloc[-1]
     quarterIndex = secondLastCandle.name
     quarterly_candles = []
@@ -151,6 +154,7 @@ def addRanges(x0, y0, x1, y1):
 
 
 def createRanges(df, range_df):
+
     if len(range_df.index) < 2:
         penultimateCandle = range_df.iloc[0]
     else:

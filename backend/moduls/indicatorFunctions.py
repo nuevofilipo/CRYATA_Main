@@ -41,8 +41,8 @@ def findLastRedCandle(intIndex, df):
 
 
 def supplyDemandZones(df, chartDf):
-    df = highsForSupplyZones(df)[0]
     lowest_df2 = highsForSupplyZones(df)[1]
+    df = highsForSupplyZones(df)[0]
 
     zones = []
 
@@ -193,6 +193,7 @@ def highsForSupplyZones(df):
         highest_index = highs_df["High"].idxmax()
     except Exception as e:
         print(e)
+        return pd.DataFrame(), pd.DataFrame()  # no idea what's happening here
 
     highest_df2 = df.loc[highest_index:]
     df["protected_highs_and_lows"] = 0
@@ -316,6 +317,10 @@ def momentumIndicator(df, chart_df):  # takes df with integer indices
     green_boxes = []
     red_box_open = False
     green_box_open = False
+
+    if df.empty:
+        print("Dataframe is empty")
+        return pd.DataFrame()
 
     high_y = df["High"].max()
     low_y = df["Low"].min()
