@@ -1,17 +1,7 @@
-// defining the chart and other chart elements ----------------------------------------------
+//! defining the chart and other chart elements ----------------------------------------------
 let urlParamsProcessedCoin = false;
 let urlParamsProcessedTf = false;
-populateSelect(); // need to call it in the beginning to populate the select element
 const mainSection = document.getElementById("tvchart");
-
-
-function getMainHeight() {
-  return mainSection.clientHeight;
-}
-function getMainWidth() {
-  return mainSection.clientWidth;
-}
-
 const chartProperties = {
   height: getMainHeight() ,
   width: getMainWidth(),
@@ -24,15 +14,18 @@ const chartProperties = {
     horzLines: { color: "#444", visible: false },
   },
 };
-
 const domElement = document.getElementById("tvchart");
 const chart = LightweightCharts.createChart(domElement, chartProperties);
 const candleSeries = chart.addCandlestickSeries();
 
-window.addEventListener("resize", () => {
-  chart.resize(getMainWidth(), getMainHeight());
-  console.log("resized");
-});
+function getMainHeight() {
+  return mainSection.clientHeight;
+}
+function getMainWidth() {
+  return mainSection.clientWidth;
+}
+
+
 
 
 // creating lines for the 4 line indicator
@@ -55,24 +48,18 @@ const band9 = chart.addLineSeries({ color: "#dd34f7", lineWidth: 1, priceLineVis
 const band10 = chart.addLineSeries({ color: "#e434f7", lineWidth: 1, priceLineVisible: false });
 const band11 = chart.addLineSeries({ color: "#f73472", lineWidth: 1, priceLineVisible: false });
 
-var addedBoxes = [];
 let addedSupplyZones = new Map();
-var addedBoxes2 = [];
-var addedBoxes3 = [];
 let addedRanges = new Map();
 
 
-// functions for fetchng data asyncronously ----------------------------------------------
-
-
-// for use with local data
+//! functions for fetching data asyncronously ----------------------------------------------
+//for use with local data
 async function getData(route){
-  
+  changeTimeFrameFromUrl();
   const selectedBtn = document.querySelector(".active");
   const response = await fetch(
     `http://127.0.0.1:5000/api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
   )
-  
   const data = await response.json();
   return data;
 }
@@ -82,7 +69,6 @@ async function getRangesData(range_value){
   const response = await fetch(
     `http://127.0.0.1:5000/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
   )
-  
   const data = await response.json();
   return data;
 
@@ -93,13 +79,10 @@ async function getDataIndividualTimeframe(endpoint, additionalParameter,  indica
   const response = await fetch(
     `http://127.0.0.1:5000/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
   )
-
   const data = await response.json();
   return data;
     
 }
-
-
 
 // for use with external hosted data
 // async function getData(route){
@@ -135,6 +118,7 @@ async function getDataIndividualTimeframe(endpoint, additionalParameter,  indica
     
 // }
 
+//! functions for creating and removing boxes and ranges----------------------------------------------
 async function createBoxesData(mapping, data, color, key){
   list = [];
   // const data = data;
@@ -160,10 +144,8 @@ async function createBoxesData(mapping, data, color, key){
   return true;
 }
 
-
-async function createRangesData(mapping, functionToApply, color, key){
+async function createRangesData(mapping, data, color, key){
   list = [];
-  const data = await functionToApply;
   data.forEach(element => {
     const i = candleSeries.createBox({
         corners: [{ time: element["x0"] / 1000, price: element["y0"] }, { time: element["x1"] / 1000, price: element["y1"] }],
@@ -181,16 +163,6 @@ async function createRangesData(mapping, functionToApply, color, key){
   mapping.set(key, list);
   }
 
-
-
-
-function removeBoxes(list){
-  list.forEach(element => {
-    candleSeries.removeBox(element);
-  });
-  list = [];
-}
-
 function removeBoxesMap(mapping, key){
   boxes = mapping.get(key);
   boxes.forEach(element => {
@@ -202,20 +174,7 @@ function removeBoxesMap(mapping, key){
 
 
 
-// functions for setting data----------------------------------------------
-function turnOffLoader(){
-  var tvchartelems = document.querySelectorAll(".tvchartbeforeload");
-  [].forEach.call(tvchartelems, function(el) {
-    el.classList.remove("tvchartbeforeload");
-  });
-
-  var loader = document.querySelectorAll(".loader");
-  [].forEach.call(loader, function(el) {
-    el.classList.remove("loader");
-  });
-  
-}
-
+//! functions for setting Line and Chart data----------------------------------------------
 
 async function setData(){
   const data = await getData("query"); 
@@ -260,6 +219,7 @@ async function setData(){
 
 
 async function setLineData(){
+  if (indicatorState() == true){
   data = await getData("4lines");
   const maDownShift = data.map((d) => {
     return { value: parseFloat(d.MA)*0.62, time: d.time / 1000 };
@@ -272,9 +232,7 @@ async function setLineData(){
   });
   const emaUpShift = data.map((d) => {
     return { value: parseFloat(d.EMA)*1.21, time: d.time / 1000 };
-  });
-
-  if (indicatorState() == true){
+  });  
   maLine1.setData(maDownShift);
   maLine2.setData(maUpShift);
   emaLine1.setData(emaDownShift);
@@ -288,6 +246,7 @@ async function setLineData(){
 }
 
 async function setVarvData(){
+  if (varvIndicatorState() == true){
   data = await getData("varv");
   const band1Data = data.map((d) => {
     return { value: parseFloat(d.out1), time: d.time / 1000 };
@@ -322,9 +281,6 @@ async function setVarvData(){
   const band11Data = data.map((d) => {
     return { value: parseFloat(d.out11), time: d.time / 1000 };
   });
-
-
-  if (varvIndicatorState() == true){
   band1.setData(band1Data);
   band2.setData(band2Data);
   band3.setData(band3Data);
@@ -351,7 +307,7 @@ async function setVarvData(){
   }
 }
 
-
+// function for setting all at once
 function setAll(){
   setData();
   setLineData();
@@ -360,12 +316,8 @@ function setAll(){
 }
 
 
-setData(); // changed this because otherwise api calls get wasted, each time
-updateIndividualIndicatorsTimeframe();
 
-// updating queries (coin and timeframe) ----------------------------------------------
-
-// function to get the coin from the url
+//! manipulate coin and timeframe from url ----------------------------------------------
 
 function getUrlParameterCoin() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -381,9 +333,7 @@ function getUrlParameterTimeframe() {
 
 function updateCoin(){
   if (getUrlParameterCoin() != null && !urlParamsProcessedCoin){
-    console.log(getUrlParameterCoin());
     document.getElementById("coin-selector").value = getUrlParameterCoin();
-    console.log(document.getElementById("coin-selector").value);
     urlParamsProcessedCoin = true;
     return getUrlParameterCoin();    
   }
@@ -406,6 +356,8 @@ function changeTimeFrameFromUrl(){
   return selectedBtn.value;
 }
 
+//! updating and changing timeframes && small timeframe-btns-----------------------------------
+// changes main timeframe
 function updateTimeframe(event, timeframe) {
   var i, tablinks;
 
@@ -418,6 +370,7 @@ function updateTimeframe(event, timeframe) {
   
 }
 
+// this makes timeframe buttons with smaller tf unclickable
 function updateIndividualIndicatorsTimeframe(){
   const individualTimeframeButtons = document.querySelectorAll('.timeframe-btn');
   const timeframeRanks = {
@@ -431,7 +384,6 @@ function updateIndividualIndicatorsTimeframe(){
 
   };
   const selectedTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
-  console.log(selectedTimeframe);
   const selectedRank = timeframeRanks[selectedTimeframe];
 
   individualTimeframeButtons.forEach(button => {
@@ -453,7 +405,7 @@ function updateIndividualIndicatorsTimeframe(){
   });
 }
 
-// this resets the button activated indicators, when the coin is changed
+// this resets indicators that get activated by the small timeframe buttons
 function updateSmallIndicatorCoin(){
   const buttons = document.querySelectorAll('.timeframe-btn');
   buttons.forEach(button => {
@@ -473,67 +425,11 @@ function updateSmallIndicatorCoin(){
   });
 }
 
-// element listeners ----------------------------------------------
 
 
-const switchElement = document.getElementById("indicator-switch");
-switchElement.addEventListener("change", function(){
-  setLineData();
-})
 
 
-const varvSwitchElement = document.getElementById("varv-indicator-switch");
-varvSwitchElement.addEventListener("change", function(){
-  setVarvData();
-  console.log("switched")
-});
-
-// function to show that data is not available for a certain coin
-function showNotification(message) {
-  const notification = document.getElementById('notification');
-  notification.textContent = message;
-  notification.classList.add('show');
-  setTimeout(() => {
-      notification.classList.remove('show');
-  }, 3000); // Hide after 3 seconds
-}
-
-
-// small individual timeframe buttons
-const Buttons = document.querySelectorAll('.timeframe-btn');
-Buttons.forEach(button => {
-    button.addEventListener('click', async function() {
-        this.classList.toggle('active');
-        const indTime = button.getAttribute('data-timeframe');
-        const indicator = button.getAttribute('data-indicator');
-        const type = button.getAttribute('data-type');
-        const color = button.getAttribute('data-color');
-        if (button.classList.contains('active')) {
-          if (type  == "boxes"){
-            const data = await getDataIndividualTimeframe( indicator, "indicatorTimeframe",  indTime);
-            try {
-              if (data.length == 0) throw new Error("No data available");
-              createBoxesData(addedSupplyZones, data, color, indicator + indTime );  
-            } catch (error){
-              button.classList.remove('active');
-              showNotification('Data not available');
-            }       
-          } else if (type == "lineSeries"){
-            createRangesData(addedRanges, getDataIndividualTimeframe( indicator, "indicatorTimeframe",  indTime), color, indicator + indTime);
-          }
-          
-        } else {
-          if (type == "boxes"){
-            removeBoxesMap(addedSupplyZones, indicator + indTime);
-          } else if (type == "lineSeries"){
-            removeBoxesMap(addedRanges, indicator + indTime);
-          }
-        }
-    });
-});
-
-
-// state functions ----------------------------------------------
+//! state functions ----------------------------------------------
 
 function indicatorState(){
   const indicatorSwitch = document.getElementById("indicator-switch");
@@ -556,7 +452,17 @@ function varvIndicatorState(){
   }
 }
 
-//html functionality
+
+//!html functionality ----------------------------------------------
+// function to show notification that data is not available
+function showNotification(message) {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.classList.add('show');
+  setTimeout(() => {
+      notification.classList.remove('show');
+  }, 3000); // Hide after 3 seconds
+}
 
 var hidden = false;
 
@@ -622,3 +528,71 @@ function populateSelect() {
       selectElement.appendChild(option);
   });
 }
+
+// turns of loader once data gets loaded
+function turnOffLoader(){
+  var tvchartelems = document.querySelectorAll(".tvchartbeforeload");
+  [].forEach.call(tvchartelems, function(el) {
+    el.classList.remove("tvchartbeforeload");
+  });
+
+  var loader = document.querySelectorAll(".loader");
+  [].forEach.call(loader, function(el) {
+    el.classList.remove("loader");
+  });
+}
+
+//! element listeners ----------------------------------------------
+// context bands
+const switchElement = document.getElementById("indicator-switch");
+switchElement.addEventListener("change", function(){
+  setLineData();
+})
+
+
+const varvSwitchElement = document.getElementById("varv-indicator-switch");
+varvSwitchElement.addEventListener("change", function(){
+  setVarvData();
+});
+
+// small individual timeframe buttons
+const Buttons = document.querySelectorAll('.timeframe-btn');
+Buttons.forEach(button => {
+    button.addEventListener('click', async function() {
+        this.classList.toggle('active');
+        const indTime = button.getAttribute('data-timeframe');
+        const indicator = button.getAttribute('data-indicator');
+        const type = button.getAttribute('data-type');
+        const color = button.getAttribute('data-color');
+        if (button.classList.contains('active')) {
+          const data = await getDataIndividualTimeframe( indicator, "indicatorTimeframe",  indTime);
+          try {
+            if (data.length == 0) throw new Error("No data available");
+            if (type  == "boxes"){
+                createBoxesData(addedSupplyZones, data, color, indicator + indTime );  
+            } else if (type == "lineSeries"){
+              createRangesData(addedRanges, data, color, indicator + indTime);
+            }
+          } catch{
+            button.classList.remove('active');
+            showNotification('Data not available');
+          }
+        } else {
+          if (type == "boxes"){
+            removeBoxesMap(addedSupplyZones, indicator + indTime);
+          } else if (type == "lineSeries"){
+            removeBoxesMap(addedRanges, indicator + indTime);
+          }
+        }
+    });
+});
+
+window.addEventListener("resize", () => {
+  chart.resize(getMainWidth(), getMainHeight());
+  console.log("resized");
+});
+
+//! first function calls on page load ----------------------------------------------
+populateSelect(); // populate the coin selector
+setData(); // initial data fetch and set
+updateIndividualIndicatorsTimeframe(); // initial setting of small timeframe buttons
