@@ -389,9 +389,12 @@ def momentumIndicator(df, chart_df):  # takes df with integer indices
 
 
 def createVarv(df, timeframe):
+    if len(df.index) < 650:
+        return pd.DataFrame()
 
-    df["standard_deviation"] = df["Close"].rolling(window=200).std() * 100
-    df["moving_average"] = df["Close"].rolling(window=200).mean()
+    length = 500
+    df["standard_deviation"] = df["Close"].rolling(window=length).std() * 100
+    df["moving_average"] = df["Close"].rolling(window=length).mean()
 
     df["deviationRatio"] = df["standard_deviation"] / df["moving_average"]
 
@@ -410,7 +413,7 @@ def createVarv(df, timeframe):
     df["band10"] = df["band1"] * df["percentageShift"] ** 9
     df["band11"] = df["band1"] * df["percentageShift"] ** 10
 
-    lenMa = 200
+    lenMa = 150
 
     df["out1"] = tan.ema(df["band1"], length=lenMa)
     df["out2"] = tan.ema(df["band2"], length=lenMa)

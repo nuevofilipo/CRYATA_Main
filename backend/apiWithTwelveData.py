@@ -1,6 +1,4 @@
 from flask import Flask, request
-
-
 from flask_caching import Cache
 
 import json, time
@@ -19,7 +17,6 @@ import numpy as np
 
 # packages needed to fetch data
 import pandas as pd
-from binance.spot import Spot as Client
 
 from moduls.getTwelveData import getResponse
 from moduls.indicatorFunctions import (

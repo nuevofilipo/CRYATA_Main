@@ -9,7 +9,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chart Dashboard</title>
-    <!-- <link rel="stylesheet" href="../css-files/dashboard-style.css" />  -->
+    <!-- <link rel="stylesheet" href="../css-files/chartViewStyle.css" />  -->
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/nuevofilipo/CRYATA_Main@latest/frontend/css-files/dashboard-style.css" /> -->
     <!-- <script src="../../libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script>  -->
     <!-- <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/CRYATA_Main/libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script>  -->
@@ -25,7 +25,7 @@
   </div>
   <div id="notification" class="notification"></div>
     <div class="chart-container">
-      <!-- <link rel="stylesheet" href="../css-files/dashboard-style.css" />  -->
+      <link rel="stylesheet" href="../css-files/chartViewStyle.css" /> 
       <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/CRYATA_Main/libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script>
         
       
@@ -86,26 +86,152 @@
               ,
               onchange="setData(), setLineData(), setVarvData(), updateSmallIndicatorCoin()"
             >
-              <option value="RNDR/USD">rndr</option>
-              <option value="BTC/USD">bitcoin</option>
-              <option value="ETH/USD">ethereum</option>
-              <option value="BNB/USD">binance-coin</option>
-              <option value="XRP/USD">ripple</option>
-              <option value="ADA/USD">cardano</option>
-              <option value="DOGE/USD">dogecoin</option>
-              <option value="SOL/USD">solana</option>
-              <option value="TON/USD">ton</option>
-              <option value="SHIB/USD">shiba-inu</option>
-              <option value="AVAX/USD">avalanche</option>
-              <option value="DOT/USD">polkadot</option>
-              <option value="BCH/USD">bitcoin-cash</option>
-              <option value="TRX/USD">tron</option>
-              <option value="LINK/USD">chainlink</option>
-              <option value="MATIC/USD">polygon</option>
-              <option value="ICP/USD">internet-computer</option>
-              <option value="ALGO/USD">Algorand</option>
-              <option value="BOME/USD">Bome</option>
-              <option value="DEXE/USD">Dexe</option>
+            <option value="BTC/USD">bitcoin</option>
+            <option value="ETH/USD">ethereum</option>
+            <option value="BNB/USD">binance-coin</option>
+            <option value="SOL/USD">solana</option>
+            <option value="XRP/USD">ripple</option>
+            <option value="DOGE/USD">dogecoin</option>
+            <option value="TON/USD">ton</option>
+            <option value="ADA/USD">cardano</option>
+            <option value="SHIB/USD">shiba-inu</option>
+            <option value="AVAX/USD">avalanche</option>
+            <option value="DOT/USD">polkadot</option>
+            <option value="BCH/USD">bitcoin-cash</option>
+            <option value="TRX/USD">tron</option>
+            <option value="LINK/USD">chainlink</option>
+            <option value="MATIC/USD">polygon</option>
+            <option value="ICP/USD">internet-computer</option>
+            <option value="NEAR/USD">near</option>
+            <option value="LTC/USD">litecoin</option>
+            <option value="DAI/USD">dai</option>
+            <option value="UNI/USD">uniswap</option>
+            <option value="APT/USD">aptos</option>
+            <option value="STX/USD">stacks</option>
+            <option value="ETC/USD">ethereum-classic</option>
+            <option value="FIL/USD">filecoin</option>
+            <option value="RNDR/USD">render</option>
+            <option value="ATOM/USD">cosmos</option>
+            <option value="XLM/USD">stellar</option>
+            <option value="HBAR/USD">hedera</option>
+            <option value="AR/USD">arweave</option>
+            <option value="IMX/USD">immutable-x</option>
+            <option value="TAO/USD">lamden</option>
+            <option value="VET/USD">vechain</option>
+            <option value="WIF/USD">wifecoin</option>
+            <option value="MKR/USD">maker</option>
+            <option value="KAS/USD">kaspa</option>
+            <option value="GRT/USD">the-graph</option>
+            <option value="INJ/USD">injective</option>
+            <option value="OP/USD">optimism</option>
+            <option value="PEPE/USD">pepe</option>
+            <option value="THETA/USD">theta</option>
+            <option value="RUNE/USD">thorchain</option>
+            <option value="FTM/USD">fantom</option>
+            <option value="FET/USD">fetch-ai</option>
+            <option value="TIA/USD">tia</option>
+            <option value="LDO/USD">lido-dao</option>
+            <option value="FLOKI/USD">floki</option>
+            <option value="ALGO/USD">algorand</option>
+            <option value="BONK/USD">bonk</option>
+            <option value="SEI/USD">sei</option>
+            <option value="JUP/USD">jupiter</option>
+            <option value="FLOW/USD">flow</option>
+            <option value="ENA/USD">enano</option>
+            <option value="GALA/USD">gala</option>
+            <option value="AAVE/USD">aave</option>
+            <option value="BSV/USD">bitcoin-sv</option>
+            <option value="BEAM/USD">beam</option>
+            <option value="DYDX/USD">dydx</option>
+            <option value="QNT/USD">quant</option>
+            <option value="BTT/USD">bittorrent</option>
+            <option value="AGIX/USD">singularitynet</option>
+            <option value="SXP/USD">swipe</option>
+            <option value="WLD/USD">worldcoin</option>
+            <option value="W/USD">whale</option>
+            <option value="CHZ/USD">chiliz</option>
+            <option value="PENDLE/USD">pendle</option>
+            <option value="ONDO/USD">ondo-finance</option>
+            <option value="EGLD/USD">elrond</option>
+            <option value="NEO/USD">neo</option>
+            <option value="AXS/USD">axie-infinity</option>
+            <option value="SAND/USD">the-sandbox</option>
+            <option value="XEC/USD">eCash</option>
+            <option value="EOS/USD">eos</option>
+            <option value="XTZ/USD">tezos</option>
+            <option value="STRK/USD">strike</option>
+            <option value="JASMY/USD">jasmy</option>
+            <option value="MINA/USD">mina</option>
+            <option value="CFX/USD">conflux</option>
+            <option value="SNX/USD">synthetix</option>
+            <option value="MANA/USD">decentraland</option>
+            <option value="ORDI/USD">ordinals</option>
+            <option value="GNO/USD">gnosis</option>
+            <option value="CKB/USD">nervos</option>
+            <option value="APE/USD">apecoin</option>
+            <option value="BLUR/USD">blur</option>
+            <option value="FRONT/USD">frontier</option>
+            <option value="FXS/USD">frax-share</option>
+            <option value="ROSE/USD">oasis-network</option>
+            <option value="LPT/USD">livepeer</option>
+            <option value="KLAY/USD">klaytn</option>
+            <option value="CAKE/USD">pancakeswap</option>
+            <option value="AXL/USD">axelar</option>
+            <option value="HNT/USD">helium</option>
+            <option value="BTG/USD">bitcoin-gold</option>
+            <option value="WOO/USD">wootrade</option>
+            <option value="1INCH/USD">1inch</option>
+            <option value="MANTA/USD">manta-network</option>
+            <option value="CRV/USD">curve-dao-token</option>
+            <option value="IOTX/USD">iotex</option>
+            <option value="ASTR/USD">astar</option>
+            <option value="FTT/USD">ftx-token</option>
+            <option value="TUSD/USD">trueusd</option>
+            <option value="BICO/USD">biconomy</option>
+            <option value="TWT/USD">trust-wallet-token</option>
+            <option value="MEME/USD">meme</option>
+            <option value="OSMO/USD">osmosis</option>
+            <option value="ARKM/USD">arkham</option>
+            <option value="BNX/USD">binaryx</option>
+            <option value="DYM/USD">dynamix</option>
+            <option value="COMP/USD">compound</option>
+            <option value="SUPER/USD">superfarm</option>
+            <option value="GLM/USD">golem</option>
+            <option value="RAY/USD">raydium</option>
+            <option value="LUNA/USD">terra</option>
+            <option value="GMT/USD">green-metaverse-token</option>
+            <option value="OCEAN/USD">ocean-protocol</option>
+            <option value="PAXG/USD">pax-gold</option>
+            <option value="RPL/USD">rocket-pool</option>
+            <option value="POLYX/USD">polymesh</option>
+            <option value="ANT/USD">aragon</option>
+            <option value="JTO/USD">justoken</option>
+            <option value="ZIL/USD">zilliqa</option>
+            <option value="ANKR/USD">ankr</option>
+            <option value="HOT/USD">holo</option>
+            <option value="CELO/USD">celo</option>
+            <option value="ZRX/USD">0x</option>
+            <option value="ZEC/USD">zcash</option>
+            <option value="SSV/USD">ssv-network</option>
+            <option value="METIS/USD">metisdao</option>
+            <option value="ENJ/USD">enjin-coin</option>
+            <option value="GMX/USD">gmx</option>
+            <option value="ILV/USD">illuvium</option>
+            <option value="GAL/USD">galxe</option>
+            <option value="ID/USD">space-id</option>
+            <option value="RVN/USD">ravencoin</option>
+            <option value="RSR/USD">reserve-rights</option>
+            <option value="SFP/USD">safepal</option>
+            <option value="SKL/USD">skale</option>
+            <option value="ETHW/USD">ethereum-pow</option>
+            <option value="SC/USD">siacoin</option>
+            <option value="ELF/USD">aelf</option>
+            <option value="QTUM/USD">qtum</option>
+            <option value="ALT/USD">altura</option>
+            <option value="BAT/USD">basic-attention-token</option>
+            <option value="YGG/USD">yield-guild-games</option>
+            <option value="PEOPLE/USD">constitutiondao</option>
+            <option value="LUNC/USD">terra-luna-classic</option>
             </select>
           </div>
 
@@ -137,10 +263,10 @@
                 <span class="slider round"></span>
               </label> -->
               <div class="timeframe-buttons">
-                <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1day" data-color="#e82ec0">1d</button>
-                <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1week" data-color="#e82ec0">1w</button>
                 <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1h" data-color="#e82ec0">1h</button>
                 <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="4h" data-color="#e82ec0">4h</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1day" data-color="#e82ec0">1d</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1week" data-color="#e82ec0">1w</button>
               </div>
             </div>
   
@@ -151,10 +277,10 @@
                 <span class="slider round"></span>
               </label> -->
               <div class="timeframe-buttons">
-                <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1day" data-color="#9e9e9e">1d</button>
-                <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1week" data-color="#9e9e9e">1w</button>
                 <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1h" data-color="#9e9e9e">1h</button>
                 <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="4h" data-color="#9e9e9e">4h</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1day" data-color="#9e9e9e">1d</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1week" data-color="#9e9e9e">1w</button>
               </div>
             </div>
   
@@ -165,10 +291,10 @@
                 <span class="slider round"></span>
               </label> -->
               <div class="timeframe-buttons">
-                <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1day" data-color="#9e9e9e">1d</button>
-                <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1week" data-color="#9e9e9e">1w</button>
                 <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1h" data-color="#9e9e9e">1h</button>
                 <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="4h" data-color="#9e9e9e">4h</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1day" data-color="#9e9e9e">1d</button>
+                <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1week" data-color="#9e9e9e">1w</button>
               </div>
             </div>
   
@@ -202,402 +328,8 @@
         type="text/javascript"
         src="../javascript-files/chartViewScript.js"
       ></script>
-    </div>
-
-    <style>
-      body {
-        font-family: 'Inter';
-        background-color: #2C2C2C;
-        margin: 0;
-        padding: 0;
-      }
-
-      .main {
-        display: flex;
-        height: calc(100vh - 69px);
-        width:calc(100%);
-        /* border-top: 1px solid #8076da;  */
-        justify-content: center; 
-        align-items: center;
-        /* padding: 5px; */
-        box-sizing: border-box;
-        position: relative;
-      }
-
-      .sidebar {
-        position: absolute;
-        top: 10px;
-        left:10px;
-        z-index: 10;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: 270px;
-        height: calc(100% - 40px);
-        align-items: center;
-        padding-right: 1px; 
-        padding-top: 15px;
-        padding-bottom: 15px;
-        box-sizing: border-box;
-      }
-      .sidebar.hidden {
-        display:none;
-      }
-
-      /* chart styling aka. in the main section ------------- */
-      .chart-container {
-        display: flex;
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      #chartbox {
-        background-color: #000000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: calc(100%);
-        width: calc(100%);
-        /* border: 1px solid #464646; */
-        /* border-radius: 10px; */
-        box-sizing: border-box;
-        /* padding: 5px; */
-        /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); */
-      }
-      #tvchart {
-        height: 100%;
-        width: 100%;
-      }
-
-      /* sidebar styling aka: in the sidebar section */
-
-      .sidebar-box {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: calc(100%);
-        width: calc(100%);
-        background-color: #ffffffd7;
-        border-radius: 10px;
-      }     
-      .hide-sidebar-box {
-        display: flex;
-        justify-content: flex-end;
-        width: 95%;
-        padding: 10px;
-        margin:10px;
-        box-sizing: border-box;
-      }
-
-      #coin-selector {
-        appearance: menulist-button;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        background-color: #131313;
-        color: white;
-        border: none;
-        border-radius: 10px;
-        padding: 10px 16px;
-        margin: 5px;
-        font-size: 16px;
-        cursor: pointer;
-        width: 95%;
-        max-width: 250px; 
-        box-sizing: border-box; /* Include padding and border in the element's total width and height */
-        transition: border-color 0.3s, box-shadow 0.3s;
-        font-family: Inter;
-        font-weight: 500;
-      }
-
-      .chartSettings{
-        display: flex;
-        justify-content: space-between;
-        flex-direction: column;
-        align-items: start;
-        width: 95%;
-        padding:5px;
-      }
-
-      .indicators-settings-box {
-        font-family: 'Inter';
-        font-weight: 600;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-        align-items: center;
-        padding: 10px;
-        margin: 10px;
-        height: 90%;
-        border-radius: 10px;
-      }
-
-      .unified-indicator-box {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        padding: 5px;
-      }
-      .tf-indicator-box {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        padding: 5px;
-      }
-
-      .indicator-container {
-        display: flex;
-        justify-content: space-between;
-        /* flex-direction: column; */
-        align-items: center;
-        width: 95%;
-        padding:5px;
-      }
-
-      .indicator-container-tf {
-        display: flex;
-        justify-content: space-between;
-        flex-direction: column;
-        align-items: start;
-        width: 95%;
-        padding:5px;
-      }
-      .timeframe-buttons {
-        display: flex;
-        gap: 10px;
-        padding-top: 10px;
-        padding-bottom: 10px;
-      }
-
-      .timeframe-btn {
-        padding: 5px 10px;
-        color: rgb(35, 35, 35);
-        border: 1px solid #1f1f1f;
-        margin-top: 5px;
-        background-color: #dddbff;
-        cursor: pointer;
-        border-radius: 3px;
-        transition: background-color 0.3s, border-color 0.3s;
-        font-family: Inter;
-        font-weight: 500;
-      }
-
-      .timeframe-btn:hover {
-        background-color: #a8a7c1;
-      }
-
-      .timeframe-btn.active {
-        background-color: #8076da;
-        color:rgb(235, 235, 235);
-        border-color: #1f1f1f;
-      }
-
-      .timeframe-btn.disabled {
-        cursor: not-allowed;
-        opacity: 0.5;
-      }
-
-      .timeframe-btn.disabled:hover {
-        background-color: #dddbff;
-      }
-
-      /* Style the large timeframe buttons */
-      .btn-group {
-        overflow: hidden;
-        border: 1px solid #1f1f1f;
-        border-radius: 10px;
-        display: flex;
-        justify-content: space-between;
-        margin:5px;
-        width: 95%;
-      }
-      .btn-group button {
-        background-color: #dddbff;
-        width: 100%;
-        float: left;
-        border: none;
-        border-right: 1px solid #1f1f1f;
-        outline: none;
-        cursor: pointer;
-        padding: 14px 16px;
-        transition: 0.35s;
-        font-size: 16px;
-        font-family: Inter;
-        font-weight: 400;
-        color: rgb(32, 32, 32);
-      }
-
-      .tablinks.right {
-        border-right: none;
-      }
-
-      .btn-group button:hover {
-        background-color: #a8a7c1;
-      }
-
-      .btn-group button.active {
-        background-color: #8076da;
-        color: white;
-      }
-
-      /* styling the switches for unified indicators */
-      .switch {
-        position: relative;
-        display: inline-block;
-        width: 60px;
-        height: 34px;
-      }
-
-      .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-      .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: radial-gradient(circle at  left,#cf65b8,#9758d3,  #8076da);
-        -webkit-transition: 0.4s;
-        transition: 0.4s;
-      }
-
-      .slider:before {
-        position: absolute;
-        content: "";
-        height: 26px;
-        width: 26px;
-        left: 4px;
-        bottom: 4px;
-        background-color: white;
-        -webkit-transition: 0.4s;
-        transition: 0.4s;
-      }
-
-      input:checked + .slider {
-        background: #8076da;
-      }
-
-      input:focus + .slider {
-        box-shadow: 0 0 1px #6200ea;
-      }
-
-      input:checked + .slider:before {
-        -webkit-transform: translateX(26px);
-        -ms-transform: translateX(26px);
-        transform: translateX(26px);
-      }
-
-      .slider.round {
-        border-radius: 34px;
-      }
-
-      .slider.round:before {
-        border-radius: 50%;
-      }
-
-      .indicator-tag {
-        color: rgb(29, 28, 28);
-        display: inline-block;
-        margin: 0;
-        margin-right: 10px;
-        padding-bottom: 0px;
-        font-size: 18px;
-      }
-
-
-
-      /* html addons ------------------------------------------------ */
-      .navbar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0px;
-            background-color: #333;
-        }
-        .navbar img {
-            max-width: 100%;
-            height: auto;
-        }
-
-
-      .notification {
-        display: none;
-        position: fixed;
-        font-weight: 600;
-        bottom: 60px;
-        left: 60px;
-        padding: 10px;
-        background-color: #f44336;
-        color: rgb(255, 255, 255);
-        border-radius: 5px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-      }
-      .notification.show {
-          display: block;
-      }
-
-      .fa {
-        font-size: 28px;
-      }
-
-      
-      .sidebar-toggle {
-        position: absolute;
-        top: 30px;
-        left: 240px;
-        z-index: 11;
-        background-color: transparent;
-        color: rgb(0, 0, 0);
-        border: none;
-        padding: 5px;
-        border-radius: 3px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-      }
-
-      .sidebar-toggle:hover {
-        background-color: #968c8c;
-      }
-
-      .sidebar-toggle.on {
-        left: 10px;
-      }
-
-      .tvchartbeforeload {
-        display: none;
-        height: 100%;
-        width: 100%;
-      }
-
-      .loader  {
-        border: 6px solid #f3f3f3; 
-        border-top: 6px solid #894ac4; 
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 2s linear infinite;
-      }
-
-
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-    </style>
-    <script>
-      
-  </script>
-    
+      <!-- <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/cryata-cdn-resources@latest/chart view/chartViewScript.js"></script> -->
+    </div>  
     
     </body>
   </body>

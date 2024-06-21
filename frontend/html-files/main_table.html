@@ -3,10 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://fonts.googleapis.com/css?family=Inter"
-      rel="stylesheet"
-    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -18,260 +14,86 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
     <title>Crypto Market Overview</title>
-    <style>
-      body {
-        /* font-family: Arial, sans-serif; */
-        font-family: "Inter";
-        background-color: #000000;
-        color: white;
-        margin: 0;
-        padding: 0;
-      }
-
-      .header-container {
-        display: flex;
-        width: 90%;
-        align-items: center;
-        justify-content: space-between;
-        margin: 10px;
-        margin-bottom: 10px;
-        padding: 10px;
-        border-radius: 10px;
-        box-sizing: border-box;
-        background-color: #d7d7d7;
-        /* background: radial-gradient(circle at right, #d134af, #9758d3, #8076da); */
-      }
-
-      .table-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin-top: 0px;
-      }
-
-      h2 {
-        text-align: center;
-        padding: 5px 0;
-        color: #141414;
-        margin: 0;
-        margin-right: 20px;
-      }
-
-      table {
-        width: 90%;
-        margin: 0 auto;
-        border-collapse: collapse;
-        /* box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); */
-        background-color: #1f1f1f;
-        overflow: hidden;
-        border-radius: 10px;
-        /* border: 1px solid #464646; */
-        /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); */
-        /* box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 6px 6px rgba(0, 0, 0, 0.4); */
-      }
-
-      th,
-      td {
-        border: 1px solid #474747;
-        padding: 10px;
-        height: 50px;
-        text-align: left;
-        font-size: 18px;
-        font-weight: 500;
-        border-right: none;
-        border-left: none;
-        border-top: none;
-      }
-
-      th {
-        /* background-color: #905dd6; */
-        font-weight: 600;
-        color: black;
-        height: 50px;
-        font-size: 20px;
-      }
-
-      td {
-        text-align: center;
-      }
-
-      tr {
-        /* border: 1px solid #383838; */
-        box-sizing: border-box;
-      }
-
-      tr:hover {
-        background-color: #353535;
-        transition: cubic-bezier(0.55, 0.085, 0.68, 0.53) 0.1s;
-        cursor: pointer;
-      }
-
-      .headerTr {
-        /* background: radial-gradient(circle at 30%,#f425ff,#9758d3,  #6b5ee0); */
-        background: radial-gradient(circle at right, #d134af, #9758d3, #8076da);
-        /* background-color: #dddbff; */
-        background-color: #8076da;
-        border-radius: 10px;
-        height: 80px;
-      }
-
-      .headerTr:hover {
-        background-color: #8076da;
-      }
-
-      /* ------------ timeframe setting*/
-      .btn-group {
-        overflow: hidden;
-        background-color: #dddbff;
-        border-radius: 10px;
-        display: flex;
-        justify-content: space-between;
-        border: 1px solid #000000;
-        /* padding:5px; */
-        /* margin:5px; */
-        width: 300px;
-        box-sizing: border-box;
-      }
-
-      .btn-group button {
-        background-color: transparent;
-        width: 100%;
-        float: left;
-        border: none;
-        border-right: 1px solid #000000;
-        outline: none;
-        cursor: pointer;
-        padding: 14px 16px;
-        transition: 0.35s;
-        font-size: 16px;
-        font-family: Inter;
-        font-weight: 400;
-        color: rgb(0, 0, 0);
-      }
-
-      .tablinks.right {
-        border-right: none;
-      }
-
-      .btn-group button:hover {
-        background-color: #a8a7c1;
-      }
-
-      .btn-group button.active {
-        background-color: #8076da;
-        color: white;
-      }
-
-      .right-th {
-        text-align: right;
-      }
-
-      .left-th {
-        text-align: left;
-      }
-
-      .center-th {
-        text-align: center;
-      }
-
-      #backToTopBtn {
-        display: none; /* Hidden by default */
-        position: fixed; /* Fixed position */
-        bottom: 76px; /* Place the button 20px from the bottom */
-        right: 20px;
-        z-index: 99; /* Make sure it does not overlap */
-        font-size: 18px; /* Increase font size */
-        border: none; /* Remove borders */
-        outline: none; /* Remove outline */
-        background-color: #d7d7d7; /* Set a background color */
-        color: rgb(27, 27, 27); /* Text color */
-        cursor: pointer; /* Add a mouse pointer on hover */
-        padding: 15px; /* Some padding */
-        border-radius: 12px; /* Rounded corners */
-        box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 1);
-      }
-
-      #backToTopBtn:hover {
-        background-color: #919191; /* Dark grey */
-      }
-    </style>
+    <link rel="stylesheet" href="../css-files/tableViewStyle.css" />
+    <!-- <link rel="stylesheet" href="../css-files/chatgpt.css" /> -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/nuevofilipo/cryata-cdn-resources@latest/table view/tableViewStyle.css"> -->
   </head>
   <body>
     <button id="backToTopBtn" title="Go to top">
       <i class="fa fa-arrow-up"></i>
     </button>
-    <div class="navbar">
+    <!-- <div class="navbar">
       <image
         src="cryata navbar.png"
         content="width=device-width, initial-scale=1.0"
       >
-      </image>
+      </image> -->
     </div>
-    <div class="table-container">
-      <div class="header-container">
-        <h2>Crypto Market Overview</h2>
-        <div class="btn-group">
-          <button
-            class="tablinks"
-            data-timeframe="1h"
-            ,
-            onclick="changeTimeFrame(event,'1h')"
-            ,
-            value="1h"
-          >
-            1h
-          </button>
-          <button
-            class="tablinks"
-            data-timeframe="4h"
-            ,
-            onclick="changeTimeFrame(event, '4h')"
-            ,
-            value="4h"
-          >
-            4h
-          </button>
-          <button
-            class="tablinks active"
-            data-timeframe="1day"
-            ,
-            onclick="changeTimeFrame(event, '1d')"
-            ,
-            value="1day"
-          >
-            1d
-          </button>
-          <button
-            class="tablinks right"
-            data-timeframe="1week"
-            ,
-            onclick="changeTimeFrame(event, '1w')"
-            ,
-            value="1week"
-          >
-            1w
-          </button>
+      <div class="table-container">
+        <div class="header-container">
+          <!-- <h2>Crypto Market Overview</h2> -->
+          <div class="btn-group">
+            <button
+              class="tablinks"
+              data-timeframe="1h"
+              ,
+              onclick="changeTimeFrame(event,'1h')"
+              ,
+              value="1h"
+            >
+              1h
+            </button>
+            <button
+              class="tablinks"
+              data-timeframe="4h"
+              ,
+              onclick="changeTimeFrame(event, '4h')"
+              ,
+              value="4h"
+            >
+              4h
+            </button>
+            <button
+              class="tablinks active"
+              data-timeframe="1day"
+              ,
+              onclick="changeTimeFrame(event, '1d')"
+              ,
+              value="1day"
+            >
+              1d
+            </button>
+            <button
+              class="tablinks right"
+              data-timeframe="1week"
+              ,
+              onclick="changeTimeFrame(event, '1w')"
+              ,
+              value="1week"
+            >
+              1w
+            </button>
+          </div>
         </div>
-      </div>
-      <table id="cryptoTable">
-        <tr class="headerTr">
-          <th class="center-th" onclick="sortTable(0)">#</th>
-          <th class="left-th" onclick="sortTable(1)">Coin</th>
-          <th class="right-th" onclick="sortTable(2)">Price</th>
-          <th class="right-th" onclick="sortTable(3)">Change</th>
-          <th class="center-th" onclick="sortTable(4)">Context Bands</th>
-          <th class="center-th" onclick="sortTable(5)">Varv</th>
-          <th class="center-th" onclick="sortTable(6)">Momentum</th>
-          <th class="right-th" onclick="sortTable(7)">Volatility Mean</th>
-          <th class="right-th" onclick="sortTable(8)">Mean Perfomance</th>
-          <th class="right-th" onclick="sortTable(9)">Median Performance</th>
-        </tr>
-      </table>
+        <table id="cryptoTable">
+          <tr class="headerTr">
+            <th class="center-th" onclick="sortTable(0)">#</th>
+            <th class="left-th" onclick="sortTable(1)">Coin</th>
+            <th class="right-th" onclick="sortTable(2)">Price</th>
+            <th class="right-th" onclick="sortTable(3)">Change</th>
+            <th class="center-th" onclick="sortTable(4)">Context Bands</th>
+            <th class="center-th" onclick="sortTable(5)">VARV</th>
+            <th class="center-th" onclick="sortTable(6)">Momentum</th>
+            <th class="right-th" onclick="sortTable(7)">Volatility</th>
+            <th class="right-th" onclick="sortTable(8)">Mean Perfomance</th>
+            <th class="right-th" onclick="sortTable(9)">Median Performance</th>
+          </tr>
+        </table>
     </div>
     <script
       type="text/javascript"
       src="../javascript-files/tableViewScript.js"
     ></script>
+    <!-- <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/cryata-cdn-resources@latest/table view/main.js"></script> -->
   </body>
 </html>

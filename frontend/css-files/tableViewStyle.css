@@ -1,0 +1,191 @@
+body {
+    /* font-family: Arial, sans-serif; */
+    font-family: "Inter";
+    background-color: #10090f;
+    color: white;
+    margin: 0;
+    padding: 0;
+  }
+
+  .header-container {
+    display: flex;
+    width: 90%;
+    align-items: center;
+    justify-content: center;
+    margin: 10px;
+    margin-bottom: 15px;
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    /* background-color: ; */
+    background-color: transparent;
+    /* background: radial-gradient(circle at right, #d134af, #9758d3, #8076da); */
+  }
+
+  h2 {
+    text-align: center;
+    padding: 5px 0;
+    color: #0e0e0e;
+    margin: 0;
+    margin-right: 20px;
+  }
+  
+  .table-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0px;
+  }
+
+  
+
+  table {
+    width: 90%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    /* box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); */
+    /* background-color: #1f1f1f; */
+    background-color: transparent;
+    overflow: hidden;
+    /* border-radius: 10px; */
+    /* border: 1px solid #464646; */
+    /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); */
+    /* box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 6px 6px rgba(0, 0, 0, 0.4); */
+  }
+
+  th,
+  td {
+    border: 1px solid #47474785;
+    padding: 10px;
+    height: 50px;
+    text-align: left;
+    font-size: 18px;
+    font-weight: 500;
+    border-right: none;
+    border-left: none;
+    border-top: none;
+    box-sizing: content-box;
+  }
+
+  th {
+    /* background-color: #905dd6; */
+    font-weight: 600;
+    color: rgb(255, 255, 255);
+    height: 40px;
+    /* padding-top: 5px;
+    padding-bottom: 5px; */
+    font-size: 20px;
+    /* border-top: 2px solid #474747; */
+    /* border-bottom: 2px solid #474747; */
+  }
+
+  td {
+    text-align: center;
+  }
+
+  tr {
+    /* border: 1px solid #383838; */
+    box-sizing: border-box;
+  }
+
+  tr:hover {
+    background-color: #3535354f;
+    transition: cubic-bezier(0.55, 0.085, 0.68, 0.53) 0.1s;
+    cursor: pointer;
+  }
+
+  .headerTr {
+    /* background: radial-gradient(circle at 30%,#f425ff,#9758d3,  #6b5ee0); */
+    /* background: radial-gradient(circle at right, #d134af, #9758d3, #8076da); */
+    background-color: #ffffff17;
+    /* background-color: transparent; */
+    /* border-radius: 10px; */
+    /* border-right: 2px solid  #5b0aa7;
+    border-left: 2px solid  #5b0aa7; */
+    /* height: 50px; */
+  }
+
+  .headerTr:hover {
+    background-color: #ffffff17;
+  }
+
+  /* ------------ timeframe setting*/
+  .btn-group {
+    overflow: hidden;
+    background-color: #dddbff;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid #000000;
+    /* padding:5px; */
+    /* margin:5px; */
+    width: 300px;
+    box-sizing: border-box;
+  }
+
+  .btn-group button {
+    background-color: transparent;
+    width: 100%;
+    float: left;
+    border: none;
+    border-right: 1px solid #000000;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.35s;
+    font-size: 16px;
+    font-family: Inter;
+    font-weight: 400;
+    color: rgb(0, 0, 0);
+  }
+
+  .tablinks.right {
+    border-right: none;
+  }
+
+  .btn-group button:hover {
+    background-color: #a8a7c1;
+  }
+
+  .btn-group button.active {
+    background-color: #8076da;
+    color: white;
+  }
+
+  .right-th {
+    text-align: right;
+    border:none;
+  }
+
+  .left-th {
+    text-align: left;
+    border:none;
+  }
+
+  .center-th {
+    text-align: center;
+    border:none;
+  }
+
+  #backToTopBtn {
+    display: none; /* Hidden by default */
+    position: fixed; /* Fixed position */
+    bottom: 76px; /* Place the button 20px from the bottom */
+    right: 20px;
+    z-index: 99; /* Make sure it does not overlap */
+    font-size: 18px; /* Increase font size */
+    border: none; /* Remove borders */
+    outline: none; /* Remove outline */
+    background-color: #d7d7d7; /* Set a background color */
+    color: rgb(27, 27, 27); /* Text color */
+    cursor: pointer; /* Add a mouse pointer on hover */
+    padding: 15px; /* Some padding */
+    border-radius: 12px; /* Rounded corners */
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 1);
+  }
+
+  #backToTopBtn:hover {
+    background-color: #919191; /* Dark grey */
+  }

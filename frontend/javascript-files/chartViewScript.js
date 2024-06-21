@@ -53,7 +53,7 @@ let addedRanges = new Map();
 
 
 //! functions for fetching data asyncronously ----------------------------------------------
-//for use with local data
+// for use with local data
 async function getData(route){
   changeTimeFrameFromUrl();
   const selectedBtn = document.querySelector(".active");
@@ -217,7 +217,7 @@ async function setData(){
 
 }
 
-
+// setting context bands data
 async function setLineData(){
   if (indicatorState() == true){
   data = await getData("4lines");
@@ -248,6 +248,17 @@ async function setLineData(){
 async function setVarvData(){
   if (varvIndicatorState() == true){
   data = await getData("varv");
+  if (data.length == 0 ){
+    showNotification('Data not available');
+    const varvSwitch = document.getElementById("varv-indicator-switch");
+    varvSwitch.click();
+    return;
+  }  else if(varvIndicatorState() == false){
+    removeVarvData();
+    console.log("in if statement after await");
+    return;
+  }
+
   const band1Data = data.map((d) => {
     return { value: parseFloat(d.out1), time: d.time / 1000 };
   });
@@ -293,18 +304,22 @@ async function setVarvData(){
   band10.setData(band10Data);
   band11.setData(band11Data);
   } else if (varvIndicatorState() == false){
-    band1.setData([]);
-    band2.setData([]);
-    band3.setData([]);
-    band4.setData([]);
-    band5.setData([]);
-    band6.setData([]);
-    band7.setData([]);
-    band8.setData([]);
-    band9.setData([]);
-    band10.setData([]);
-    band11.setData([]);
+    removeVarvData();
   }
+}
+
+async function removeVarvData(){
+  band1.setData([]);
+  band2.setData([]);
+  band3.setData([]);
+  band4.setData([]);
+  band5.setData([]);
+  band6.setData([]);
+  band7.setData([]);
+  band8.setData([]);
+  band9.setData([]);
+  band10.setData([]);
+  band11.setData([]);
 }
 
 // function for setting all at once
@@ -431,6 +446,7 @@ function updateSmallIndicatorCoin(){
 
 //! state functions ----------------------------------------------
 
+// context bands
 function indicatorState(){
   const indicatorSwitch = document.getElementById("indicator-switch");
   if (indicatorSwitch.checked){
@@ -493,7 +509,7 @@ function hideSidebar(){
 function populateSelect() {
   const symbols = [ "NEARUSDT", "LTCUSDT",
     "DAIUSDT", "LEOUSDT", "UNIUSDT", "APTUSDT", "STXUSDT", "ETCUSDT",
-    "MNTUSDT", "FILUSDT", "CROUSDT", "RNDRUSDT", "ATOMUSDT", "XLMUSDT",
+     "FILUSDT", "RNDRUSDT", "ATOMUSDT", "XLMUSDT",
     "OKBUSDT", "HBARUSDT", "ARUSDT", "IMXUSDT", "TAOUSDT", "VETUSDT",
     "WIFUSDT", "MKRUSDT", "KASUSDT", "GRTUSDT", "INJUSDT", "OPUSDT",
     "PEPEUSDT", "THETAUSDT", "RUNEUSDT", "FTMUSDT", "FETUSDT", "TIAUSDT",
@@ -517,7 +533,7 @@ function populateSelect() {
     "METISUSDT", "ENJUSDT", "GMXUSDT", "ILVUSDT", "GALUSDT", "IDUSDT",
     "TRACUSDT", "RVNUSDT", "RSRUSDT", "SFPUSDT", "SKLUSDT", "ABTUSDT",
     "ETHWUSDT", "SCUSDT", "ELFUSDT", "QTUMUSDT", "ALTUSDT", "BATUSDT",
-    "YGGUSDT", "CSPRUSDT", "PEOPLEUSDT", "LUNCUSDT", "SATSUSDT", "XAUTUSDT"
+    "YGGUSDT", "CSPRUSDT", "PEOPLEUSDT", "LUNCUSDT"
   ];
   const selectElement = document.getElementById('coin-selector');
   symbols.forEach(symbol => {
@@ -593,6 +609,6 @@ window.addEventListener("resize", () => {
 });
 
 //! first function calls on page load ----------------------------------------------
-populateSelect(); // populate the coin selector
+// populateSelect(); // populate the coin selector
 setData(); // initial data fetch and set
 updateIndividualIndicatorsTimeframe(); // initial setting of small timeframe buttons

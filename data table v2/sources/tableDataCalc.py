@@ -49,7 +49,7 @@ def varvIndicatorMetric(df, timeframe):
     try:
         dfLastRow = dfVarv.iloc[-1]
     except:
-        return "not sufficient data"
+        return "no data"
 
     zone = 1
 

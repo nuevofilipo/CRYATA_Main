@@ -41,7 +41,7 @@ function addRow(
 
   cell1.innerHTML = index;
   cell2.innerHTML = coin;
-  cell3.innerHTML = price;
+  cell3.innerHTML = "$"+String(price);
   cell3.style.textAlign = "right";
   cell3b.innerHTML = String(priceChange) + " %";
   cell3b.style.textAlign = "right";
@@ -273,7 +273,7 @@ async function changeTimeFrame(event, timeframe) {
   // reset table
   var table = document.getElementById("cryptoTable");
   table.innerHTML =
-    "<tr class='headerTr'><th onclick='sortTable(0)'>#</th><th onclick='sortTable(1)'>Coin</th><th onclick='sortTable(2)'>Price (USD)</th><th onclick='sortTable(3)'>Change %</th><th onclick='sortTable(4)'>Context Bands</th><th onclick='sortTable(5)'>Varv</th><th onclick='sortTable(6)'>Momentum</th><th onclick='sortTable(7)'>VolatilityMean</th><th onclick='sortTable(8)'>Mean Performance</th><th onclick='sortTable(9)'>median Performance</th></tr>";
+    "<tr class='headerTr'><th class='center-th' onclick='sortTable(0)'>#</th><th class='left-th' onclick='sortTable(1)'>Coin</th><th class='right-th' onclick='sortTable(2)'>Price (USD)</th><th class='right-th' onclick='sortTable(3)'>Change %</th><th class='center-th' onclick='sortTable(4)'>Context Bands</th><th class='center-th' onclick='sortTable(5)'>Varv</th><th class='center-th' onclick='sortTable(6)'>Momentum</th><th class='right-th' onclick='sortTable(7)'>VolatilityMean</th><th class='right-th' onclick='sortTable(8)'>Mean Performance</th><th class='right-th' onclick='sortTable(9)'>median Performance</th></tr>";
   main(timeframe);
   console.log("Timeframe changed to: " + timeframe);
   tablinks = document.getElementsByClassName("tablinks");
@@ -330,4 +330,9 @@ mybutton.onclick = function () {
 };
 
 //! Initial call to populate table with data
-main("1d");
+window.onload = function() {
+  function initialize() {
+    main("1d");
+  }
+  initialize();
+};
