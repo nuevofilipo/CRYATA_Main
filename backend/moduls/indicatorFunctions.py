@@ -388,7 +388,7 @@ def momentumIndicator(df, chart_df):  # takes df with integer indices
     return combined_df
 
 
-def createVarv(df, timeframe):
+def createVarv(df, timeframe, chart_df):
     if len(df.index) < 650:
         return pd.DataFrame()
 
@@ -447,6 +447,9 @@ def createVarv(df, timeframe):
     if timeframe == "1week":
         df.set_index("time", inplace=True)
         df = df.resample("W-MON").last().dropna().reset_index()
+
+    cutoff_timestamp = chart_df["time"].iloc[0]
+    df = df[df["time"] > cutoff_timestamp]
     return df
 
 

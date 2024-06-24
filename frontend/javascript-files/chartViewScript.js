@@ -29,24 +29,25 @@ function getMainWidth() {
 
 
 // creating lines for the 4 line indicator
-const maLine1 = chart.addLineSeries({ color: "#2196F3", lineWidth: 2, priceLineVisible: false });
+const maLine1 = chart.addLineSeries({ color: "#3d4654", lineWidth: 2, priceLineVisible: false });
 const maLine2 = chart.addLineSeries({ color: "#2196F3", lineWidth: 2 , priceLineVisible: false});
 const emaLine1 = chart.addLineSeries({ color: "violet", lineWidth: 1, priceLineVisible: false });
 const emaLine2 = chart.addLineSeries({ color: "violet", lineWidth: 1, priceLineVisible: false });
 
 
 // creating lines for the varv indicator
-const band1 = chart.addLineSeries({ color: "#f73434", lineWidth: 1, priceLineVisible: false });
-const band2 = chart.addLineSeries({ color: "#f74434", lineWidth: 1, priceLineVisible: false });
-const band3 = chart.addLineSeries({ color: "#f7dd34", lineWidth: 1, priceLineVisible: false });
-const band4 = chart.addLineSeries({ color: "#34f741", lineWidth: 1, priceLineVisible: false });
-const band5 = chart.addLineSeries({ color: "#34f7d7", lineWidth: 1, priceLineVisible: false });
-const band6 = chart.addLineSeries({ color: "#34b3f7", lineWidth: 1, priceLineVisible: false });
-const band7 = chart.addLineSeries({ color: "#2196F3", lineWidth: 1, priceLineVisible: false });
-const band8 = chart.addLineSeries({ color: "#5b34f7", lineWidth: 1, priceLineVisible: false });
-const band9 = chart.addLineSeries({ color: "#dd34f7", lineWidth: 1, priceLineVisible: false });
-const band10 = chart.addLineSeries({ color: "#e434f7", lineWidth: 1, priceLineVisible: false });
-const band11 = chart.addLineSeries({ color: "#f73472", lineWidth: 1, priceLineVisible: false });
+const band1 = chart.addLineSeries({ color: "rgb(243, 152, 33)", lineWidth: 1, priceLineVisible: false });
+const band2 = chart.addLineSeries({ color: "rgb(170, 243, 33)", lineWidth: 1, priceLineVisible: false });
+const band3 = chart.addLineSeries({ color: "rgb(33, 243, 86)", lineWidth: 1, priceLineVisible: false });
+const band4 = chart.addLineSeries({ color: "rgb(33, 243, 173)", lineWidth: 1, priceLineVisible: false });
+const band5 = chart.addLineSeries({ color: "rgb(33, 184, 243)", lineWidth: 1, priceLineVisible: false });
+const band6 = chart.addLineSeries({ color: "rgb(33, 72, 243)", lineWidth: 1, priceLineVisible: false });
+const band7 = chart.addLineSeries({ color: "rgb(33, 65, 243)", lineWidth: 1, priceLineVisible: false });
+const band8 = chart.addLineSeries({ color: "rgb(47, 33, 243)", lineWidth: 1, priceLineVisible: false });
+const band9 = chart.addLineSeries({ color: "rgb(149, 33, 243)", lineWidth: 1, priceLineVisible: false });
+const band10 = chart.addLineSeries({ color: "rgb(236, 33, 243)", lineWidth: 1, priceLineVisible: false });
+const band11 = chart.addLineSeries({ color: "rgb(243, 33, 61)", lineWidth: 1, priceLineVisible: false });
+
 
 let addedSupplyZones = new Map();
 let addedRanges = new Map();
@@ -54,44 +55,12 @@ let addedRanges = new Map();
 
 //! functions for fetching data asyncronously ----------------------------------------------
 // for use with local data
-async function getData(route){
-  changeTimeFrameFromUrl();
-  const selectedBtn = document.querySelector(".active");
-  const response = await fetch(
-    `http://127.0.0.1:5000/api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
-  )
-  const data = await response.json();
-  return data;
-}
-
-async function getRangesData(range_value){
-  const selectedBtn = document.querySelector(".active");
-  const response = await fetch(
-    `http://127.0.0.1:5000/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
-  )
-  const data = await response.json();
-  return data;
-
-}
-
-async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
-  const chartTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
-  const response = await fetch(
-    `http://127.0.0.1:5000/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
-  )
-  const data = await response.json();
-  return data;
-    
-}
-
-// for use with external hosted data
 // async function getData(route){
 //   changeTimeFrameFromUrl();
 //   const selectedBtn = document.querySelector(".active");
 //   const response = await fetch(
-//     `https://new-cryata-backend-production.up.railway.app//api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
+//     `http://127.0.0.1:5000/api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
 //   )
-  
 //   const data = await response.json();
 //   return data;
 // }
@@ -99,9 +68,8 @@ async function getDataIndividualTimeframe(endpoint, additionalParameter,  indica
 // async function getRangesData(range_value){
 //   const selectedBtn = document.querySelector(".active");
 //   const response = await fetch(
-//     `https://new-cryata-backend-production.up.railway.app/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
+//     `http://127.0.0.1:5000/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
 //   )
-  
 //   const data = await response.json();
 //   return data;
 
@@ -110,13 +78,46 @@ async function getDataIndividualTimeframe(endpoint, additionalParameter,  indica
 // async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
 //   const chartTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
 //   const response = await fetch(
-//     `https://new-cryata-backend-production.up.railway.app/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
+//     `http://127.0.0.1:5000/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
 //   )
-
 //   const data = await response.json();
 //   return data;
     
 // }
+
+// for use with external hosted data
+async function getData(route){
+  changeTimeFrameFromUrl();
+  const selectedBtn = document.querySelector(".active");
+  const response = await fetch(
+    `https://new-cryata-backend-production.up.railway.app//api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
+  )
+  
+  const data = await response.json();
+  return data;
+}
+
+async function getRangesData(range_value){
+  const selectedBtn = document.querySelector(".active");
+  const response = await fetch(
+    `https://new-cryata-backend-production.up.railway.app/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
+  )
+  
+  const data = await response.json();
+  return data;
+
+}
+
+async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
+  const chartTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
+  const response = await fetch(
+    `https://new-cryata-backend-production.up.railway.app/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
+  )
+
+  const data = await response.json();
+  return data;
+    
+}
 
 //! functions for creating and removing boxes and ranges----------------------------------------------
 async function createBoxesData(mapping, data, color, key){
@@ -362,7 +363,9 @@ function changeTimeFrameFromUrl(){
     const buttons = document.querySelectorAll('.tablinks');
     buttons.forEach(button => {
       if (button.getAttribute('data-timeframe') == selectedTimeframe){
-        button.click();
+        button.classList.add('active');
+      } else if (button.classList.contains('active')){
+        button.classList.remove('active');
       }
     });
     urlParamsProcessedTf = true;
@@ -381,6 +384,10 @@ function updateTimeframe(event, timeframe) {
     tablinks[i].className = tablinks[i].className.replace(" active", "");
   }
   event.currentTarget.className += " active";
+
+  // Save the selected timeframe to localStorage
+  localStorage.setItem('selectedTimeframe', timeframe);
+
   setAll();
   
 }
@@ -558,6 +565,20 @@ function turnOffLoader(){
   });
 }
 
+function setSavedTimeframe(){
+  const savedTimeframe = localStorage.getItem('selectedTimeframe');
+    
+  if (savedTimeframe){
+      const button = document.querySelector(`.tablinks[data-timeframe="${savedTimeframe}"]`);
+          button.classList.add('active');
+  } else {
+      const defaultButton = document.querySelector('.tablinks[data-timeframe="1day"]');
+      if (defaultButton) {
+          defaultButton.classList.add('active');
+      }
+  }
+}
+
 //! element listeners ----------------------------------------------
 // context bands
 const switchElement = document.getElementById("indicator-switch");
@@ -571,10 +592,11 @@ varvSwitchElement.addEventListener("change", function(){
   setVarvData();
 });
 
-// small individual timeframe buttons
+// small individual timeframe buttons activation!!
 const Buttons = document.querySelectorAll('.timeframe-btn');
 Buttons.forEach(button => {
     button.addEventListener('click', async function() {
+        button.disabled = true;
         this.classList.toggle('active');
         const indTime = button.getAttribute('data-timeframe');
         const indicator = button.getAttribute('data-indicator');
@@ -600,6 +622,8 @@ Buttons.forEach(button => {
             removeBoxesMap(addedRanges, indicator + indTime);
           }
         }
+
+        button.disabled = false;
     });
 });
 
@@ -608,7 +632,10 @@ window.addEventListener("resize", () => {
   console.log("resized");
 });
 
+
+
 //! first function calls on page load ----------------------------------------------
 // populateSelect(); // populate the coin selector
+setSavedTimeframe(); // set the saved timeframe
 setData(); // initial data fetch and set
 updateIndividualIndicatorsTimeframe(); // initial setting of small timeframe buttons

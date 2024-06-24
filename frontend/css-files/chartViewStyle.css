@@ -213,6 +213,7 @@ body {
 .btn-group {
   overflow: hidden;
   border: 1px solid #1f1f1f;
+  background-color: #dddbff;
   border-radius: 10px;
   display: flex;
   justify-content: space-between;
@@ -221,7 +222,7 @@ body {
   box-sizing: border-box;
 }
 .btn-group button {
-  background-color: #dddbff;
+  background-color: transparent;
   width: 100%;
   float: left;
   border: none;

@@ -44,7 +44,7 @@ def varvIndicatorMetric(df, timeframe):
         return -1
 
     price = df.iloc[-1]["Close"]
-    dfVarv = createVarv(df, timeframe)
+    dfVarv = createVarv(df, timeframe, df)
 
     try:
         dfLastRow = dfVarv.iloc[-1]

@@ -247,8 +247,9 @@ def query_momentum():
 def query_varv():
     user_query = str(request.args.get("coin"))
     timeframe_query = str(request.args.get("timeframe"))
+    chart_df = main_data_fetch(user_query, timeframe_query)
     df = main_data_fetch(user_query, "1day")
-    df2 = createVarv(df, timeframe_query)
+    df2 = createVarv(df, timeframe_query, chart_df)
     return df2.to_json(orient="records")
 
 

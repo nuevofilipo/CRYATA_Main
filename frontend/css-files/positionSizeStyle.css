@@ -1,0 +1,110 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #0F090E;
+    font-family: "Inter", sans-serif;
+  }
+
+  .doublePointBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .calculator {
+    background-color: #D7D7D7;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    color: rgb(0, 0, 0);
+    /* box-shadow: 0 0 5px 2px #8076da; */
+  }
+
+  .calculator h2 {
+    margin-bottom: 20px;
+  }
+
+  .inputAndTag {
+    display: block;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .input-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .input-group,
+  .confidence-group {
+    margin-bottom: 20px;
+  }
+
+  .input-group label,
+  .confidence-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .input-group .input,
+  .confidence-group .radio-group input {
+    margin-bottom: 10px;
+  }
+
+  .confidence-group .radio-group input {
+    accent-color: #8076da;
+  }
+
+  .input {
+    width: 100px;
+    padding: 5px;
+    margin: 0 10px;
+    text-align: center;
+    border: 1px solid #1f1f1f;
+    background-color: #dddbff;
+    border-radius: 5px;
+  }
+
+  .radio-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .radio-group label {
+    margin: 0 10px;
+  }
+
+  button {
+    background-color: #8076da;
+    color: white;
+    border: 1px solid #1f1f1f ;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #a7a1e2;
+  }
+
+  .output {
+    background-color: #000000;
+    color: rgb(255, 255, 255);
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 5px;
+  }

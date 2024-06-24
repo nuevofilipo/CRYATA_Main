@@ -329,10 +329,12 @@ mybutton.onclick = function () {
   });
 };
 
+
+
 //! Initial call to populate table with data
 window.onload = function() {
   function initialize() {
-    main("1d");
+      main("1d");
   }
   initialize();
 };

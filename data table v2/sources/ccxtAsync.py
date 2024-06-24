@@ -290,7 +290,6 @@ if __name__ == "__main__":
         "ASTRUSDT",
         "PRIMEUSDT",
         "FTTUSDT",
-        "TUSDUSDT",
         "BICOUSDT",
         "TWTUSDT",
         "MEMEUSDT",
