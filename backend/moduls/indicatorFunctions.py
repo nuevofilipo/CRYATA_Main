@@ -5,7 +5,6 @@ import numpy as np
 import time
 
 import pandas_ta as tan
-import plotly.graph_objects as go
 
 
 from scipy.signal import savgol_filter
@@ -401,6 +400,8 @@ def createVarv(df, timeframe, chart_df):
     df["percentageShift"] = (1 + (0.115 * df["deviationRatio"])) ** (0.1)
 
     df["band1"] = df["Close"] / (1 + (0.115 * df["deviationRatio"])) ** (0.5)
+
+    print(df)
 
     df["band2"] = df["band1"] * df["percentageShift"]
     df["band3"] = df["band1"] * df["percentageShift"] ** 2

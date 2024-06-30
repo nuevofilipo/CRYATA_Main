@@ -1,11 +1,233 @@
+<!-- https://www.kaiko.com/delivery/cryptocurrency-rest-api
+    potential data provider -->
+
+<!-- https://lukka.tech/lukka-prime/ -->
+
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chart Dashboard</title>
+    <!-- <link rel="stylesheet" href="../css-files/chartViewStyle.css" />  -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/nuevofilipo/CRYATA_Main@latest/frontend/css-files/dashboard-style.css" /> -->
+    <!-- <script src="../../libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script>  -->
+    <!-- <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/CRYATA_Main/libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script>  -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+  </head>
+
+  <body>
+    <div class="chart-container">
+      <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/CRYATA_Main/libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script>
+
+      <main id="main" , class="main">
+        <div id="chartbox">
+          <div id="tvchart"></div>
+        </div>
+      </main>
+      <style>
+        body {
+          margin: 0;
+          padding: 0;
+          font-family: "Inter", sans-serif;
+          background-color: #0F090E;
+          color: #c3bcdb;
+        }
+
+        #tvchart {
+          position: relative;
+          
+          height: 60%;
+          width: calc(100% + 90px);
+        }
+        .chart-container {
+            overflow: hidden;
+          display: flex;
+          height: 100%;
+          width: 100%;
+          margin: 0;
+          padding: 0;
+        }
+        #chartbox {
+          position: absolute;  
+          /* overflow: hidden; */
+          background-color: transparent;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: calc(100%);
+          width: calc(100% + 150px);
+          /* border: 1px solid #464646; */
+          /* border-radius: 10px; */
+          box-sizing: border-box;
+          /* padding: 5px; */
+          /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); */
+        }
+
+        .main {
+          display: flex;
+          height: calc(100vh);
+          width: calc(100%);
+          /* border-top: 1px solid #8076da;  */
+          justify-content: center;
+          align-items: center;
+          /* padding: 5px; */
+          box-sizing: border-box;
+          position: relative;
+        }
+      </style>
+
+      <script>
+        //! defining the chart and other chart elements ----------------------------------------------
+        let urlParamsProcessedCoin = false;
+        let urlParamsProcessedTf = false;
+        const mainSection = document.getElementById("tvchart");
+        const chartProperties = {
+          crosshair: {
+            vertLine: {
+              visible: false,
+            },
+            horzLine: {
+              visible: false,
+            },
+          },
+          height: getMainHeight(),
+          width: getMainWidth(),
+          layout: {
+            background: { color: "transparent" },
+            textColor: "#C3BCDB",
+          },
+          grid: {
+            vertLines: { color: "#444", visible: false },
+            horzLines: { color: "#444", visible: false },
+          },
+          timeScale: {
+            visible: false,
+          },
+          rightPriceScale: {
+            mode: LightweightCharts.PriceScaleMode.Logarithmic,
+            autoscale: true,
+            // visible: false,
+            
+          },
+        };
+        const domElement = document.getElementById("tvchart");
+        const chart = LightweightCharts.createChart(
+          domElement,
+          chartProperties
+        );
+        const candleSeries = chart.addCandlestickSeries({
+          priceLineVisible: false,
+        });
+
+        function getMainHeight() {
+          return mainSection.clientHeight;
+        }
+        function getMainWidth() {
+          return mainSection.clientWidth;
+        }
+
+        const band1 = chart.addLineSeries({ color: "rgb(243, 152, 33)", lineWidth: 1, priceLineVisible: false });
+        const band2 = chart.addLineSeries({ color: "rgb(170, 243, 33)", lineWidth: 1, priceLineVisible: false });
+        const band3 = chart.addLineSeries({ color: "rgb(33, 243, 86)", lineWidth: 1, priceLineVisible: false });
+        const band4 = chart.addLineSeries({ color: "rgb(33, 243, 173)", lineWidth: 1, priceLineVisible: false });
+        const band5 = chart.addLineSeries({ color: "rgb(33, 184, 243)", lineWidth: 1, priceLineVisible: false });
+        const band6 = chart.addLineSeries({ color: "rgb(33, 72, 243)", lineWidth: 1, priceLineVisible: false });
+        const band7 = chart.addLineSeries({ color: "rgb(33, 65, 243)", lineWidth: 1, priceLineVisible: false });
+        const band8 = chart.addLineSeries({ color: "rgb(47, 33, 243)", lineWidth: 1, priceLineVisible: false });
+        const band9 = chart.addLineSeries({ color: "rgb(149, 33, 243)", lineWidth: 1, priceLineVisible: false });
+        const band10 = chart.addLineSeries({ color: "rgb(236, 33, 243)", lineWidth: 1, priceLineVisible: false });
+        const band11 = chart.addLineSeries({ color: "rgb(243, 33, 61)", lineWidth: 1, priceLineVisible: false });
+
+        const data = null;
+        const varvData = null;
+
+        fetch("cdata.json")
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            candleSeries.setData(data);
+            chart.timeScale().fitContent();
+          });
+
+          fetch("varvData.json")
+  .then((response) => response.json())
+  .then((varvData) => {
+    console.log(varvData); 
+
+   
+    const b1 = varvData.map((point) => ({
+      time: point.time, 
+      value: point.out1 
+    }));
+    const b2 = varvData.map((point) => ({
+      time: point.time, // Convert time to Date object
+      value: point.out2 // Example: Use out2 as the value for your chart
+    }));
+    const b3 = varvData.map((point) => ({
+      time: point.time, // Convert time to Date object
+      value: point.out3 // Example: Use out3 as the value for your chart
+    }));
+    const b4 = varvData.map((point) => ({
+      time: point.time, // Convert time to Date object
+      value: point.out4 // Example: Use out4 as the value for your chart
+    }));
+    const b5 = varvData.map((point) => ({
+      time: point.time, // Convert time to Date object
+      value: point.out5 // Example: Use out5 as the value for your chart
+    }));
+    const b6 = varvData.map((point) => ({
+      time: point.time, // Convert time to Date object
+      value: point.out6 // Example: Use out6 as the value for your chart
+    }));
+    const b7 = varvData.map((point) => ({
+      time: point.time, // Convert time to Date object
+      value: point.out7 // Example: Use out7 as the value for your chart
+    }));
+    const b8 = varvData.map((point) => ({
+      time: point.time, // Convert time to Date object
+      value: point.out8 // Example: Use out8 as the value for your chart
+    }));
+    const b9 = varvData.map((point) => ({
+      time: point.time, // Convert time to Date object
+      value: point.out9 // Example: Use out9 as the value for your chart
+    }));
+    const b10 = varvData.map((point) => ({
+      time: point.time, // Convert time to Date object
+      value: point.out10 // Example: Use out10 as the value for your chart
+    }));
+    const b11 = varvData.map((point) => ({
+      time: point.time, // Convert time to Date object
+      value: point.out11 // Example: Use out11 as the value for your chart
+    }));
     
-</body>
+
+    band1.setData(b1); // Set the data to your chart
+    band2.setData(b2); // Set the data to your chart
+    band3.setData(b3); // Set the data to your chart
+    band4.setData(b4); // Set the data to your chart
+    band5.setData(b5); // Set the data to your chart
+    band6.setData(b6); // Set the data to your chart
+    band7.setData(b7); // Set the data to your chart
+    band8.setData(b8); // Set the data to your chart
+    band9.setData(b9); // Set the data to your chart
+    band10.setData(b10); // Set the data to your chart
+    band11.setData(b11); // Set the data to your chart
+  })
+  .catch((error) => {
+    console.error('Error fetching or setting data:', error);
+  });
+        
+      </script>
+    </div>
+  </body>
 </html>

@@ -89,9 +89,9 @@ body {
 }
 
 #coin-selector {
-  /* appearance: none;
+  appearance: none;
   -webkit-appearance: none;
-  -moz-appearance: none; */
+  -moz-appearance: none;
   background-color: #131313;
   color: white;
   border: none;
@@ -105,8 +105,16 @@ body {
   max-width: 250px;
   box-sizing: border-box; /* Include padding and border in the element's total width and height */
   transition: border-color 0.3s, box-shadow 0.3s;
-  font-family: Inter;
+  font-family: Inter, sans-serif;
   font-weight: 500;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-chevron-down" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+#coin-selector::-ms-expand {
+  display: none; /* Remove default arrow in Internet Explorer */
 }
 
 #coin-selector:hover {

@@ -4,77 +4,74 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Position Sizing Calculator</title>
-    <link rel="stylesheet" href="../css-files/positionSizeStyle.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   </head>
   <body>
     <div class="container" id="positionSizingContainer">
       <div class="calculator">
         <h2>Position Sizing Calculator</h2>
+        <div class="info-container">
+          <div class="info-hover"><i class="fa-solid fa-circle-info" style="font-size: 22px;"></i></i></div>
+          <div class="info-popup">
+            <p>Use this to calculate the position size for your trades</p>
+          </div>
+        </div>
         <div class="input-group">
           <div class="inputAndTag">
             <label for="reward">reward</label>
             <input type="text" id="reward" class="input" placeholder="input" />
           </div>
-
-          
-
           <div class="doublePointBox">
-            <h3 >:</h3>
+            <h3>:</h3>
           </div>
           <div class="inputAndTag">
             <label for="risk">risk</label>
             <input type="text" id="risk" class="input" placeholder="input" />
           </div>
-          <!--not so sute yet whether this is the right way to set it -->
         </div>
         <div class="confidence-group">
-          <label for="confidence">Confidence Multiplier</label>
+          <label for="confidence">Confidence Multiplier:</label>
           <div class="radio-group">
-            <input
-              type="radio"
-              id="confident"
-              name="confidence"
-              value=1
-            />
+            <input type="radio" id="confident" name="confidence" value="1" />
             <label for="confident">avg. conviction</label>
             <input
               type="radio"
               id="more_confident"
               name="confidence"
-              value=1.25
+              value="1.25"
             />
             <label for="more_confident">high conviction</label>
             <input
               type="radio"
               id="very_confident"
               name="confidence"
-              value=1.5
+              value="1.5"
             />
             <label for="very_confident">very high conviction</label>
           </div>
         </div>
         <button id="calculate">Calculate</button>
-        <div class="output" id="output">output</div>
+        <div class="output deactivated" id="output">output</div>
       </div>
     </div>
     <script>
       document
         .getElementById("calculate")
         .addEventListener("click", function () {
-          // Add your functionality here
           const risk = Number(document.getElementById("risk").value);
           const reward = Number(document.getElementById("reward").value);
-          const confidenceMultiplier = Number(document.querySelector(
-            'input[name="confidence"]:checked'
-          ).value);
+          const confidenceMultiplier = Number(
+            document.querySelector('input[name="confidence"]:checked').value
+          );
 
           console.log(reward);
 
-          // calculatig position size
-          // Validate inputs
           if (isNaN(risk) || isNaN(reward) || risk <= 0 || reward <= 0) {
             document.getElementById("output").innerText =
               "Please enter valid risk and reward values.";
@@ -82,24 +79,204 @@
           }
 
           const base = 1 - risk / (risk + reward);
-
-          // using change of base formula
           const n = Math.log(0.01) / Math.log(base);
-
-
           const result = (1 / n) * 100 * confidenceMultiplier;
+
+          const outputElement = document.getElementById("output");
+          outputElement.classList.remove("deactivated");
 
           document.getElementById(
             "output"
           ).innerText = `Position Size: ${result.toFixed(2)} %`;
         });
-        document.getElementById("positionSizingContainer").addEventListener("keypress", function(e) {
+
+      document
+        .getElementById("positionSizingContainer")
+        .addEventListener("keypress", function (e) {
           if (e.key === "Enter") {
             document.getElementById("calculate").click();
           }
         });
-
-
     </script>
+    <style>
+      body {
+        /* display: flex; */
+        /* justify-content: center; */
+        /* align-items: center; */
+        height: 100vh;
+        margin: 0;
+        background-color: #0f090e;
+        font-family: "Inter", sans-serif;
+      }
+
+      .doublePointBox {
+        display: flex;
+        justify-content: center; /* Center horizontally */
+        align-items: flex-start; /* Align at the top */
+        height: auto; /* Ensure it adjusts to content */
+        padding-top: 8px; /* Add some padding if needed */
+      }
+
+      h3 {
+        margin: 0;
+        padding: 0;
+      }
+
+      h2 {
+        font-size: 27x;
+      }
+
+      .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+      }
+
+      .calculator {
+        background-color: #d7d7d7;
+        position: relative;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        text-align: center;
+        color: rgb(0, 0, 0);
+      }
+
+      .calculator h2 {
+        margin-bottom: 20px;
+      }
+
+      .inputAndTag {
+        display: block;
+        justify-content: center;
+        align-items: center;
+        font-size: 17px;
+        font-weight: 500;
+      }
+
+      .input-group {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+      }
+
+      h3 {
+        margin-bottom: 14px;
+      }
+
+      .input-group,
+      .confidence-group {
+        margin-bottom: 20px;
+      }
+
+      .input-group label,
+      .confidence-group label {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      .confidence-group label {
+        font-size: 17px;
+        font-weight: 400;
+      }
+
+      .input-group .input,
+      .confidence-group .radio-group input {
+        margin-bottom: 10px;
+      }
+
+      .confidence-group .radio-group input {
+        accent-color: #8076da;
+      }
+
+      .input {
+        width: 100px;
+        padding: 5px;
+        margin: 0 10px;
+        text-align: center;
+        border: 1px solid #1f1f1f;
+        background-color: #dddbff;
+        border-radius: 5px;
+      }
+
+      .radio-group {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .radio-group label {
+        margin: 0 10px;
+        font-weight: 500;
+      }
+
+      button {
+        background-color: #8076da;
+        color: white;
+        border: 1px solid #1f1f1f;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #a7a1e2;
+      }
+
+      .output {
+        background-color: #000000;
+        color: rgb(255, 255, 255);
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      .output.deactivated {
+        visibility: hidden;
+      }
+
+      /* info hover over begins here */
+
+      .info-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: inline-block;
+      }
+
+      .info-hover {
+        padding: 10px 20px;
+        background-color: transparent;
+        color: rgb(48, 48, 48);
+        cursor: pointer;
+        border-radius: 5px;
+      }
+
+      .info-popup {
+        display: none;
+        position: absolute;
+        bottom: 100%; /* Position the popup above the hover element */
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px;
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        white-space: nowrap;
+        z-index: 1;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .info-container:hover .info-popup {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+      }
+    </style>
   </body>
 </html>

@@ -1,5 +1,4 @@
 body {
-    /* font-family: Arial, sans-serif; */
     font-family: "Inter";
     background-color: #10090f;
     color: white;
@@ -118,7 +117,7 @@ body {
     border-radius: 10px;
     display: flex;
     justify-content: space-between;
-    border: 1px solid #000000;
+    border: none;
     /* padding:5px; */
     /* margin:5px; */
     width: 300px;
