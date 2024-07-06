@@ -9,14 +9,16 @@ sys.path.append("../../")
 
 from backend.moduls.getTwelveData import getResponse
 from backend.moduls.indicatorFunctions import (
-    create4Lines,
+    createContextBands,
     createVarv,
     momentumIndicator,
+    imbalanceZones,
+    supplyDemandZones,
 )
 
 
-def contextBandsCalculation(df):
-    df4Lines = create4Lines(df, "1day")
+def contextBandsMetric(df):
+    df4Lines = createContextBands(df, "1day", df)
     dfLastRow = df4Lines.iloc[-1]
     upperMA = dfLastRow["MA"] * 1.62
     lowerMA = dfLastRow["MA"] * 0.62
@@ -106,6 +108,44 @@ def medianPerformance(df):
     return round(median * 100, 3)
 
 
+def nearestZoneMetric(df):
+    imbalance_df = imbalanceZones(df)
+    supplyDemand_df = supplyDemandZones(df, df)
+
+    still_open_imbalance = []
+    still_open_supply = []
+
+    for index, row in imbalance_df.iterrows():
+        if row["x1"] == df.index[-1]:
+            still_open_imbalance.append({"y0": row["y0"], "y1": row["y1"]})
+
+    for index, row in supplyDemand_df.iterrows():
+        if row["x1"] == df.iloc[-1]["time"]:
+            still_open_supply.append({"y0": row["y0"], "y1": row["y1"]})
+
+    combined = still_open_imbalance + still_open_supply
+    closestDistance = 1000000
+    closestZone = None
+    currentPrice = df.iloc[-1]["Close"]
+    for zone in combined:
+        distance1 = abs(currentPrice - zone["y0"])
+        distance2 = abs(currentPrice - zone["y1"])
+        currDistance = min(distance1, distance2)
+        if currDistance < closestDistance:
+            closestDistance = currDistance
+            closestZone = zone
+
+    if closestZone == None:
+        return "no data"
+    closestZone = (
+        closestZone["y0"]
+        if abs(currentPrice - closestZone["y0"]) < abs(currentPrice - closestZone["y1"])
+        else closestZone["y1"]
+    )
+    percentageToZone = round((closestZone - currentPrice) / currentPrice * 100, 1)
+    return percentageToZone
+
+
 def createTableRow(df, coin, timeframe, priceChangeDict={}):
     pastCoinName = coin[: len(coin) - 2] + "1m"  # btcusdt1m, for every timeframe
 
@@ -126,7 +166,7 @@ def createTableRow(df, coin, timeframe, priceChangeDict={}):
             "coin": coin,
             "price": price,
             "priceChange": priceChange,
-            "contextBands": contextBandsCalculation(df),
+            "contextBands": contextBandsMetric(df),
             "varvIndicator": varvIndicatorMetric(df, timeframe),
             "momentumIndicator": momentumIndicatorMetric(df),
             "volatilityMean1d": str(volatilityMeanAbsolute(df, 200)) + " %",
@@ -135,6 +175,7 @@ def createTableRow(df, coin, timeframe, priceChangeDict={}):
             "volatilityMean1w": str(volatilityMeanAbsolute(df, 400)) + " %",
             "meanPerformance": str(meanPerformance(df)) + " %",
             "medianPerformance": str(medianPerformance(df)) + " %",
+            "nearestZone": nearestZoneMetric(df),
         }
     else:
         dict_entry = {
@@ -146,6 +187,7 @@ def createTableRow(df, coin, timeframe, priceChangeDict={}):
             "momentumIndicator": momentumIndicatorMetric(df),
             "meanPerformance": str(meanPerformance(df)) + " %",
             "medianPerformance": str(medianPerformance(df)) + " %",
+            "nearestZone": nearestZoneMetric(df),
         }
     return dict_entry
 
@@ -173,6 +215,8 @@ def createEntireTable():  # for experimenting -- not used for any calculations
 
 
 def main():  # for experimenting -- not used for any calculations
-    df = getResponse("BTC/USD", "1day", 1000)
-    # print(createTableRow(df, "BTC/USD", "1d"))
-    print(meanPerformance(df))
+    df = getResponse("ETH/USD", "1day", 1000)
+    print(nearestZoneMetric(df))
+
+
+# main()

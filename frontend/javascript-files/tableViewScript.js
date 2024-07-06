@@ -9,7 +9,8 @@ function addRow(
   momentum,
   volatilityMean,
   meanPerformance,
-  medianPerformance
+  medianPerformance,
+  nearestZone
 ) {
   var table = document.getElementById("cryptoTable");
   var row = table.insertRow(-1); // Insert row at the end of the table
@@ -38,6 +39,9 @@ function addRow(
   var cell7 = row.insertCell(7);
   var cell8 = row.insertCell(8);
   var cell9 = row.insertCell(9);
+  var cell10 = row.insertCell(10);
+  cell10.innerHTML = nearestZone + " %";
+  cell10.style.textAlign = "right";
 
   cell1.innerHTML = index;
   cell2.innerHTML = coin;
@@ -262,7 +266,8 @@ async function main(timeframe) {
       entry.momentumIndicator,
       volatilityMean[index],
       entry.meanPerformance,
-      entry.medianPerformance
+      entry.medianPerformance,
+      entry.nearestZone
     );
   });
 
@@ -273,7 +278,7 @@ async function changeTimeFrame(event, timeframe) {
   // reset table
   var table = document.getElementById("cryptoTable");
   table.innerHTML =
-    "<tr class='headerTr'><th class='center-th' onclick='sortTable(0)'>#</th><th class='left-th' onclick='sortTable(1)'>Coin</th><th class='right-th' onclick='sortTable(2)'>Price (USD)</th><th class='right-th' onclick='sortTable(3)'>Change %</th><th class='center-th' onclick='sortTable(4)'>Context Bands</th><th class='center-th' onclick='sortTable(5)'>Varv</th><th class='center-th' onclick='sortTable(6)'>Momentum</th><th class='right-th' onclick='sortTable(7)'>VolatilityMean</th><th class='right-th' onclick='sortTable(8)'>Mean Performance</th><th class='right-th' onclick='sortTable(9)'>median Performance</th></tr>";
+    "<tr class='headerTr'><th class='center-th' onclick='sortTable(0)'>#</th><th class='left-th' onclick='sortTable(1)'>Coin</th><th class='right-th' onclick='sortTable(2)'>Price</th><th class='right-th' onclick='sortTable(3)'>Change</th><th class='center-th' onclick='sortTable(4)'>Context Bands</th><th class='center-th' onclick='sortTable(5)'>VARV</th><th class='center-th' onclick='sortTable(6)'>Momentum</th><th class='right-th' onclick='sortTable(7)'>Volatility</th><th class='right-th' onclick='sortTable(8)'>Mean Performance</th><th class='right-th' onclick='sortTable(9)'>Median Performance</th><th class='right-th' onclick='sortTable(10)'>nearest zone</th></tr>";
   main(timeframe);
   console.log("Timeframe changed to: " + timeframe);
   tablinks = document.getElementsByClassName("tablinks");

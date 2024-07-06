@@ -23,7 +23,7 @@ from moduls.indicatorFunctions import (
     supplyDemandZones,
     momentumIndicator,
     createVarv,
-    create4Lines,
+    createContextBands,
     imbalanceZones,
 )
 
@@ -278,9 +278,16 @@ def query_ranges():
 def query_4lines():
     user_query = str(request.args.get("coin"))
     timeframe_query = str(request.args.get("timeframe"))
-    df = main_data_fetch(user_query, timeframe_query)
+    chart_df = main_data_fetch(user_query, timeframe_query)
 
-    df1 = create4Lines(df, timeframe_query)
+    if timeframe_query != "1week" and timeframe_query != "1day":
+
+        df = main_data_fetch(user_query, "1day")
+        print("in here, getting 1day")
+    else:
+        df = chart_df
+
+    df1 = createContextBands(df, timeframe_query, chart_df)
     return df1.to_json(orient="records")
 
 

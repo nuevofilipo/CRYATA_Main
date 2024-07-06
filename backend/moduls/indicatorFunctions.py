@@ -401,7 +401,7 @@ def createVarv(df, timeframe, chart_df):
 
     df["band1"] = df["Close"] / (1 + (0.115 * df["deviationRatio"])) ** (0.5)
 
-    print(df)
+    # print(df)
 
     df["band2"] = df["band1"] * df["percentageShift"]
     df["band3"] = df["band1"] * df["percentageShift"] ** 2
@@ -454,7 +454,7 @@ def createVarv(df, timeframe, chart_df):
     return df
 
 
-def create4Lines(df, timeFrame):
+def createContextBands(df, timeFrame, chart_df):
     if timeFrame == "1week":
         df["MA"] = tan.sma(df["Close"], length=9)
         df["EMA"] = tan.ema(df["Close"], length=12)
@@ -463,6 +463,9 @@ def create4Lines(df, timeFrame):
         # df["EMA"] = ta.EMA(df["Close"], timeperiod=84) # using talib you have to give timeperiod, and using pandas_ta you have to give length
         df["MA"] = tan.sma(df["Close"], length=63)
         df["EMA"] = tan.ema(df["Close"], length=84)
+
+    cutoff_timestamp = chart_df["time"].iloc[0]
+    df = df[df["time"] > cutoff_timestamp]
     return df
 
 
