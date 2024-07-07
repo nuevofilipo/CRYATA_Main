@@ -25,6 +25,7 @@ const chartProperties = {
     visible: false,
     fixLeftEdge: true,
     fixRightEdge: true,
+
   },
   rightPriceScale: {
     mode: LightweightCharts.PriceScaleMode.Logarithmic,
@@ -49,6 +50,7 @@ window.addEventListener("resize", () => {
   chart.resize(getMainWidth(), getMainHeight());
   console.log("resized");
 });
+
 
 
 const band1 = chart.addLineSeries({
@@ -61644,9 +61646,7 @@ const varvData = [
 ];
 candleSeries.setData(data);
 chart.timeScale().fitContent();
-// chart.timeScale().applyOptions({
-//   barSpacing: 1,
-// });
+
 
 const b1 = varvData.map((point) => ({
   time: point.time,
@@ -61703,4 +61703,45 @@ band7.setData(b7); // Set the data to your chart
 band8.setData(b8); // Set the data to your chart
 band9.setData(b9); // Set the data to your chart
 band10.setData(b10); // Set the data to your chart
-band11.setData(b11); // Set the data to your chart
+band11.setData(b11); // Set the data to your char
+
+var totalLength = data.length;
+var somePercent = data.length * 0.2;
+
+
+const visibleRange = { from: somePercent, to: data.length - somePercent }; // Adjust these values as needed
+chart.timeScale().setVisibleLogicalRange(visibleRange);
+
+
+
+let zoomedOut = false;
+let atTop = false;
+let scrollSpeed = 0.7;
+
+chart.timeScale().subscribeVisibleLogicalRangeChange((range) => {
+  const logicalRange = chart.timeScale().getVisibleLogicalRange();
+  // console.log(logicalRange);
+  if (logicalRange.to - logicalRange.from >= totalLength-5) {
+    console.log("zoomed out");
+    zoomedOut = true;
+  } else {
+    zoomedOut = false;  
+  }
+});
+
+document.addEventListener('scroll', () => {
+  if (window.scrollY <= 0) {
+    atTop = true;
+    console.log("at top");
+  } else {
+    atTop = false;
+  }
+});
+
+document.addEventListener('wheel', (event) => {
+
+  if (atTop && event.deltaY < 0) return;
+  if (zoomedOut && event.deltaY > 0 || event.deltaY < 0 && !atTop) {
+    window.scrollBy(0, event.deltaY * scrollSpeed);
+  }
+});
