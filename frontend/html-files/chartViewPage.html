@@ -34,7 +34,7 @@
         <section class="sidebar" id="sidebar">
           <div class="sidebar-box">
           <div class="indicators-settings-box">
-            <div class="chartSettings">
+          <div class="chartSettings">
             <div class="btn-group">
               <button
                 class="tablinks"
@@ -78,13 +78,14 @@
               </button>
             </div>
   
-            <select
+          <select
               name="coin-selector"
               ,
               id="coin-selector"
               ,
               onchange="setData(), setLineData(), setVarvData(), updateSmallIndicatorCoin()"
             >
+            <option value="ETH/BTC">eth/btc</option>
             <option value="BTC/USD">bitcoin</option>
             <option value="ETH/USD">ethereum</option>
             <option value="BNB/USD">binance-coin</option>
@@ -232,7 +233,29 @@
             <option value="LUNC/USD">terra-luna-classic</option>
             <option value="DEXE/USD">DeXe</option>
             </select>
+
+
+            <div class="btn-group">
+              <button
+                class="pairAgainst active"
+                data-currency="USD"
+                onclick="updatePairAgainst(event, 'usd')"
+                value="USD"
+              >
+                /USD
+              </button>
+              <button
+                class="pairAgainst right"
+                data-currency="BTC"
+                onclick="updatePairAgainst(event, 'btc')"
+                value="BTC"
+              >
+                /BTC
+              </button>
+            </div>
           </div>
+
+          
 
             <div class="unified-indicator-box">
 

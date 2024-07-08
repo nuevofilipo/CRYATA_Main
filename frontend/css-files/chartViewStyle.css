@@ -245,7 +245,8 @@ body {
   color: rgb(32, 32, 32);
 }
 
-.tablinks.right {
+
+.btn-group button.right {
   border-right: none;
 }
 

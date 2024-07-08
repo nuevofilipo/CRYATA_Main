@@ -57,18 +57,18 @@ let addedRanges = new Map();
 // for use with local data
 async function getData(route){
   changeTimeFrameFromUrl();
-  const selectedBtn = document.querySelector(".active");
+  const selectedTimeframe = document.querySelector(".tablinks.active");
   const response = await fetch(
-    `http://127.0.0.1:5000/api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
+    `http://127.0.0.1:5000/api/${route}/?coin=${updateCoin()}&timeframe=${selectedTimeframe.value}` 
   )
   const data = await response.json();
   return data;
 }
 
 async function getRangesData(range_value){
-  const selectedBtn = document.querySelector(".active");
+  const selectedTimeframe = document.querySelector(".tablinks.active");
   const response = await fetch(
-    `http://127.0.0.1:5000/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
+    `http://127.0.0.1:5000/api/ranges/?coin=${updateCoin()}&timeframe=${selectedTimeframe.value}&ranges=${range_value}` 
   )
   const data = await response.json();
   return data;
@@ -354,6 +354,13 @@ function updateCoin(){
     return getUrlParameterCoin();    
   }
   const selectedCoin = document.getElementById("coin-selector").value;
+
+  const pairAgainst = document.querySelector(".pairAgainst.active").value;
+  if (pairAgainst == "BTC"){
+    return selectedCoin.replace("USD", "BTC");
+  }
+
+  
   return selectedCoin;
 }
 
@@ -375,6 +382,15 @@ function changeTimeFrameFromUrl(){
 }
 
 //! updating and changing timeframes && small timeframe-btns-----------------------------------
+function updatePairAgainst(event, pairAgainst) {
+  var options = document.querySelectorAll(".pairAgainst");
+  for (var i = 0; i < options.length; i++) {
+    options[i].classList.remove("active");
+  }
+  event.currentTarget.classList.add("active");
+  setAll();
+}
+
 // changes main timeframe
 function updateTimeframe(event, timeframe) {
   var i, tablinks;
