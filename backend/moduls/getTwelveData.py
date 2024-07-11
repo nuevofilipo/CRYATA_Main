@@ -1,20 +1,65 @@
 import requests as rq
 import pandas as pd
-from binance.spot import Spot as Client
 from datetime import datetime
+import numpy as np
+
+# needed for caching
+import redis
+import json
+from functools import lru_cache
+
+redis_client = redis.Redis(host="localhost", port=6379, db=0)
+
+CACHE_EXPIRATION = 60  # one minute
 
 
-url = "https://api.twelvedata.com/time_series?"
+def cache_key(coin, candleTimeFrame, limit):
+    return f"{coin}-{candleTimeFrame}-{limit}"
 
 
+@lru_cache(maxsize=128)
 def getResponse(coin, candleTimeFrame, limit):
-    try:
-        data = getTwelveData(coin, candleTimeFrame, limit)
-    except:
-        print("TwelveData API failed, trying CCXT API")
-        data = getCCXTData(coin, candleTimeFrame, limit)
+    key = cache_key(coin, candleTimeFrame, limit)
+    cached_data = redis_client.get(key)
+    if cached_data:
+        cached_data_str = cached_data.decode("utf-8")
+        return pd.read_json(cached_data_str)
 
-    return data
+    result = None
+    if coin.endswith("BTC"):
+        coin_df = getResponse(coin[:-3] + "USD", candleTimeFrame, limit)
+        btc_df = getResponse("BTC/USD", candleTimeFrame, limit)
+        result = create_result_df(coin_df, btc_df)
+    else:
+        try:
+            data = getTwelveData(coin, candleTimeFrame, limit)
+        except:
+            print("TwelveData API failed, trying CCXT API")
+            data = getCCXTData(coin, candleTimeFrame, limit)
+        result = data
+
+    redis_client.setex(key, CACHE_EXPIRATION, result.to_json())
+    return result
+
+
+def create_result_df(coin_df, btc_df):
+    # Find common time values
+    common_times = np.intersect1d(coin_df["time"], btc_df["time"])
+
+    coin_df = coin_df[coin_df["time"].isin(common_times)]
+    btc_df = btc_df[btc_df["time"].isin(common_times)]
+
+    coin_df = coin_df.sort_values("time")
+    btc_df = btc_df.sort_values("time")
+
+    result_df = pd.DataFrame()
+
+    result_df["time"] = common_times
+
+    columns = ["Open", "High", "Low", "Close"]
+    result_df[columns] = coin_df[columns].values / btc_df[columns].values
+
+    return result_df
 
 
 def fixingData(df):
@@ -42,6 +87,7 @@ def fixingData(df):
 
 
 def getTwelveData(coin, candleTimeFrame, limit):
+    url = "https://api.twelvedata.com/time_series?"
 
     now = datetime.now()
 
@@ -157,5 +203,5 @@ def getCCXTData(coin, candleTimeFrame, limit):
         return pd.DataFrame(columns=columns)
 
 
-# output = getResponse("BTC/USD", "1day", 100)
+# output = getResponse("ETH/BTC", "1day", 100)
 # print(output)
