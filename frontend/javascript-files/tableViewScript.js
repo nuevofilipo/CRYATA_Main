@@ -210,7 +210,7 @@ function compareCells(cellX, cellY, order) {
 // Function to fetch data from the API
 async function getTableViewData(tableName) {
   const response = await fetch(
-    `https://table-view-api-production.up.railway.app/?name=${tableName}`
+    `https://table-view-api-production.up.railway.app/?name=${tableName}_btc`
   );
   const data = await response.json();
   return data;

@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.INFO)
 pd.options.mode.chained_assignment = None
 
 # importing own functions
-from tableDataCalc import createTableRow
+from tableDataCalc import createTableRow, createTableRow2
 
 backupUrl = "https://api.binance.us/api/v3/klines"
 columns = ["timestamp", "Open", "High", "Low", "Close", "Volume"]
@@ -370,9 +370,8 @@ if __name__ == "__main__":
         )
         logging.info(f"logger: fetched priceChangeDictionary {timeframe}")
 
-        # print(priceChange_dictionary)
-
         dfs_dictionary = asyncio_main(exchange, timeframe, symbols)
+        btc_df = dfs_dictionary["btcusdt" + timeframe]
         logging.info(f"logger: fetched data for {timeframe}")
 
         with concurrent.futures.ProcessPoolExecutor(
@@ -380,21 +379,32 @@ if __name__ == "__main__":
         ) as executor:  # 4 is current best
             futures_results = [
                 executor.submit(
-                    createTableRow, df, df_name, timeframe, priceChange_dictionary
+                    createTableRow2,
+                    df,
+                    df_name,
+                    timeframe,
+                    priceChange_dictionary,
+                    btc_df,
                 )
                 for df_name, df in dfs_dictionary.items()
             ]
 
-        out_results = []
+        usd_results = []
+        btc_results = []
 
         for f in futures_results:
             try:
-                out_results.append(f.result())
+                result = f.result()
+                usd_results.append(result["usd"])
+                btc_results.append(result["btc"])
             except Exception as e:
                 print(e)
 
-        df_table = pd.DataFrame(out_results)
-        df_table.index = df_table.index + 1
+        df_usd_table = pd.DataFrame(usd_results)
+        df_usd_table.index = df_usd_table.index + 1
+
+        df_btc_table = pd.DataFrame(btc_results)
+        df_btc_table.index = df_btc_table.index + 1
         logging.info(f"logger: calculated table for {timeframe}")
 
         # !inserting into database -------------------
@@ -408,7 +418,13 @@ if __name__ == "__main__":
             echo=False,
             isolation_level="READ COMMITTED",
         )
-        df_table.to_sql(
+        df_usd_table.to_sql(
             "table" + timeframe, con=engine, if_exists="replace", chunksize=1000
+        )
+        df_btc_table.to_sql(
+            "table" + timeframe + "_btc",
+            con=engine,
+            if_exists="replace",
+            chunksize=1000,
         )
         logging.info(f"logger: inserted data for {timeframe}")

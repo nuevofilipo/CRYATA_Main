@@ -181,14 +181,7 @@ def make_cache_key(coin, timeframe, limits):
 
 # this is the main function for getting data and then caching it
 def main_data_fetch(coin, timeframe, limits=mainLimit):
-    @cache.cached(
-        timeout=60, key_prefix=lambda: make_cache_key(coin, timeframe, limits)
-    )
-    def fetchDataInside():
-        data = gettingData(coin, timeframe, limits)
-        return data
-
-    return fetchDataInside()
+    return gettingData(coin, timeframe, limits)
 
 
 @app.route("/api/query/", methods=["GET"])  # regular endpoint for simply getting data
