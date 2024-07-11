@@ -209,8 +209,16 @@ function compareCells(cellX, cellY, order) {
 
 // Function to fetch data from the API
 async function getTableViewData(tableName) {
+  var currentPairAgainst = document.querySelector(".pairAgainst.active").value;
+  if (currentPairAgainst === "usd") {
+    currentPairAgainst = "";
+  } else {
+    currentPairAgainst = "_btc";
+  }
+
+
   const response = await fetch(
-    `https://table-view-api-production.up.railway.app/?name=${tableName}_btc`
+    `https://table-view-api-production.up.railway.app/?name=${tableName}${currentPairAgainst}`
   );
   const data = await response.json();
   return data;
@@ -274,18 +282,33 @@ async function main(timeframe) {
   headerTr = document.getElementsByClassName("headerTr");
 }
 
-async function changeTimeFrame(event, timeframe) {
-  // reset table
+async function updateTable(timeframe){
   var table = document.getElementById("cryptoTable");
   table.innerHTML =
-    "<tr class='headerTr'><th class='center-th' onclick='sortTable(0)'>#</th><th class='left-th' onclick='sortTable(1)'>Coin</th><th class='right-th' onclick='sortTable(2)'>Price</th><th class='right-th' onclick='sortTable(3)'>Change</th><th class='center-th' onclick='sortTable(4)'>Context Bands</th><th class='center-th' onclick='sortTable(5)'>VARV</th><th class='center-th' onclick='sortTable(6)'>Momentum</th><th class='right-th' onclick='sortTable(7)'>Volatility</th><th class='right-th' onclick='sortTable(8)'>Mean Performance</th><th class='right-th' onclick='sortTable(9)'>Median Performance</th><th class='right-th' onclick='sortTable(10)'>nearest zone</th></tr>";
+  "<tr class='headerTr'><th class='center-th' onclick='sortTable(0)'>#</th><th class='left-th' onclick='sortTable(1)'>Coin</th><th class='right-th' onclick='sortTable(2)'>Price</th><th class='right-th' onclick='sortTable(3)'>Change</th><th class='center-th' onclick='sortTable(4)'>Context Bands</th><th class='center-th' onclick='sortTable(5)'>VARV</th><th class='center-th' onclick='sortTable(6)'>Momentum</th><th class='right-th' onclick='sortTable(7)'>Volatility</th><th class='right-th' onclick='sortTable(8)'>Mean Performance</th><th class='right-th' onclick='sortTable(9)'>Median Performance</th><th class='right-th' onclick='sortTable(10)'>nearest zone</th></tr>";
   main(timeframe);
+}
+
+async function changeTimeFrame(event, timeframe) {
+  // reset table
+  updateTable(timeframe);
   console.log("Timeframe changed to: " + timeframe);
   tablinks = document.getElementsByClassName("tablinks");
   for (i = 0; i < tablinks.length; i++) {
     tablinks[i].className = tablinks[i].className.replace(" active", "");
   }
   event.currentTarget.className += " active";
+}
+
+function updatePairAgainst(event, pairAgainst) {
+  var options = document.querySelectorAll(".pairAgainst");
+  for (var i = 0; i < options.length; i++) {
+    options[i].classList.remove("active");
+  }
+  event.currentTarget.classList.add("active");
+   var currTimeframe = document.querySelector(".tablinks.active").getAttribute("data-timeframe");
+  updateTable(currTimeframe);
+
 }
 
 // Event delegation to handle clicks on dynamically added rows

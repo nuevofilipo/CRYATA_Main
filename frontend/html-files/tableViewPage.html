@@ -55,7 +55,7 @@
             </button>
             <button
               class="tablinks active"
-              data-timeframe="1day"
+              data-timeframe="1d"
               ,
               onclick="changeTimeFrame(event, '1d')"
               ,
@@ -65,13 +65,32 @@
             </button>
             <button
               class="tablinks right"
-              data-timeframe="1week"
+              data-timeframe="1w"
               ,
               onclick="changeTimeFrame(event, '1w')"
               ,
               value="1week"
             >
               1w
+            </button>
+          </div>
+
+          <div class="btn-group">
+            <button
+              class="pairAgainst active"
+              data-currency="usd"
+              onclick="updatePairAgainst(event, 'usd')"
+              value="usd"
+            >
+              /USD
+            </button>
+            <button
+              class="pairAgainst right"
+              data-currency="btc"
+              onclick="updatePairAgainst(event, 'btc')"
+              value="btc"
+            >
+              /BTC
             </button>
           </div>
         </div>
