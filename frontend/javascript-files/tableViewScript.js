@@ -1,5 +1,6 @@
 // Function to add a new row to the table
 function addRow(
+  currentPairAgainst,
   index,
   coin,
   price,
@@ -45,7 +46,11 @@ function addRow(
 
   cell1.innerHTML = index;
   cell2.innerHTML = coin;
-  cell3.innerHTML = "$"+String(price);
+  if (currentPairAgainst === "usd") {
+    cell3.innerHTML = "$"+String(price);
+  } else {
+    cell3.innerHTML = String(price) + " BTC";
+  }
   cell3.style.textAlign = "right";
   cell3b.innerHTML = String(priceChange) + " %";
   cell3b.style.textAlign = "right";
@@ -208,8 +213,7 @@ function compareCells(cellX, cellY, order) {
 }
 
 // Function to fetch data from the API
-async function getTableViewData(tableName) {
-  var currentPairAgainst = document.querySelector(".pairAgainst.active").value;
+async function getTableViewData(tableName, currentPairAgainst) {
   if (currentPairAgainst === "usd") {
     currentPairAgainst = "";
   } else {
@@ -226,7 +230,8 @@ async function getTableViewData(tableName) {
 
 // Loop through API response and add rows to the table
 async function main(timeframe) {
-  const data = await getTableViewData("table" + timeframe);
+  var currentPairAgainst = document.querySelector(".pairAgainst.active").value;
+  const data = await getTableViewData("table" + timeframe, currentPairAgainst);
   var DailyData = null;
   var varvIndicator = [];
   var contextBands = [];
@@ -265,6 +270,7 @@ async function main(timeframe) {
 
   data.forEach(function (entry, index) {
     addRow(
+      currentPairAgainst,
       entry.index,
       entry.coin,
       entry.price,
@@ -304,6 +310,7 @@ function updatePairAgainst(event, pairAgainst) {
   var options = document.querySelectorAll(".pairAgainst");
   for (var i = 0; i < options.length; i++) {
     options[i].classList.remove("active");
+    
   }
   event.currentTarget.classList.add("active");
    var currTimeframe = document.querySelector(".tablinks.active").getAttribute("data-timeframe");
@@ -336,7 +343,7 @@ document
 function goToChartViewPage(coin) {
     // for this to work, the local host of the chart view page has to be open
     var timeframe = document.querySelector(".tablinks.active").getAttribute("data-timeframe");
-   window.location.href = `http://127.0.0.1:5500/frontend/html-files/chartViewPage.html?coin=${coin}&timeframe=${timeframe}`;
+   window.location.href = `http://127.0.0.1:5501/frontend/html-files/chartViewPage.html?coin=${coin}&timeframe=${timeframe}`;
 }
 
 let mybutton = document.getElementById("backToTopBtn");
@@ -361,7 +368,11 @@ mybutton.onclick = function () {
 
 //! Initial call to populate table with data
 async function init() {
+  // wait 1 second
+  
+  await new Promise((r) => setTimeout(r, 100));
   main("1d");
+  console.log("initializing complete");
 }
 
 document.addEventListener("DOMContentLoaded", init);

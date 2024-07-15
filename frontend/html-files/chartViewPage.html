@@ -1,357 +1,260 @@
-<!-- https://www.kaiko.com/delivery/cryptocurrency-rest-api
-    potential data provider -->
-
-<!-- https://lukka.tech/lukka-prime/ -->
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chart Dashboard</title>
-    <!-- <link rel="stylesheet" href="../css-files/chartViewStyle.css" />  -->
+    <title>Chart View Page</title>
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/nuevofilipo/CRYATA_Main@latest/frontend/css-files/dashboard-style.css" /> -->
-    <!-- <script src="../../libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script>  -->
-    <!-- <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/CRYATA_Main/libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script>  -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
   </head>
 
   <body>
     <div class="navbar">
-      <img src="cryata small screen.png" alt="Logo">
-  </div>
-  <div id="notification" class="notification"></div>
-    <div class="chart-container">
-      <link rel="stylesheet" href="../css-files/chartViewStyle.css" /> 
+      <img src="cryata small screen.png" alt="Logo" />
+    </div> 
+    <div id="notification" class="notification"></div>
+    <div class="chart-container"> <!-- copy this div into webflow, you don't need body etc. -->
+      <link rel="stylesheet" href="../css-files/chartViewStyle.css" />
       <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/CRYATA_Main/libraries/lightweight-charts/dist/lightweight-charts.standalone.development.js"></script>
-      
-      
 
-      <main id="main" , class="main">
+      <main id="main" class="main">
         <section class="sidebar" id="sidebar">
           <div class="sidebar-box">
-          <div class="indicators-settings-box">
-          <div class="chartSettings">
-            <div class="btn-group">
-              <button
-                class="tablinks"
-                data-timeframe="1h"
-                ,
-                onclick="updateTimeframe(event, '1h')"
-                ,
-                value="1h"
-              >
-                1h
-              </button>
-              <button
-                class="tablinks"
-                data-timeframe="4h"
-                ,
-                onclick="updateTimeframe(event, '4h')"
-                ,
-                value="4h"
-              >
-                4h
-              </button>
-              <button
-                class="tablinks"
-                data-timeframe="1day"
-                ,
-                onclick="updateTimeframe(event, '1day')"
-                ,
-                value="1day"
-              >
-                1d
-              </button>
-              <button
-                class="tablinks right"
-                data-timeframe="1week"
-                ,
-                onclick="updateTimeframe(event, '1week')"
-                ,
-                value="1week"
-              >
-                1w
-              </button>
-            </div>
-  
-          <select
-              name="coin-selector"
-              ,
-              id="coin-selector"
-              ,
-              onchange="setData(), setLineData(), setVarvData(), updateSmallIndicatorCoin()"
-            >
-            <option value="BTC/USD">bitcoin</option>
-            <option value="ETH/USD">ethereum</option>
-            <option value="BNB/USD">binance-coin</option>
-            <option value="SOL/USD">solana</option>
-            <option value="XRP/USD">ripple</option>
-            <option value="DOGE/USD">dogecoin</option>
-            <option value="TON/USD">ton</option>
-            <option value="ADA/USD">cardano</option>
-            <option value="SHIB/USD">shiba-inu</option>
-            <option value="AVAX/USD">avalanche</option>
-            <option value="DOT/USD">polkadot</option>
-            <option value="BCH/USD">bitcoin-cash</option>
-            <option value="TRX/USD">tron</option>
-            <option value="LINK/USD">chainlink</option>
-            <option value="MATIC/USD">polygon</option>
-            <option value="ICP/USD">internet-computer</option>
-            <option value="NEAR/USD">near</option>
-            <option value="LTC/USD">litecoin</option>
-            <option value="DAI/USD">dai</option>
-            <option value="UNI/USD">uniswap</option>
-            <option value="APT/USD">aptos</option>
-            <option value="STX/USD">stacks</option>
-            <option value="ETC/USD">ethereum-classic</option>
-            <option value="FIL/USD">filecoin</option>
-            <option value="RNDR/USD">render</option>
-            <option value="ATOM/USD">cosmos</option>
-            <option value="XLM/USD">stellar</option>
-            <option value="HBAR/USD">hedera</option>
-            <option value="AR/USD">arweave</option>
-            <option value="IMX/USD">immutable-x</option>
-            <option value="TAO/USD">lamden</option>
-            <option value="VET/USD">vechain</option>
-            <option value="WIF/USD">wifecoin</option>
-            <option value="MKR/USD">maker</option>
-            <option value="KAS/USD">kaspa</option>
-            <option value="GRT/USD">the-graph</option>
-            <option value="INJ/USD">injective</option>
-            <option value="OP/USD">optimism</option>
-            <option value="PEPE/USD">pepe</option>
-            <option value="THETA/USD">theta</option>
-            <option value="RUNE/USD">thorchain</option>
-            <option value="FTM/USD">fantom</option>
-            <option value="FET/USD">fetch-ai</option>
-            <option value="TIA/USD">tia</option>
-            <option value="LDO/USD">lido-dao</option>
-            <option value="FLOKI/USD">floki</option>
-            <option value="ALGO/USD">algorand</option>
-            <option value="BONK/USD">bonk</option>
-            <option value="SEI/USD">sei</option>
-            <option value="JUP/USD">jupiter</option>
-            <option value="FLOW/USD">flow</option>
-            <option value="ENA/USD">enano</option>
-            <option value="GALA/USD">gala</option>
-            <option value="AAVE/USD">aave</option>
-            <option value="BSV/USD">bitcoin-sv</option>
-            <option value="BEAM/USD">beam</option>
-            <option value="DYDX/USD">dydx</option>
-            <option value="QNT/USD">quant</option>
-            <option value="BTT/USD">bittorrent</option>
-            <option value="AGIX/USD">singularitynet</option>
-            <option value="SXP/USD">swipe</option>
-            <option value="WLD/USD">worldcoin</option>
-            <option value="W/USD">whale</option>
-            <option value="CHZ/USD">chiliz</option>
-            <option value="PENDLE/USD">pendle</option>
-            <option value="ONDO/USD">ondo-finance</option>
-            <option value="EGLD/USD">elrond</option>
-            <option value="NEO/USD">neo</option>
-            <option value="AXS/USD">axie-infinity</option>
-            <option value="SAND/USD">the-sandbox</option>
-            <option value="XEC/USD">eCash</option>
-            <option value="EOS/USD">eos</option>
-            <option value="XTZ/USD">tezos</option>
-            <option value="STRK/USD">strike</option>
-            <option value="JASMY/USD">jasmy</option>
-            <option value="MINA/USD">mina</option>
-            <option value="CFX/USD">conflux</option>
-            <option value="SNX/USD">synthetix</option>
-            <option value="MANA/USD">decentraland</option>
-            <option value="ORDI/USD">ordinals</option>
-            <option value="GNO/USD">gnosis</option>
-            <option value="CKB/USD">nervos</option>
-            <option value="APE/USD">apecoin</option>
-            <option value="BLUR/USD">blur</option>
-            <option value="FRONT/USD">frontier</option>
-            <option value="FXS/USD">frax-share</option>
-            <option value="ROSE/USD">oasis-network</option>
-            <option value="LPT/USD">livepeer</option>
-            <option value="KLAY/USD">klaytn</option>
-            <option value="CAKE/USD">pancakeswap</option>
-            <option value="AXL/USD">axelar</option>
-            <option value="HNT/USD">helium</option>
-            <option value="BTG/USD">bitcoin-gold</option>
-            <option value="WOO/USD">wootrade</option>
-            <option value="1INCH/USD">1inch</option>
-            <option value="MANTA/USD">manta-network</option>
-            <option value="CRV/USD">curve-dao-token</option>
-            <option value="IOTX/USD">iotex</option>
-            <option value="ASTR/USD">astar</option>
-            <option value="FTT/USD">ftx-token</option>
-            <option value="BICO/USD">biconomy</option>
-            <option value="TWT/USD">trust-wallet-token</option>
-            <option value="MEME/USD">meme</option>
-            <option value="OSMO/USD">osmosis</option>
-            <option value="ARKM/USD">arkham</option>
-            <option value="BNX/USD">binaryx</option>
-            <option value="DYM/USD">dynamix</option>
-            <option value="COMP/USD">compound</option>
-            <option value="SUPER/USD">superfarm</option>
-            <option value="GLM/USD">golem</option>
-            <option value="RAY/USD">raydium</option>
-            <option value="LUNA/USD">terra</option>
-            <option value="GMT/USD">green-metaverse-token</option>
-            <option value="OCEAN/USD">ocean-protocol</option>
-            <option value="PAXG/USD">pax-gold</option>
-            <option value="RPL/USD">rocket-pool</option>
-            <option value="POLYX/USD">polymesh</option>
-            <option value="ANT/USD">aragon</option>
-            <option value="JTO/USD">justoken</option>
-            <option value="ZIL/USD">zilliqa</option>
-            <option value="ANKR/USD">ankr</option>
-            <option value="HOT/USD">holo</option>
-            <option value="CELO/USD">celo</option>
-            <option value="ZRX/USD">0x</option>
-            <option value="ZEC/USD">zcash</option>
-            <option value="SSV/USD">ssv-network</option>
-            <option value="METIS/USD">metisdao</option>
-            <option value="ENJ/USD">enjin-coin</option>
-            <option value="GMX/USD">gmx</option>
-            <option value="ILV/USD">illuvium</option>
-            <option value="GAL/USD">galxe</option>
-            <option value="ID/USD">space-id</option>
-            <option value="RVN/USD">ravencoin</option>
-            <option value="RSR/USD">reserve-rights</option>
-            <option value="SFP/USD">safepal</option>
-            <option value="SKL/USD">skale</option>
-            <option value="ETHW/USD">ethereum-pow</option>
-            <option value="SC/USD">siacoin</option>
-            <option value="ELF/USD">aelf</option>
-            <option value="QTUM/USD">qtum</option>
-            <option value="ALT/USD">altura</option>
-            <option value="BAT/USD">basic-attention-token</option>
-            <option value="YGG/USD">yield-guild-games</option>
-            <option value="PEOPLE/USD">constitutiondao</option>
-            <option value="LUNC/USD">terra-luna-classic</option>
-            <option value="DEXE/USD">DeXe</option>
-            </select>
+            <div class="indicators-settings-box">
+              <div class="chartSettings">
+                <div class="btn-group">
+                  <button class="tablinks" data-timeframe="1h" onclick="updateTimeframe(event, '1h')" value="1h">1h</button>
+                  <button class="tablinks" data-timeframe="4h" onclick="updateTimeframe(event, '4h')" value="4h">4h</button>
+                  <button class="tablinks" data-timeframe="1day" onclick="updateTimeframe(event, '1day')" value="1day">1d</button>
+                  <button class="tablinks right" data-timeframe="1week" onclick="updateTimeframe(event, '1week')" value="1week">1w</button>
+                </div>
 
+                <select name="coin-selector" , id="coin-selector" , onchange="onChangeOfCoin()">
+                  <option value="BTC/USD">bitcoin</option>
+                  <option value="ETH/USD">ethereum</option>
+                  <option value="BNB/USD">binance-coin</option>
+                  <option value="SOL/USD">solana</option>
+                  <option value="XRP/USD">ripple</option>
+                  <option value="DOGE/USD">dogecoin</option>
+                  <option value="TON/USD">ton</option>
+                  <option value="ADA/USD">cardano</option>
+                  <option value="SHIB/USD">shiba-inu</option>
+                  <option value="AVAX/USD">avalanche</option>
+                  <option value="DOT/USD">polkadot</option>
+                  <option value="BCH/USD">bitcoin-cash</option>
+                  <option value="TRX/USD">tron</option>
+                  <option value="LINK/USD">chainlink</option>
+                  <option value="MATIC/USD">polygon</option>
+                  <option value="ICP/USD">internet-computer</option>
+                  <option value="NEAR/USD">near</option>
+                  <option value="LTC/USD">litecoin</option>
+                  <option value="DAI/USD">dai</option>
+                  <option value="UNI/USD">uniswap</option>
+                  <option value="APT/USD">aptos</option>
+                  <option value="STX/USD">stacks</option>
+                  <option value="ETC/USD">ethereum-classic</option>
+                  <option value="FIL/USD">filecoin</option>
+                  <option value="RNDR/USD">render</option>
+                  <option value="ATOM/USD">cosmos</option>
+                  <option value="XLM/USD">stellar</option>
+                  <option value="HBAR/USD">hedera</option>
+                  <option value="AR/USD">arweave</option>
+                  <option value="IMX/USD">immutable-x</option>
+                  <option value="TAO/USD">lamden</option>
+                  <option value="VET/USD">vechain</option>
+                  <option value="WIF/USD">wifecoin</option>
+                  <option value="MKR/USD">maker</option>
+                  <option value="KAS/USD">kaspa</option>
+                  <option value="GRT/USD">the-graph</option>
+                  <option value="INJ/USD">injective</option>
+                  <option value="OP/USD">optimism</option>
+                  <option value="PEPE/USD">pepe</option>
+                  <option value="THETA/USD">theta</option>
+                  <option value="RUNE/USD">thorchain</option>
+                  <option value="FTM/USD">fantom</option>
+                  <option value="FET/USD">fetch-ai</option>
+                  <option value="TIA/USD">tia</option>
+                  <option value="LDO/USD">lido-dao</option>
+                  <option value="FLOKI/USD">floki</option>
+                  <option value="ALGO/USD">algorand</option>
+                  <option value="BONK/USD">bonk</option>
+                  <option value="SEI/USD">sei</option>
+                  <option value="JUP/USD">jupiter</option>
+                  <option value="FLOW/USD">flow</option>
+                  <option value="ENA/USD">enano</option>
+                  <option value="GALA/USD">gala</option>
+                  <option value="AAVE/USD">aave</option>
+                  <option value="BSV/USD">bitcoin-sv</option>
+                  <option value="BEAM/USD">beam</option>
+                  <option value="DYDX/USD">dydx</option>
+                  <option value="QNT/USD">quant</option>
+                  <option value="BTT/USD">bittorrent</option>
+                  <option value="AGIX/USD">singularitynet</option>
+                  <option value="SXP/USD">swipe</option>
+                  <option value="WLD/USD">worldcoin</option>
+                  <option value="W/USD">whale</option>
+                  <option value="CHZ/USD">chiliz</option>
+                  <option value="PENDLE/USD">pendle</option>
+                  <option value="ONDO/USD">ondo-finance</option>
+                  <option value="EGLD/USD">elrond</option>
+                  <option value="NEO/USD">neo</option>
+                  <option value="AXS/USD">axie-infinity</option>
+                  <option value="SAND/USD">the-sandbox</option>
+                  <option value="XEC/USD">eCash</option>
+                  <option value="EOS/USD">eos</option>
+                  <option value="XTZ/USD">tezos</option>
+                  <option value="STRK/USD">strike</option>
+                  <option value="JASMY/USD">jasmy</option>
+                  <option value="MINA/USD">mina</option>
+                  <option value="CFX/USD">conflux</option>
+                  <option value="SNX/USD">synthetix</option>
+                  <option value="MANA/USD">decentraland</option>
+                  <option value="ORDI/USD">ordinals</option>
+                  <option value="GNO/USD">gnosis</option>
+                  <option value="CKB/USD">nervos</option>
+                  <option value="APE/USD">apecoin</option>
+                  <option value="BLUR/USD">blur</option>
+                  <option value="FRONT/USD">frontier</option>
+                  <option value="FXS/USD">frax-share</option>
+                  <option value="ROSE/USD">oasis-network</option>
+                  <option value="LPT/USD">livepeer</option>
+                  <option value="KLAY/USD">klaytn</option>
+                  <option value="CAKE/USD">pancakeswap</option>
+                  <option value="AXL/USD">axelar</option>
+                  <option value="HNT/USD">helium</option>
+                  <option value="BTG/USD">bitcoin-gold</option>
+                  <option value="WOO/USD">wootrade</option>
+                  <option value="1INCH/USD">1inch</option>
+                  <option value="MANTA/USD">manta-network</option>
+                  <option value="CRV/USD">curve-dao-token</option>
+                  <option value="IOTX/USD">iotex</option>
+                  <option value="ASTR/USD">astar</option>
+                  <option value="FTT/USD">ftx-token</option>
+                  <option value="BICO/USD">biconomy</option>
+                  <option value="TWT/USD">trust-wallet-token</option>
+                  <option value="MEME/USD">meme</option>
+                  <option value="OSMO/USD">osmosis</option>
+                  <option value="ARKM/USD">arkham</option>
+                  <option value="BNX/USD">binaryx</option>
+                  <option value="DYM/USD">dynamix</option>
+                  <option value="COMP/USD">compound</option>
+                  <option value="SUPER/USD">superfarm</option>
+                  <option value="GLM/USD">golem</option>
+                  <option value="RAY/USD">raydium</option>
+                  <option value="LUNA/USD">terra</option>
+                  <option value="GMT/USD">green-metaverse-token</option>
+                  <option value="OCEAN/USD">ocean-protocol</option>
+                  <option value="PAXG/USD">pax-gold</option>
+                  <option value="RPL/USD">rocket-pool</option>
+                  <option value="POLYX/USD">polymesh</option>
+                  <option value="ANT/USD">aragon</option>
+                  <option value="JTO/USD">justoken</option>
+                  <option value="ZIL/USD">zilliqa</option>
+                  <option value="ANKR/USD">ankr</option>
+                  <option value="HOT/USD">holo</option>
+                  <option value="CELO/USD">celo</option>
+                  <option value="ZRX/USD">0x</option>
+                  <option value="ZEC/USD">zcash</option>
+                  <option value="SSV/USD">ssv-network</option>
+                  <option value="METIS/USD">metisdao</option>
+                  <option value="ENJ/USD">enjin-coin</option>
+                  <option value="GMX/USD">gmx</option>
+                  <option value="ILV/USD">illuvium</option>
+                  <option value="GAL/USD">galxe</option>
+                  <option value="ID/USD">space-id</option>
+                  <option value="RVN/USD">ravencoin</option>
+                  <option value="RSR/USD">reserve-rights</option>
+                  <option value="SFP/USD">safepal</option>
+                  <option value="SKL/USD">skale</option>
+                  <option value="ETHW/USD">ethereum-pow</option>
+                  <option value="SC/USD">siacoin</option>
+                  <option value="ELF/USD">aelf</option>
+                  <option value="QTUM/USD">qtum</option>
+                  <option value="ALT/USD">altura</option>
+                  <option value="BAT/USD">basic-attention-token</option>
+                  <option value="YGG/USD">yield-guild-games</option>
+                  <option value="PEOPLE/USD">constitutiondao</option>
+                  <option value="LUNC/USD">terra-luna-classic</option>
+                  <option value="DEXE/USD">DeXe</option>
+                </select>
 
-            <div class="btn-group">
-              <button
-                class="pairAgainst active"
-                data-currency="USD"
-                onclick="updatePairAgainst(event, 'usd')"
-                value="USD"
-              >
-                /USD
-              </button>
-              <button
-                class="pairAgainst right"
-                data-currency="BTC"
-                onclick="updatePairAgainst(event, 'btc')"
-                value="BTC"
-              >
-                /BTC
-              </button>
+                <div class="btn-group">
+                  <button class="pairAgainst" data-currency="USD" onclick="updatePairAgainst(event, 'usd')" value="USD">/USD</button>
+                  <button class="pairAgainst right" data-currency="BTC" onclick="updatePairAgainst(event, 'btc')" value="BTC">/BTC</button>
+                </div>
+              </div>
+              <div class="unified-indicator-box">
+                <div class="indicator-container">
+                  <p class="indicator-tag">Context Bands</p>
+                  <label class="switch">
+                    <input id="indicator-switch" type="checkbox" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="indicator-container">
+                  <p class="indicator-tag">Varv</p>
+                  <label class="switch">
+                    <input id="varv-indicator-switch" type="checkbox" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="tf-indicator-box">
+                <div class="indicator-container-tf">
+                  <p class="indicator-tag">Supply/Demand</p>
+                  <div class="timeframe-buttons">
+                    <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1h" data-color="#e82ec0">1h</button>
+                    <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="4h" data-color="#e82ec0">4h</button>
+                    <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1day" data-color="#e82ec0">1d</button>
+                    <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1week" data-color="#e82ec0">1w</button>
+                  </div>
+                </div>
+                <div class="indicator-container-tf">
+                  <p class="indicator-tag">Imbalance Zones</p>
+                  <div class="timeframe-buttons">
+                    <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1h" data-color="#9e9e9e">1h</button>
+                    <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="4h" data-color="#9e9e9e">4h</button>
+                    <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1day" data-color="#9e9e9e">1d</button>
+                    <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1week" data-color="#9e9e9e">1w</button>
+                  </div>
+                </div>
+                <div class="indicator-container-tf">
+                  <p class="indicator-tag">Momentum</p>
+                  <div class="timeframe-buttons">
+                    <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1h" data-color="#9e9e9e">1h</button>
+                    <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="4h" data-color="#9e9e9e">4h</button>
+                    <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1day" data-color="#9e9e9e">1d</button>
+                    <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1week" data-color="#9e9e9e">1w</button>
+                  </div>
+                </div>
+                <div class="indicator-container-tf">
+                  <p class="indicator-tag">Ranges</p>
+                  <div class="timeframe-buttons">
+                    <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1day" data-color="#e02bd4">1d</button>
+                    <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1week" data-color="#ffdd00">1w</button>
+                    <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1m" data-color="#03c4ff">1m</button>
+                    <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="3m" data-color="#ff03a3">3m</button>
+                    <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1y" data-color="#03ff81">1y</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-
-          
-
-            <div class="unified-indicator-box">
-
-            <div class="indicator-container">
-              <p class="indicator-tag">Context Bands</p>
-              <label class="switch">
-                <input id="indicator-switch" type="checkbox" />
-                <span class="slider round"></span>
-              </label>
-            </div>
-  
-            <div class="indicator-container">
-              <p class="indicator-tag">Varv</p>
-              <label class="switch">
-                <input id="varv-indicator-switch" type="checkbox" />
-                <span class="slider round"></span>
-              </label>
-            </div>
-          </div>
-  
-
-          <div class="tf-indicator-box">
-            <div class="indicator-container-tf">
-              <p class="indicator-tag">Supply/Demand</p>
-              <!-- <label class="switch">
-                <input id="zones-indicator-switch" type="checkbox" />
-                <span class="slider round"></span>
-              </label> -->
-              <div class="timeframe-buttons">
-                <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1h" data-color="#e82ec0">1h</button>
-                <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="4h" data-color="#e82ec0">4h</button>
-                <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1day" data-color="#e82ec0">1d</button>
-                <button class="timeframe-btn" data-type="boxes" data-indicator="supplyDemand" data-timeframe="1week" data-color="#e82ec0">1w</button>
-              </div>
-            </div>
-  
-            <div class="indicator-container-tf">
-              <p class="indicator-tag">Imbalance Zones</p>
-              <!-- <label class="switch">
-                <input id="zones2-indicator-switch" type="checkbox" />
-                <span class="slider round"></span>
-              </label> -->
-              <div class="timeframe-buttons">
-                <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1h" data-color="#9e9e9e">1h</button>
-                <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="4h" data-color="#9e9e9e">4h</button>
-                <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1day" data-color="#9e9e9e">1d</button>
-                <button class="timeframe-btn" data-type="boxes" data-indicator="imbalanceZones" data-timeframe="1week" data-color="#9e9e9e">1w</button>
-              </div>
-            </div>
-  
-            <div class="indicator-container-tf">
-              <p class="indicator-tag">Momentum</p>
-              <!-- <label class="switch">
-                <input id="momentum-indicator-switch" type="checkbox" />
-                <span class="slider round"></span>
-              </label> -->
-              <div class="timeframe-buttons">
-                <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1h" data-color="#9e9e9e">1h</button>
-                <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="4h" data-color="#9e9e9e">4h</button>
-                <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1day" data-color="#9e9e9e">1d</button>
-                <button class="timeframe-btn" data-type="boxes" data-indicator="momentum" data-timeframe="1week" data-color="#9e9e9e">1w</button>
-              </div>
-            </div>
-  
-            <div class="indicator-container-tf">
-              <p class="indicator-tag">Ranges</p>
-              <!-- <label class="switch">
-                <input id="1y" type="checkbox" />
-                <span class="slider round"></span>
-              </label> -->
-              <div class="timeframe-buttons">
-                <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1day" data-color="#e02bd4">1d</button>
-                <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1week" data-color="#ffdd00">1w</button>
-                <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1m" data-color="#03c4ff">1m</button>
-                <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="3m" data-color="#ff03a3">3m</button>
-                <button class="timeframe-btn" data-type="lineSeries" data-indicator="ranges" data-timeframe="1y" data-color="#03ff81">1y</button>
-              </div>
-            </div>
-            </div>
-
-          </div>
-          <div>
         </section>
-        <button class="sidebar-toggle" id="sidebar-toggle" onclick="hideSidebar()"><i class="fa fa-angle-double-left"></i></button> 
-        <div id="chartbox"> 
-          <div id="tvchart" class="tvchartbeforeload"></div> <!-- loader class is used to display the loading animation -->
-          <div class="loader"></div>
+        <button class="sidebar-toggle" id="sidebar-toggle" onclick="hideSidebar()">
+          <i class="fa fa-angle-double-left"></i>
+        </button>
+        <div id="chartbox">
+          <div id="tvchart" class="tvchartbeforeload"></div>
+          <div class="spinning loader"></div>
         </div>
       </main>
 
-      <script
-        type="text/javascript"
-        src="../javascript-files/chartViewScript.js"
-      ></script>
+      <script type="text/javascript" src="../javascript-files/chartViewScript.js"></script>
       <!-- <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/cryata-cdn-resources@latest/chart view/chartViewScript.js"></script> -->
-    </div>  
-    
-    </body>
+    </div>
   </body>
 </html>

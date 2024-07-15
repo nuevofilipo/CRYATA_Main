@@ -1,47 +1,18 @@
 import pandas as pd
-
-pd.options.mode.chained_assignment = None
 import numpy as np
 import time
-
 import pandas_ta as tan
-
 
 from scipy.signal import savgol_filter
 from scipy.signal import find_peaks
 
-
-def intToTime(integer, dataframe):
-    if integer > 0:
-        timestamp = dataframe.loc[integer, "time"]
-    else:
-        timestamp = dataframe.loc[0, "time"]
-    return timestamp
+pd.options.mode.chained_assignment = None  # default='warn' # this is to avoid the SettingWithCopyWarning
 
 
-def intToTime1(integer, dataframe):
-    timestamp = dataframe.index[integer]
-    return timestamp
-
-
-# this two are helper functions for the supplyDemandZones function
-def findLastGreenCandle(intIndex, df):
-    for index, row in df[intIndex::-1].iterrows():
-        if row["Close"] > row["Open"]:
-            return index
-    return 0
-
-
-def findLastRedCandle(intIndex, df):
-    for index, row in df[intIndex::-1].iterrows():
-        if row["Close"] < row["Open"]:
-            return index
-    return 0
-
-
-def supplyDemandZones(df, chartDf):
-    lowest_df2 = highsForSupplyZones(df)[1]
-    df = highsForSupplyZones(df)[0]
+# !main indicator Calcultion functions ----------------------------
+def supplyDemandZonesCalc(df, chartDf):
+    lowest_df2 = highsLowsPrep(df)[1]
+    df = highsLowsPrep(df)[0]
 
     zones = []
 
@@ -53,7 +24,6 @@ def supplyDemandZones(df, chartDf):
     last_high_zone = 0
     last_index_zone = 0
     for index, row in df[::-1].iterrows():
-
         if row["ultra_stationary"] == 1 and row["Low"] > last_high_zone:
             start_index = findLastGreenCandle(index, df)
             zones.append(
@@ -121,195 +91,8 @@ def supplyDemandZones(df, chartDf):
     return zones_df
 
 
-def highsForSupplyZones(df):
-    df_length = len(df.index)
-
-    df["atr"] = tan.atr(df["High"], df["Low"], df["Close"], length=1)
-    df["atr"] = df.atr.rolling(window=30).mean()
-    df["close_smooth"] = savgol_filter(df["Close"], 20, 5)
-
-    atr = df["atr"].iloc[-1]
-
-    peaks_idx, _ = find_peaks(df["close_smooth"], distance=15, width=3, prominence=atr)
-    troughs_idx, _ = find_peaks(
-        -df["close_smooth"], distance=15, width=3, prominence=atr
-    )
-
-    # ! defining accurate highs and lows, scanning candles left and right for the high----------------------------------------------
-
-    df["is_peak"] = 0
-    df["is_peak"].iloc[peaks_idx] = 1  # peaks are maxima from the savgol filter
-
-    df["is_trough"] = 0
-    df["is_trough"].iloc[troughs_idx] = 1  # troughs are minima from the savgol filter
-
-    df["actual_high"] = (
-        0  # actual highs are the real highs surrounding the approximate high
-    )
-    for index, row in df.iterrows():
-        if row["is_peak"] == 1:
-            integer_index = df.index.get_loc(index)
-            if integer_index < 8:
-                index_integer1 = 0
-            else:
-                index_integer1 = integer_index - 8
-            start = df.index[index_integer1]
-            until_end = df_length - integer_index
-            if until_end <= 8 and until_end > 0:
-                index_integer2 = integer_index + (until_end - 1)
-            else:
-                index_integer2 = integer_index + 8
-            end = df.index[index_integer2]
-            max_value = df.loc[start:end, "High"].max()
-            max_index = df.loc[start:end, "High"].idxmax()
-            df.at[max_index, "actual_high"] = 1
-
-    df["actual_low"] = 0
-    for index, row in df.iterrows():
-        if row["is_trough"] == 1:
-            integer_index = df.index.get_loc(index)
-            if integer_index < 8:
-                index_integer1 = 0
-            else:
-                index_integer1 = integer_index - 8
-            start = df.index[index_integer1]
-            until_end = df_length - integer_index
-            if until_end <= 8:
-                index_integer2 = integer_index + (until_end - 1)
-            else:
-                index_integer2 = integer_index + 8
-            end = df.index[index_integer2]
-            min_value = df.loc[start:end, "Low"].min()
-            min_index = df.loc[start:end, "Low"].idxmin()
-            df.at[min_index, "actual_low"] = 1
-
-    # defining valid highs, only the ones that haven't been broken----------------------------------------------
-
-    highs_df = df[df["actual_high"] == 1]
-
-    ##! working on
-    try:
-        highest_index = highs_df["High"].idxmax()
-    except Exception as e:
-        print(e)
-        return pd.DataFrame(), pd.DataFrame()  # no idea what's happening here
-
-    highest_df2 = df.loc[highest_index:]
-    df["protected_highs_and_lows"] = 0
-    # this is basically the same as the valid_high, just that this is in the real df
-    # here I am unnecessarily creating a new df, npt sure whether I really need it
-
-    highest_df2["valid_high"] = 0
-    last_high = 0
-    for index, row in highest_df2[::-1].iterrows():
-        if row["actual_high"] == 1:
-            if last_high == 0:
-                highest_point = df.loc[index:, "High"].idxmax()
-                highest_df2.at[highest_point, "valid_high"] = 1
-                df.at[highest_point, "protected_highs_and_lows"] = (
-                    1  # trying to add to normal df, so to not need the highest_df2
-                )
-                last_high = df.at[highest_point, "High"]
-            elif row["High"] > last_high:
-                highest_df2.at[index, "valid_high"] = 1
-                df.at[index, "protected_highs_and_lows"] = 1
-                last_high = row["High"]
-            elif row["High"] < last_high:
-                highest_df2.at[index, "valid_high"] = 0
-                df.at[index, "protected_highs_and_lows"] = 0
-
-    lows_df = df[df["actual_low"] == 1]
-    lowest_index = lows_df["Low"].idxmin()
-    lowest_df2 = df.loc[lowest_index:]
-
-    lowest_df2["valid_low"] = 0
-    last_low = 0
-    for index, row in lowest_df2[::-1].iterrows():
-        if row["actual_low"] == 1:
-            if last_low == 0:
-                lowest_point = df.loc[index:, "Low"].idxmin()
-                lowest_df2.at[lowest_point, "valid_low"] = 1
-                df.at[lowest_point, "protected_highs_and_lows"] = -1
-                last_low = df.at[lowest_point, "Low"]
-            elif row["Low"] < last_low:
-                lowest_df2.at[index, "valid_low"] = 1
-                df.at[index, "protected_highs_and_lows"] = -1
-                last_low = row["Low"]
-            elif row["Low"] > last_low:
-                lowest_df2.at[index, "valid_low"] = 0
-                df.at[index, "protected_highs_and_lows"] = 0
-
-    # checking whether the high is protected or not, name = ultra_stationary----------------------------------------------
-    # there is no difference between valid highs and protected, however ones are in another
-    # based on the ultra stationary we will define the zones
-    df["ultra_stationary"] = 0
-    valid_high_bool = False
-    for index, row in df.iterrows():
-        if row["actual_high"] == 1 or row["actual_low"] == 1:
-            if (
-                row["actual_low"] == 1
-                and row["Low"] < last_low
-                and valid_high_bool == True
-            ):
-                df.at[real_index, "ultra_stationary"] = 1
-            if row["actual_high"] == 1 and valid_high_bool == True:
-                valid_high_bool = True
-            else:
-                valid_high_bool = False
-            if row["protected_highs_and_lows"] == 1:
-                valid_high_bool = True
-                real_index = index
-            if row["actual_low"] == 1:
-                last_low = row["Low"]
-
-    valid_low_bool = False
-    for index, row in df.iterrows():
-        if row["actual_high"] == 1 or row["actual_low"] == 1:
-            if (
-                row["actual_high"] == 1
-                and row["High"] > last_high
-                and valid_low_bool == True
-            ):
-                df.at[real_index, "ultra_stationary"] = -1
-            if row["actual_low"] == 1 and valid_low_bool == True:
-                valid_low_bool = True
-            else:
-                valid_low_bool = False
-            if row["protected_highs_and_lows"] == -1:
-                valid_low_bool = True
-                real_index = index
-            if row["actual_high"] == 1:
-                last_high = row["High"]
-
-    return df, lowest_df2
-
-
-def momentumIndicatorPrep(df):
-    currState = "neutral"
-    last_high = None
-    last_low = None
-
-    df["momentum"] = "neutral"
-
-    for index, row in df.iterrows():
-        if row["actual_high"] == 1:
-            last_high = row["High"]
-        if row["actual_low"] == 1:
-            last_low = row["Low"]
-
-        if last_high != None and last_low != None:
-            if row["Close"] > last_high and currState != "bullish":
-                currState = "bullish"
-            elif row["Close"] < last_low and currState != "bearish":
-                currState = "bearish"
-
-        df.at[index, "momentum"] = currState
-
-    return df
-
-
-def momentumIndicator(df, chart_df):  # takes df with integer indices
-    df = momentumIndicatorPrep(highsForSupplyZones(df)[0])
+def momentumCalc(df, chart_df):  # takes df with integer indices
+    df = momentumIndicatorPrep(highsLowsPrep(df)[0])
     timeNow = chart_df["time"].iloc[-1]
 
     red_boxes = []
@@ -387,7 +170,7 @@ def momentumIndicator(df, chart_df):  # takes df with integer indices
     return combined_df
 
 
-def createVarv(df, timeframe, chart_df):
+def varvCalc(df, timeframe, chart_df):
     if len(df.index) < 650:
         return pd.DataFrame()
 
@@ -454,7 +237,7 @@ def createVarv(df, timeframe, chart_df):
     return df
 
 
-def createContextBands(df, timeFrame, chart_df):
+def contextBandsCalc(df, timeFrame, chart_df):
     if timeFrame == "1week":
         df["MA"] = tan.sma(df["Close"], length=9)
         df["EMA"] = tan.ema(df["Close"], length=12)
@@ -469,7 +252,7 @@ def createContextBands(df, timeFrame, chart_df):
     return df
 
 
-def imbalanceZones(df):
+def imbalanceZonesCalc(df):
     df_length = len(df.index)
     zonesRed = []
     updated_zonesRed = []
@@ -542,3 +325,325 @@ def imbalanceZones(df):
 
     zones_df = pd.DataFrame(all_zones)
     return zones_df
+
+
+def rangesCalc(df, range_df):
+    if df.empty or range_df.empty:
+        return pd.DataFrame()
+
+    if len(range_df.index) < 2:
+        penultimateCandle = range_df.iloc[0]
+    else:
+        penultimateCandle = range_df.iloc[-2]
+    rangeList = addRanges(
+        penultimateCandle.name,
+        penultimateCandle["Open"],
+        df.index[-1],
+        penultimateCandle["Close"],
+    )
+
+    df_out = pd.DataFrame(rangeList)
+    return df_out
+
+
+#! small helper functions  ----------------------------
+def intToTime(integer, dataframe):
+    if integer > 0:
+        timestamp = dataframe.loc[integer, "time"]
+    else:
+        timestamp = dataframe.loc[0, "time"]
+    return timestamp
+
+
+def intToTime1(integer, dataframe):
+    timestamp = dataframe.index[integer]
+    return timestamp
+
+
+# this two are helper functions for the supplyDemandZones function
+def findLastGreenCandle(intIndex, df):
+    for index, row in df[intIndex::-1].iterrows():
+        if row["Close"] > row["Open"]:
+            return index
+    return 0
+
+
+def findLastRedCandle(intIndex, df):
+    for index, row in df[intIndex::-1].iterrows():
+        if row["Close"] < row["Open"]:
+            return index
+    return 0
+
+
+#! big helper functions  ----------------------------------------------
+def highsLowsPrep(df):
+    df_length = len(df.index)
+
+    df["atr"] = tan.atr(df["High"], df["Low"], df["Close"], length=1)
+    df["atr"] = df.atr.rolling(window=30).mean()
+    df["close_smooth"] = savgol_filter(df["Close"], 20, 5)
+
+    atr = df["atr"].iloc[-1]
+
+    peaks_idx, _ = find_peaks(df["close_smooth"], distance=15, width=3, prominence=atr)
+    troughs_idx, _ = find_peaks(-df["close_smooth"], distance=15, width=3, prominence=atr)
+
+    # defining accurate highs and lows, scanning candles left and right for the high
+
+    df["is_peak"] = 0
+    df["is_peak"].iloc[peaks_idx] = 1  # peaks are maxima from the savgol filter
+
+    df["is_trough"] = 0
+    df["is_trough"].iloc[troughs_idx] = 1  # troughs are minima from the savgol filter
+
+    df["actual_high"] = 0  # actual highs are the real highs surrounding the approximate high
+    for index, row in df.iterrows():
+        if row["is_peak"] == 1:
+            integer_index = df.index.get_loc(index)
+            if integer_index < 8:
+                index_integer1 = 0
+            else:
+                index_integer1 = integer_index - 8
+            start = df.index[index_integer1]
+            until_end = df_length - integer_index
+            if until_end <= 8 and until_end > 0:
+                index_integer2 = integer_index + (until_end - 1)
+            else:
+                index_integer2 = integer_index + 8
+            end = df.index[index_integer2]
+            max_value = df.loc[start:end, "High"].max()
+            max_index = df.loc[start:end, "High"].idxmax()
+            df.at[max_index, "actual_high"] = 1
+
+    df["actual_low"] = 0
+    for index, row in df.iterrows():
+        if row["is_trough"] == 1:
+            integer_index = df.index.get_loc(index)
+            if integer_index < 8:
+                index_integer1 = 0
+            else:
+                index_integer1 = integer_index - 8
+            start = df.index[index_integer1]
+            until_end = df_length - integer_index
+            if until_end <= 8:
+                index_integer2 = integer_index + (until_end - 1)
+            else:
+                index_integer2 = integer_index + 8
+            end = df.index[index_integer2]
+            min_value = df.loc[start:end, "Low"].min()
+            min_index = df.loc[start:end, "Low"].idxmin()
+            df.at[min_index, "actual_low"] = 1
+
+    # defining valid highs, only the ones that haven't been broken----------------------------------------------
+
+    highs_df = df[df["actual_high"] == 1]
+
+    try:
+        highest_index = highs_df["High"].idxmax()
+    except Exception as e:
+        print(e)
+        return pd.DataFrame(), pd.DataFrame()  # no idea what's happening here
+
+    highest_df2 = df.loc[highest_index:]
+    df["protected_highs_and_lows"] = 0
+    # this is basically the same as the valid_high, just that this is in the real df
+    # here I am unnecessarily creating a new df, npt sure whether I really need it
+
+    highest_df2["valid_high"] = 0
+    last_high = 0
+    for index, row in highest_df2[::-1].iterrows():
+        if row["actual_high"] == 1:
+            if last_high == 0:
+                highest_point = df.loc[index:, "High"].idxmax()
+                highest_df2.at[highest_point, "valid_high"] = 1
+                df.at[highest_point, "protected_highs_and_lows"] = 1  # trying to add to normal df, so to not need the highest_df2
+                last_high = df.at[highest_point, "High"]
+            elif row["High"] > last_high:
+                highest_df2.at[index, "valid_high"] = 1
+                df.at[index, "protected_highs_and_lows"] = 1
+                last_high = row["High"]
+            elif row["High"] < last_high:
+                highest_df2.at[index, "valid_high"] = 0
+                df.at[index, "protected_highs_and_lows"] = 0
+
+    lows_df = df[df["actual_low"] == 1]
+    lowest_index = lows_df["Low"].idxmin()
+    lowest_df2 = df.loc[lowest_index:]
+
+    lowest_df2["valid_low"] = 0
+    last_low = 0
+    for index, row in lowest_df2[::-1].iterrows():
+        if row["actual_low"] == 1:
+            if last_low == 0:
+                lowest_point = df.loc[index:, "Low"].idxmin()
+                lowest_df2.at[lowest_point, "valid_low"] = 1
+                df.at[lowest_point, "protected_highs_and_lows"] = -1
+                last_low = df.at[lowest_point, "Low"]
+            elif row["Low"] < last_low:
+                lowest_df2.at[index, "valid_low"] = 1
+                df.at[index, "protected_highs_and_lows"] = -1
+                last_low = row["Low"]
+            elif row["Low"] > last_low:
+                lowest_df2.at[index, "valid_low"] = 0
+                df.at[index, "protected_highs_and_lows"] = 0
+
+    # checking whether the high is protected or not, name = ultra_stationary----------------------------------------------
+    # there is no difference between valid highs and protected, however ones are in another
+    # based on the ultra stationary we will define the zones
+    df["ultra_stationary"] = 0
+    valid_high_bool = False
+    for index, row in df.iterrows():
+        if row["actual_high"] == 1 or row["actual_low"] == 1:
+            if row["actual_low"] == 1 and row["Low"] < last_low and valid_high_bool == True:
+                df.at[real_index, "ultra_stationary"] = 1
+            if row["actual_high"] == 1 and valid_high_bool == True:
+                valid_high_bool = True
+            else:
+                valid_high_bool = False
+            if row["protected_highs_and_lows"] == 1:
+                valid_high_bool = True
+                real_index = index
+            if row["actual_low"] == 1:
+                last_low = row["Low"]
+
+    valid_low_bool = False
+    for index, row in df.iterrows():
+        if row["actual_high"] == 1 or row["actual_low"] == 1:
+            if row["actual_high"] == 1 and row["High"] > last_high and valid_low_bool == True:
+                df.at[real_index, "ultra_stationary"] = -1
+            if row["actual_low"] == 1 and valid_low_bool == True:
+                valid_low_bool = True
+            else:
+                valid_low_bool = False
+            if row["protected_highs_and_lows"] == -1:
+                valid_low_bool = True
+                real_index = index
+            if row["actual_high"] == 1:
+                last_high = row["High"]
+
+    return df, lowest_df2
+
+
+def momentumIndicatorPrep(df):
+    currState = "neutral"
+    last_high = None
+    last_low = None
+
+    df["momentum"] = "neutral"
+
+    for index, row in df.iterrows():
+        if row["actual_high"] == 1:
+            last_high = row["High"]
+        if row["actual_low"] == 1:
+            last_low = row["Low"]
+
+        if last_high != None and last_low != None:
+            if row["Close"] > last_high and currState != "bullish":
+                currState = "bullish"
+            elif row["Close"] < last_low and currState != "bearish":
+                currState = "bearish"
+
+        df.at[index, "momentum"] = currState
+
+    return df
+
+
+def create_yearly_candles(monthly_candles):
+    monthly_candles["Time"] = pd.to_datetime(monthly_candles.index)
+
+    # Group the monthly candles by year
+    grouped = monthly_candles.groupby(pd.Grouper(key="Time", freq="Y"))
+    yearly_candles = []
+    # Iterate over the groups and extract the first and last candles of each year
+    for year, group in grouped:
+        first_candle = group.iloc[0]
+        last_candle = group.iloc[-1]
+
+        year_data = {
+            "Time": first_candle["Time"],
+            "Open": first_candle["Open"],
+            "Close": last_candle["Close"],
+        }
+
+        yearly_candles.append(year_data)
+    columns = ["Time", "Open", "Close"]
+    dfYearlyData = pd.DataFrame(yearly_candles, columns=columns)
+    dfYearlyData.set_index("Time", inplace=True)
+    return dfYearlyData
+
+
+def createQuarterlyCandles(yearly_df, monthly_df):
+    if yearly_df.empty or monthly_df.empty:
+        return pd.DataFrame()
+
+    secondLastCandle = yearly_df.iloc[-1]
+    quarterIndex = secondLastCandle.name
+    quarterly_candles = []
+    while quarterIndex <= monthly_df.index[-3]:
+        first_candle = monthly_df.loc[quarterIndex]
+        last_candle = monthly_df.loc[quarterIndex + pd.DateOffset(months=2)]
+        quarter_data = {
+            "Time": first_candle.name,
+            "Open": first_candle["Open"],
+            "Close": last_candle["Close"],
+        }
+        quarterly_candles.append(quarter_data)
+        quarterIndex = quarterIndex + pd.DateOffset(months=3)
+    columns = ["Time", "Open", "Close"]
+    dfQuarterlyData = pd.DataFrame(quarterly_candles, columns=columns)
+    dfQuarterlyData.set_index("Time", inplace=True)
+    return dfQuarterlyData
+
+
+def addRanges(x0, y0, x1, y1):
+    rangeLines = []
+
+    rangeLines.append(
+        {
+            "x0": x0,
+            "y0": y0,
+            "x1": x1,
+            "y1": y0,
+        }
+    )
+
+    rangeLines.append(
+        {
+            "x0": x0,
+            "y0": y1,
+            "x1": x1,
+            "y1": y1,
+        }
+    )
+    middle = (y0 + y1) / 2
+
+    rangeLines.append(
+        {
+            "x0": x0,
+            "y0": middle,
+            "x1": x1,
+            "y1": middle,
+        }
+    )
+
+    quarter1 = (y0 + middle) / 2
+    quarter2 = (y1 + middle) / 2
+
+    rangeLines.append(
+        {
+            "x0": x0,
+            "y0": quarter1,
+            "x1": x1,
+            "y1": quarter1,
+        }
+    )
+
+    rangeLines.append(
+        {
+            "x0": x0,
+            "y0": quarter2,
+            "x1": x1,
+            "y1": quarter2,
+        }
+    )
+    return rangeLines

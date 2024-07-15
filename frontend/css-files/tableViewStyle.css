@@ -9,7 +9,7 @@ body {
   .header-container {
     display: flex;
     width: 90%;
-    align-items: center;
+    align-items: space;
     justify-content: center;
     margin: 10px;
     margin-bottom: 15px;
@@ -122,6 +122,8 @@ body {
     /* margin:5px; */
     width: 300px;
     box-sizing: border-box;
+    margin-left: 10px;
+    margin-right: 10px;
   }
 
   .btn-group button {
@@ -140,7 +142,7 @@ body {
     color: rgb(0, 0, 0);
   }
 
-  .tablinks.right {
+  .tablinks.right, .pairAgainst.right {
     border-right: none;
   }
 

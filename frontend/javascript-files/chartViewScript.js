@@ -13,6 +13,10 @@ const chartProperties = {
     vertLines: { color: "#444", visible:false },
     horzLines: { color: "#444", visible: false },
   },
+  crosshair:{
+    mode: LightweightCharts.CrosshairMode.Normal,
+    
+  }
 };
 const domElement = document.getElementById("tvchart");
 const chart = LightweightCharts.createChart(domElement, chartProperties);
@@ -324,11 +328,21 @@ async function removeVarvData(){
 }
 
 // function for setting all at once
-function setAll(){
-  setData();
+async function setAll(){
+  await setData();
   setLineData();
   setVarvData();
   updateIndividualIndicatorsTimeframe();
+}
+
+async function onChangeOfCoin(){
+  setLoader()
+  removeVarvData()
+  await setData() 
+  setLineData() 
+  setVarvData() 
+  updateSmallIndicatorCoin()
+  turnOffLoader()
 }
 
 
@@ -344,7 +358,15 @@ function getUrlParameterCoin() {
 function getUrlParameterTimeframe() {
   const urlParams = new URLSearchParams(window.location.search);
   const myParam = urlParams.get('timeframe');
-  return myParam;
+  var syntaxMap = {
+    '1h': '1h',
+    '4h': '4h',
+    '1d': '1day',
+    '1w': '1week',
+    '1day': '1day',
+    '1week': '1week',
+  };
+  return syntaxMap[myParam];
 }
 
 function updateCoin(){
@@ -388,11 +410,15 @@ function updatePairAgainst(event, pairAgainst) {
     options[i].classList.remove("active");
   }
   event.currentTarget.classList.add("active");
+  var currentPairAgainst = event.currentTarget.getAttribute("data-currency");
+  localStorage.setItem('selectedPairAgainst', currentPairAgainst);
+
   setAll();
 }
 
 // changes main timeframe
-function updateTimeframe(event, timeframe) {
+async function updateTimeframe(event, timeframe) {
+  setLoader();
   var i, tablinks;
 
   tablinks = document.getElementsByClassName("tablinks");
@@ -404,7 +430,8 @@ function updateTimeframe(event, timeframe) {
   // Save the selected timeframe to localStorage
   localStorage.setItem('selectedTimeframe', timeframe);
 
-  setAll();
+  await setAll();
+  turnOffLoader();
   
 }
 
@@ -581,6 +608,16 @@ function turnOffLoader(){
   });
 }
 
+function setLoader(){
+  var tvchart = document.getElementById("tvchart");
+  tvchart.classList.add("tvchartbeforeload");
+
+  var loader = document.querySelectorAll(".spinning");
+  [].forEach.call(loader, function(el) {
+    el.classList.add("loader");
+  });
+}
+
 function setSavedTimeframe(){
   const savedTimeframe = localStorage.getItem('selectedTimeframe');
     
@@ -595,10 +632,24 @@ function setSavedTimeframe(){
   }
 }
 
+function setSavedPairAgainst(){
+  const savedPairAgainst = localStorage.getItem('selectedPairAgainst');
+    
+  if (savedPairAgainst){
+      const button = document.querySelector(`.pairAgainst[data-currency="${savedPairAgainst}"]`);
+          button.classList.add('active');
+  } else {
+      const defaultButton = document.querySelector('.pairAgainst[data-currency="USD"]');
+      if (defaultButton) {
+          defaultButton.classList.add('active');
+      }
+  }
+}
+
 //! element listeners ----------------------------------------------
 // context bands
-const switchElement = document.getElementById("indicator-switch");
-switchElement.addEventListener("change", function(){
+const contextBandsSwitchElement = document.getElementById("indicator-switch");
+contextBandsSwitchElement.addEventListener("change", function(){
   setLineData();
 })
 
@@ -648,10 +699,18 @@ window.addEventListener("resize", () => {
   console.log("resized");
 });
 
+document.addEventListener('DOMContentLoaded', (event) => {
+  const indicatorSwitch = document.getElementById('indicator-switch');
+  indicatorSwitch.checked = false; // Uncheck the switch
+  const varvSwitch = document.getElementById('varv-indicator-switch');
+  varvSwitch.checked = false; // Uncheck the switch
+});
+
 
 
 //! first function calls on page load ----------------------------------------------
 // populateSelect(); // populate the coin selector
 setSavedTimeframe(); // set the saved timeframe
+setSavedPairAgainst(); // set the saved pair against
 setData(); // initial data fetch and set
 updateIndividualIndicatorsTimeframe(); // initial setting of small timeframe buttons

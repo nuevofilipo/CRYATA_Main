@@ -6,24 +6,26 @@ import numpy as np
 # needed for caching
 import redis
 import json
-from functools import lru_cache
 
-redis_client = redis.Redis(host="localhost", port=6379, db=0)
-
-CACHE_EXPIRATION = 60  # one minute
-
-
-def cache_key(coin, candleTimeFrame, limit):
-    return f"{coin}-{candleTimeFrame}-{limit}"
+""
+redis_host = "roundhouse.proxy.rlwy.net"
+redis_port = 45766
+redis_password = "SnCAssYEzOUuwMCKrTULmnyEnntCChwN"
 
 
-@lru_cache(maxsize=128)
+# redis_client = redis.Redis(host="localhost", port=6379, db=0) # local redis
+redis_client = redis.Redis(host=redis_host, port=redis_port, password=redis_password, db=0)  # remote redis
+CACHE_EXPIRATION = 120  # one minute redis cache expiration
+
+
 def getResponse(coin, candleTimeFrame, limit):
     key = cache_key(coin, candleTimeFrame, limit)
     cached_data = redis_client.get(key)
     if cached_data:
         cached_data_str = cached_data.decode("utf-8")
-        return pd.read_json(cached_data_str)
+        output = pd.read_json(cached_data_str)
+        print("Cache hit")
+        return transformData(output)
 
     result = None
     if coin.endswith("BTC"):
@@ -38,54 +40,12 @@ def getResponse(coin, candleTimeFrame, limit):
             data = getCCXTData(coin, candleTimeFrame, limit)
         result = data
 
+    print("Cache miss")
     redis_client.setex(key, CACHE_EXPIRATION, result.to_json())
     return result
 
 
-def create_result_df(coin_df, btc_df):
-    # Find common time values
-    common_times = np.intersect1d(coin_df["time"], btc_df["time"])
-
-    coin_df = coin_df[coin_df["time"].isin(common_times)]
-    btc_df = btc_df[btc_df["time"].isin(common_times)]
-
-    coin_df = coin_df.sort_values("time")
-    btc_df = btc_df.sort_values("time")
-
-    result_df = pd.DataFrame()
-
-    result_df["time"] = common_times
-
-    columns = ["Open", "High", "Low", "Close"]
-    result_df[columns] = coin_df[columns].values / btc_df[columns].values
-
-    return result_df
-
-
-def fixingData(df):
-    prev_low = 0
-
-    for index, row in df.iterrows():
-        if index == 0:
-            prev_low = row["Low"]
-        elif (row["Low"] / prev_low) < 0.1:
-            df.at[index, "Low"] = prev_low
-        else:
-            prev_low = row["Low"]
-
-    prev_high = 0
-
-    for index, row in df.iterrows():
-        if index == 0:
-            prev_high = row["High"]
-        elif (row["High"] / prev_high) > 10:
-            df.at[index, "High"] = prev_high
-        else:
-            prev_high = row["High"]
-
-    return df
-
-
+#! api query functions ----------------------------
 def getTwelveData(coin, candleTimeFrame, limit):
     url = "https://api.twelvedata.com/time_series?"
 
@@ -203,5 +163,60 @@ def getCCXTData(coin, candleTimeFrame, limit):
         return pd.DataFrame(columns=columns)
 
 
-# output = getResponse("ETH/BTC", "1day", 100)
+# !helper functions ----------------------------
+def cache_key(coin, candleTimeFrame, limit):
+    return f"{coin}-{candleTimeFrame}-{limit}"
+
+
+def transformData(data):
+    data["time"] = pd.to_datetime(data["time"], unit="ms")
+    return data
+
+
+def create_result_df(coin_df, btc_df):
+    # Find common time values
+    common_times = np.intersect1d(coin_df["time"], btc_df["time"])
+
+    coin_df = coin_df[coin_df["time"].isin(common_times)]
+    btc_df = btc_df[btc_df["time"].isin(common_times)]
+
+    coin_df = coin_df.sort_values("time")
+    btc_df = btc_df.sort_values("time")
+
+    result_df = pd.DataFrame()
+
+    result_df["time"] = common_times
+
+    columns = ["Open", "High", "Low", "Close"]
+    result_df[columns] = coin_df[columns].values / btc_df[columns].values
+
+    return result_df
+
+
+# for getTwelveData
+def fixingData(df):
+    prev_low = 0
+
+    for index, row in df.iterrows():
+        if index == 0:
+            prev_low = row["Low"]
+        elif (row["Low"] / prev_low) < 0.1:
+            df.at[index, "Low"] = prev_low
+        else:
+            prev_low = row["Low"]
+
+    prev_high = 0
+
+    for index, row in df.iterrows():
+        if index == 0:
+            prev_high = row["High"]
+        elif (row["High"] / prev_high) > 10:
+            df.at[index, "High"] = prev_high
+        else:
+            prev_high = row["High"]
+
+    return df
+
+
+# output = getResponse("DOGE/USD", "1day", 100)
 # print(output)

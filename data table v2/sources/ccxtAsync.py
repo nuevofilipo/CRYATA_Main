@@ -166,6 +166,12 @@ def asyncio_main(exchange, timeFrame, symbols, retries_left=3, limit=1000, since
 
 
 # !using concurrent futures -------------------
+sinceTimestampMapping = {
+    "1d": 1000 * 60 * 60 * 24,
+    "1w": 1000 * 60 * 60 * 24 * 7,
+    "1h": 1000 * 60 * 60,
+    "4h": 1000 * 60 * 60 * 4,
+}
 
 
 if __name__ == "__main__":
@@ -352,14 +358,7 @@ if __name__ == "__main__":
         exchange = ccxt.binance()
         sinceTimestamp = None
         currentTimeInMs = exchange.milliseconds()
-        if timeframe == "1d":
-            sinceTimestamp = currentTimeInMs - 1000 * 60 * 60 * 24
-        elif timeframe == "1w":
-            sinceTimestamp = currentTimeInMs - 1000 * 60 * 60 * 24 * 7
-        elif timeframe == "1h":
-            sinceTimestamp = currentTimeInMs - 1000 * 60 * 60
-        elif timeframe == "4h":
-            sinceTimestamp = currentTimeInMs - 1000 * 60 * 60 * 4
+        sinceTimestamp = currentTimeInMs - sinceTimestampMapping[timeframe]
 
         priceChange_dictionary = asyncio_main(
             exchange,
@@ -371,7 +370,10 @@ if __name__ == "__main__":
         logging.info(f"logger: fetched priceChangeDictionary {timeframe}")
 
         dfs_dictionary = asyncio_main(exchange, timeframe, symbols)
-        btc_df = dfs_dictionary["btcusdt" + timeframe]
+        btc_df = dfs_dictionary[
+            "btcusdt" + timeframe
+        ]  #! need this to calculate table with alt/btc data
+
         logging.info(f"logger: fetched data for {timeframe}")
 
         with concurrent.futures.ProcessPoolExecutor(
