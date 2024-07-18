@@ -26,10 +26,10 @@
             <div class="indicators-settings-box">
               <div class="chartSettings">
                 <div class="btn-group">
-                  <button class="tablinks" data-timeframe="1h" onclick="updateTimeframe(event, '1h')" value="1h">1h</button>
-                  <button class="tablinks" data-timeframe="4h" onclick="updateTimeframe(event, '4h')" value="4h">4h</button>
-                  <button class="tablinks" data-timeframe="1day" onclick="updateTimeframe(event, '1day')" value="1day">1d</button>
-                  <button class="tablinks right" data-timeframe="1week" onclick="updateTimeframe(event, '1week')" value="1week">1w</button>
+                  <button class="tablinks" data-timeframe="1h" onclick="changeTimeframe(event, '1h')" value="1h">1h</button>
+                  <button class="tablinks" data-timeframe="4h" onclick="changeTimeframe(event, '4h')" value="4h">4h</button>
+                  <button class="tablinks" data-timeframe="1day" onclick="changeTimeframe(event, '1day')" value="1day">1d</button>
+                  <button class="tablinks right" data-timeframe="1week" onclick="changeTimeframe(event, '1week')" value="1week">1w</button>
                 </div>
 
                 <select name="coin-selector" , id="coin-selector" , onchange="onChangeOfCoin()">
@@ -182,8 +182,8 @@
                 </select>
 
                 <div class="btn-group">
-                  <button class="pairAgainst" data-currency="USD" onclick="updatePairAgainst(event, 'usd')" value="USD">/USD</button>
-                  <button class="pairAgainst right" data-currency="BTC" onclick="updatePairAgainst(event, 'btc')" value="BTC">/BTC</button>
+                  <button class="pairAgainst" data-currency="USD" onclick="changePairAgainst(event, 'usd')" value="USD">/USD</button>
+                  <button class="pairAgainst right" data-currency="BTC" onclick="changePairAgainst(event, 'btc')" value="BTC">/BTC</button>
                 </div>
               </div>
               <div class="unified-indicator-box">

@@ -647,3 +647,36 @@ def addRanges(x0, y0, x1, y1):
         }
     )
     return rangeLines
+
+
+if __name__ == "__main__":
+    # for plotting highs only experimental
+    import plotly.graph_objects as go
+    from getTwelveData import getResponse
+
+    df = getResponse("BTC/USD", "1day", 2000)
+    df = highsLowsPrep(df)[0]
+    # print(df)
+
+    # Create the figure
+    fig = go.Figure()
+
+    # Add the OHLC data
+    fig.add_trace(go.Candlestick(x=df["time"], open=df["Open"], high=df["High"], low=df["Low"], close=df["Close"], name="OHLC"))
+
+    # Add markers for actual_high
+    highs = df[df["protected_highs_and_lows"] == 1]
+    fig.add_trace(go.Scatter(x=highs["time"], y=highs["High"], mode="markers", marker=dict(color="red", size=10), name="Actual High"))
+
+    lows = df[df["protected_highs_and_lows"] == -1]
+    fig.add_trace(go.Scatter(x=lows["time"], y=lows["Low"], mode="markers", marker=dict(color="blue", size=10), name="Actual Low"))
+
+    # protected_extrema = df[df["protected_highs_and_lows"] != 0]
+
+    # fig.add_trace(go.Scatter(x=protected_extrema["time"], y=protected_extrema["protected_highs_and_lows"], mode="markers", marker=dict(color="green", size=10), name="Protected Highs and Lows"))
+
+    # Update layout
+    fig.update_layout(title="OHLC with Actual Highs", xaxis_title="Time", yaxis_title="Price", xaxis_rangeslider_visible=False)
+
+    # Show the figure
+    fig.show()

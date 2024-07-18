@@ -1,6 +1,7 @@
 //! defining the chart and other chart elements ----------------------------------------------
-let urlParamsProcessedCoin = false;
-let urlParamsProcessedTf = false;
+let g_urlParamsProcessedCoin = false;
+let g_urlParamsProcessedTf = false;
+let firstLoad = true;
 const mainSection = document.getElementById("tvchart");
 const chartProperties = {
   height: getMainHeight() ,
@@ -61,63 +62,51 @@ let addedRanges = new Map();
 // for use with local data
 async function getData(route){
   changeTimeFrameFromUrl();
-  const selectedTimeframe = document.querySelector(".tablinks.active");
   const response = await fetch(
-    `http://127.0.0.1:5000/api/${route}/?coin=${updateCoin()}&timeframe=${selectedTimeframe.value}` 
+    `http://127.0.0.1:5000/api/${route}/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}` 
   )
   const data = await response.json();
   return data;
 }
 
 async function getRangesData(range_value){
-  const selectedTimeframe = document.querySelector(".tablinks.active");
   const response = await fetch(
-    `http://127.0.0.1:5000/api/ranges/?coin=${updateCoin()}&timeframe=${selectedTimeframe.value}&ranges=${range_value}` 
+    `http://127.0.0.1:5000/api/ranges/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}&ranges=${range_value}` 
   )
   const data = await response.json();
   return data;
-
 }
 
 async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
-  const chartTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
   const response = await fetch(
-    `http://127.0.0.1:5000/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
+    `http://127.0.0.1:5000/api/${endpoint}/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}&${additionalParameter}=${indicatorTimeframe}` 
   )
   const data = await response.json();
   return data;
-    
 }
 
 // for use with external hosted data
 // async function getData(route){
 //   changeTimeFrameFromUrl();
-//   const selectedBtn = document.querySelector(".active");
 //   const response = await fetch(
-//     `https://new-cryata-backend-production.up.railway.app//api/${route}/?coin=${updateCoin()}&timeframe=${selectedBtn.value}` 
+//     `https://new-cryata-backend-production.up.railway.app//api/${route}/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}`
 //   )
-  
 //   const data = await response.json();
 //   return data;
 // }
 
 // async function getRangesData(range_value){
-//   const selectedBtn = document.querySelector(".active");
 //   const response = await fetch(
-//     `https://new-cryata-backend-production.up.railway.app/api/ranges/?coin=${updateCoin()}&timeframe=${selectedBtn.value}&ranges=${range_value}` 
+//     `https://new-cryata-backend-production.up.railway.app/api/ranges/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}&ranges=${range_value}` 
 //   )
-  
 //   const data = await response.json();
 //   return data;
-
 // }
 
 // async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
-//   const chartTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
 //   const response = await fetch(
-//     `https://new-cryata-backend-production.up.railway.app/api/${endpoint}/?coin=${updateCoin()}&timeframe=${chartTimeframe}&${additionalParameter}=${indicatorTimeframe}` 
+//     `https://new-cryata-backend-production.up.railway.app/api/${endpoint}/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}&${additionalParameter}=${indicatorTimeframe}`
 //   )
-
 //   const data = await response.json();
 //   return data;
     
@@ -126,7 +115,6 @@ async function getDataIndividualTimeframe(endpoint, additionalParameter,  indica
 //! functions for creating and removing boxes and ranges----------------------------------------------
 async function createBoxesData(mapping, data, color, key){
   list = [];
-  // const data = data;
   data.forEach(element => {
     color = element.hasOwnProperty("color") ? element["color"] : color;
     const i = candleSeries.createBox({
@@ -207,7 +195,11 @@ async function setData(){
     
   });
 
-  turnOffLoader();
+  if(firstLoad){
+    turnOffLoader();
+    firstLoad = false;
+  }
+  
 
   candleSeries.setData(cdata);
   chart.priceScale("right").applyOptions({
@@ -226,6 +218,17 @@ async function setData(){
 async function setLineData(){
   if (indicatorState() == true){
   data = await getData("4lines");
+  if (data.length == 0 ){
+    showNotification('Data not available');
+    const indicatorSwitch = document.getElementById("indicator-switch");
+    indicatorSwitch.click();
+    return;
+  } else if(indicatorState() == false){
+    removeContextBandsData();
+    return;
+  }
+
+
   const maDownShift = data.map((d) => {
     return { value: parseFloat(d.MA)*0.62, time: d.time / 1000 };
   });
@@ -243,12 +246,17 @@ async function setLineData(){
   emaLine1.setData(emaDownShift);
   emaLine2.setData(emaUpShift);
   } else if (indicatorState() == false){
-    maLine1.setData([]);
-    maLine2.setData([]);
-    emaLine1.setData([]);
-    emaLine2.setData([]);
+    removeContextBandsData();
   }
 }
+
+async function removeContextBandsData(){
+  maLine1.setData([]);
+  maLine2.setData([]);
+  emaLine1.setData([]);
+  emaLine2.setData([]);
+}
+
 
 async function setVarvData(){
   if (varvIndicatorState() == true){
@@ -327,84 +335,30 @@ async function removeVarvData(){
   band11.setData([]);
 }
 
-// function for setting all at once
+//! functions for setting multiple at once
 async function setAll(){
+  updateSmallIndicatorsTf();
   await setData();
-  setLineData();
-  setVarvData();
-  updateIndividualIndicatorsTimeframe();
+  await setLineData();
+  await setVarvData();
+
 }
 
 async function onChangeOfCoin(){
-  setLoader()
-  removeVarvData()
-  await setData() 
-  setLineData() 
-  setVarvData() 
-  updateSmallIndicatorCoin()
-  turnOffLoader()
-}
-
-
-
-//! manipulate coin and timeframe from url ----------------------------------------------
-
-function getUrlParameterCoin() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const myParam = urlParams.get('coin');
-  return myParam;
-}
-
-function getUrlParameterTimeframe() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const myParam = urlParams.get('timeframe');
-  var syntaxMap = {
-    '1h': '1h',
-    '4h': '4h',
-    '1d': '1day',
-    '1w': '1week',
-    '1day': '1day',
-    '1week': '1week',
-  };
-  return syntaxMap[myParam];
-}
-
-function updateCoin(){
-  if (getUrlParameterCoin() != null && !urlParamsProcessedCoin){
-    document.getElementById("coin-selector").value = getUrlParameterCoin();
-    urlParamsProcessedCoin = true;
-    return getUrlParameterCoin();    
-  }
-  const selectedCoin = document.getElementById("coin-selector").value;
-
-  const pairAgainst = document.querySelector(".pairAgainst.active").value;
-  if (pairAgainst == "BTC"){
-    return selectedCoin.replace("USD", "BTC");
-  }
-
-  
-  return selectedCoin;
-}
-
-function changeTimeFrameFromUrl(){
-  if (getUrlParameterTimeframe() != null && !urlParamsProcessedTf){
-    const selectedTimeframe = getUrlParameterTimeframe();
-    const buttons = document.querySelectorAll('.tablinks');
-    buttons.forEach(button => {
-      if (button.getAttribute('data-timeframe') == selectedTimeframe){
-        button.classList.add('active');
-      } else if (button.classList.contains('active')){
-        button.classList.remove('active');
-      }
-    });
-    urlParamsProcessedTf = true;
-  }
-  const selectedBtn = document.querySelector(".active");
-  return selectedBtn.value;
+  setLoader();
+  removeContextBandsData();
+  removeVarvData();
+  await setData(); 
+  await setLineData(); 
+  await setVarvData(); 
+  await updateSmallIndicatorCoin();
+  turnOffLoader();
+  chart.resize(getMainWidth(), getMainHeight());
+  chart.timeScale().fitContent();
 }
 
 //! updating and changing timeframes && small timeframe-btns-----------------------------------
-function updatePairAgainst(event, pairAgainst) {
+function changePairAgainst(event, pairAgainst) {
   var options = document.querySelectorAll(".pairAgainst");
   for (var i = 0; i < options.length; i++) {
     options[i].classList.remove("active");
@@ -417,8 +371,10 @@ function updatePairAgainst(event, pairAgainst) {
 }
 
 // changes main timeframe
-async function updateTimeframe(event, timeframe) {
+async function changeTimeframe(event, timeframe) {
   setLoader();
+  removeContextBandsData();
+  removeVarvData();
   var i, tablinks;
 
   tablinks = document.getElementsByClassName("tablinks");
@@ -432,11 +388,13 @@ async function updateTimeframe(event, timeframe) {
 
   await setAll();
   turnOffLoader();
+  chart.resize(getMainWidth(), getMainHeight());
+  chart.timeScale().fitContent(); 
   
 }
 
 // this makes timeframe buttons with smaller tf unclickable
-function updateIndividualIndicatorsTimeframe(){
+function updateSmallIndicatorsTf(){
   const individualTimeframeButtons = document.querySelectorAll('.timeframe-btn');
   const timeframeRanks = {
     '1h': 1,
@@ -471,26 +429,88 @@ function updateIndividualIndicatorsTimeframe(){
 }
 
 // this resets indicators that get activated by the small timeframe buttons
-function updateSmallIndicatorCoin(){
+async function updateSmallIndicatorCoin() {
   const buttons = document.querySelectorAll('.timeframe-btn');
-  buttons.forEach(button => {
+  await Promise.all(Array.from(buttons).map(async button => {
     const indTime = button.getAttribute('data-timeframe');
     const indicator = button.getAttribute('data-indicator');
     const type = button.getAttribute('data-type');
     const color = button.getAttribute('data-color');
     if (button.classList.contains('active')) {
-      if (type == "boxes"){
+      if (type == "boxes") {
         removeBoxesMap(addedSupplyZones, indicator + indTime);
-        createBoxesData(addedSupplyZones, getDataIndividualTimeframe( indicator, "indicatorTimeframe",  indTime), color, indicator + indTime );
-      } else if (type == "lineSeries"){
+        const data = await getDataIndividualTimeframe(indicator, "indicatorTimeframe", indTime);
+        createBoxesData(addedSupplyZones, data, color, indicator + indTime);
+      } else if (type == "lineSeries") {
         removeBoxesMap(addedRanges, indicator + indTime);
-        createRangesData(addedRanges, getDataIndividualTimeframe( indicator, "indicatorTimeframe",  indTime), color, indicator + indTime);
+        const data = await getDataIndividualTimeframe(indicator, "indicatorTimeframe", indTime);
+        createRangesData(addedRanges, data, color, indicator + indTime);
       }
     }
-  });
+  }));
+}
+
+//! getter functions: current coin and current timeframe
+function getCurrentCoin(){
+  if (getUrlParameterCoin() != null && !g_urlParamsProcessedCoin){
+    document.getElementById("coin-selector").value = getUrlParameterCoin();
+    g_urlParamsProcessedCoin = true;
+    return getUrlParameterCoin();    
+  }
+  const selectedCoin = document.getElementById("coin-selector").value;
+
+  const pairAgainst = document.querySelector(".pairAgainst.active").value;
+  if (pairAgainst == "BTC"){
+    return selectedCoin.replace("USD", "BTC");
+  }
+  return selectedCoin;
+}
+
+function getCurrentTimeframe(){
+  const chartTimeframe = document.querySelector('.tablinks.active').getAttribute('data-timeframe');
+  return chartTimeframe;
 }
 
 
+//! manipulate coin and timeframe from url && getCurrentCoin----------------------------------------------
+function getUrlParameterCoin() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const myParam = urlParams.get('coin');
+  return myParam;
+}
+
+function getUrlParameterTimeframe() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const myParam = urlParams.get('timeframe');
+  var syntaxMap = {
+    '1h': '1h',
+    '4h': '4h',
+    '1d': '1day',
+    '1w': '1week',
+    '1day': '1day',
+    '1week': '1week',
+  };
+  return syntaxMap[myParam];
+}
+
+
+
+function changeTimeFrameFromUrl(){
+  if (getUrlParameterTimeframe() != null && !g_urlParamsProcessedTf){
+    const selectedTimeframe = getUrlParameterTimeframe();
+    const buttons = document.querySelectorAll('.tablinks');
+    buttons.forEach(button => {
+      if (button.getAttribute('data-timeframe') == selectedTimeframe){
+        button.classList.add('active');
+      } else if (button.classList.contains('active')){
+        button.classList.remove('active');
+      }
+    });
+    g_urlParamsProcessedTf = true;
+  }
+  const selectedBtn = document.querySelector(".active");
+  return selectedBtn.value;
+}
 
 
 
@@ -618,6 +638,8 @@ function setLoader(){
   });
 }
 
+// saving certain settings locally over reload
+
 function setSavedTimeframe(){
   const savedTimeframe = localStorage.getItem('selectedTimeframe');
     
@@ -713,4 +735,4 @@ document.addEventListener('DOMContentLoaded', (event) => {
 setSavedTimeframe(); // set the saved timeframe
 setSavedPairAgainst(); // set the saved pair against
 setData(); // initial data fetch and set
-updateIndividualIndicatorsTimeframe(); // initial setting of small timeframe buttons
+updateSmallIndicatorsTf(); // initial setting of small timeframe buttons
