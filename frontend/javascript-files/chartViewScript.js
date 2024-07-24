@@ -1,7 +1,7 @@
 //! defining the chart and other chart elements ----------------------------------------------
-let g_urlParamsProcessedCoin = false;
-let g_urlParamsProcessedTf = false;
-let firstLoad = true;
+var g_urlParamsProcessedCoin = false;
+var g_urlParamsProcessedTf = false;
+var g_firstLoad = true;
 const mainSection = document.getElementById("tvchart");
 const chartProperties = {
   height: getMainHeight() ,
@@ -17,8 +17,16 @@ const chartProperties = {
   crosshair:{
     mode: LightweightCharts.CrosshairMode.Normal,
     
-  }
+  },
+  timeScale: {
+    timeVisible: true,
+  },
+  rightPriceScale: {
+    mode: 1,
+    autoScale: true,
+  },
 };
+
 const domElement = document.getElementById("tvchart");
 const chart = LightweightCharts.createChart(domElement, chartProperties);
 const candleSeries = chart.addCandlestickSeries();
@@ -54,8 +62,8 @@ const band10 = chart.addLineSeries({ color: "rgb(236, 33, 243)", lineWidth: 1, p
 const band11 = chart.addLineSeries({ color: "rgb(243, 33, 61)", lineWidth: 1, priceLineVisible: false });
 
 
-let addedSupplyZones = new Map();
-let addedRanges = new Map();
+var addedSupplyZones = new Map();
+var addedRanges = new Map();
 
 
 //! functions for fetching data asyncronously ----------------------------------------------
@@ -114,7 +122,7 @@ async function getDataIndividualTimeframe(endpoint, additionalParameter,  indica
 
 //! functions for creating and removing boxes and ranges----------------------------------------------
 async function createBoxesData(mapping, data, color, key){
-  list = [];
+  var list = [];
   data.forEach(element => {
     color = element.hasOwnProperty("color") ? element["color"] : color;
     const i = candleSeries.createBox({
@@ -138,7 +146,7 @@ async function createBoxesData(mapping, data, color, key){
 }
 
 async function createRangesData(mapping, data, color, key){
-  list = [];
+  var list = [];
   data.forEach(element => {
     const i = candleSeries.createBox({
         corners: [{ time: element["x0"] / 1000, price: element["y0"] }, { time: element["x1"] / 1000, price: element["y1"] }],
@@ -195,23 +203,15 @@ async function setData(){
     
   });
 
-  if(firstLoad){
+  if(g_firstLoad){
     turnOffLoader();
-    firstLoad = false;
+    g_firstLoad = false;
   }
   
 
   candleSeries.setData(cdata);
-  chart.priceScale("right").applyOptions({
-    autoScale: true,
-    mode: 1,
-  });
-  chart.timeScale().applyOptions({
-    timeVisible: true,
-  })
   chart.resize(getMainWidth(), getMainHeight());
-
-
+  chart.timeScale().fitContent();
 }
 
 // setting context bands data
@@ -341,7 +341,6 @@ async function setAll(){
   await setData();
   await setLineData();
   await setVarvData();
-
 }
 
 async function onChangeOfCoin(){
@@ -353,12 +352,12 @@ async function onChangeOfCoin(){
   await setVarvData(); 
   await updateSmallIndicatorCoin();
   turnOffLoader();
-  chart.resize(getMainWidth(), getMainHeight());
   chart.timeScale().fitContent();
 }
 
 //! updating and changing timeframes && small timeframe-btns-----------------------------------
-function changePairAgainst(event, pairAgainst) {
+async function changePairAgainst(event, pairAgainst) {
+  setLoader();
   var options = document.querySelectorAll(".pairAgainst");
   for (var i = 0; i < options.length; i++) {
     options[i].classList.remove("active");
@@ -367,7 +366,9 @@ function changePairAgainst(event, pairAgainst) {
   var currentPairAgainst = event.currentTarget.getAttribute("data-currency");
   localStorage.setItem('selectedPairAgainst', currentPairAgainst);
 
-  setAll();
+  await setAll();
+  turnOffLoader();
+  chart.timeScale().fitContent();
 }
 
 // changes main timeframe
@@ -388,7 +389,6 @@ async function changeTimeframe(event, timeframe) {
 
   await setAll();
   turnOffLoader();
-  chart.resize(getMainWidth(), getMainHeight());
   chart.timeScale().fitContent(); 
   
 }
@@ -626,6 +626,7 @@ function turnOffLoader(){
   [].forEach.call(loader, function(el) {
     el.classList.remove("loader");
   });
+  chart.resize(getMainWidth(), getMainHeight());
 }
 
 function setLoader(){
@@ -735,4 +736,5 @@ document.addEventListener('DOMContentLoaded', (event) => {
 setSavedTimeframe(); // set the saved timeframe
 setSavedPairAgainst(); // set the saved pair against
 setData(); // initial data fetch and set
+console.log("setting data");
 updateSmallIndicatorsTf(); // initial setting of small timeframe buttons

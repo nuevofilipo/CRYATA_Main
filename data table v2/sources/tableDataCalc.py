@@ -9,11 +9,11 @@ sys.path.append("../../")
 
 from backend.moduls.getTwelveData import getResponse
 from backend.moduls.indicatorFunctions import (
-    createContextBands,
-    createVarv,
-    momentumIndicator,
-    imbalanceZones,
-    supplyDemandZones,
+    contextBandsCalc,
+    varvCalc,
+    momentumCalc,
+    imbalanceZonesCalc,
+    supplyDemandZonesCalc,
 )
 
 
@@ -47,10 +47,7 @@ def getPastPrice(coin, priceChangeDict, btc_boolean):
     if not btc_boolean and pastCoinName in priceChangeDict:
         past_price = priceChangeDict[pastCoinName].iloc[0]["Open"]
     elif btc_boolean and pastCoinName in priceChangeDict:
-        past_price = (
-            priceChangeDict[pastCoinName].iloc[0]["Open"]
-            / priceChangeDict["btcusdt1m"].iloc[0]["Open"]
-        )
+        past_price = priceChangeDict[pastCoinName].iloc[0]["Open"] / priceChangeDict["btcusdt1m"].iloc[0]["Open"]
     return past_price
 
 
@@ -61,7 +58,7 @@ def getPriceChange(currPrice, pastPrice):
 
 
 def contextBandsMetric(df):
-    df4Lines = createContextBands(df, "1day", df)
+    df4Lines = contextBandsCalc(df, "1day", df)
     dfLastRow = df4Lines.iloc[-1]
     upperMA = dfLastRow["MA"] * 1.62
     lowerMA = dfLastRow["MA"] * 0.62
@@ -89,7 +86,7 @@ def varvIndicatorMetric(df, timeframe):
         return -1
 
     price = df.iloc[-1]["Close"]
-    dfVarv = createVarv(df, timeframe, df)
+    dfVarv = varvCalc(df, timeframe, df)
 
     try:
         dfLastRow = dfVarv.iloc[-1]
@@ -107,7 +104,7 @@ def varvIndicatorMetric(df, timeframe):
 
 
 def momentumIndicatorMetric(df):
-    combinedDf = momentumIndicator(df, df)
+    combinedDf = momentumCalc(df, df)
 
     # case when there is not enough data
     if combinedDf.empty:
@@ -152,8 +149,8 @@ def medianPerformance(df):
 
 
 def nearestZoneMetric(df):
-    imbalance_df = imbalanceZones(df)
-    supplyDemand_df = supplyDemandZones(df, df)
+    imbalance_df = imbalanceZonesCalc(df)
+    supplyDemand_df = supplyDemandZonesCalc(df, df)
 
     still_open_imbalance = []
     still_open_supply = []
@@ -180,11 +177,7 @@ def nearestZoneMetric(df):
 
     if closestZone == None:
         return "no data"
-    closestZone = (
-        closestZone["y0"]
-        if abs(currentPrice - closestZone["y0"]) < abs(currentPrice - closestZone["y1"])
-        else closestZone["y1"]
-    )
+    closestZone = closestZone["y0"] if abs(currentPrice - closestZone["y0"]) < abs(currentPrice - closestZone["y1"]) else closestZone["y1"]
     percentageToZone = round((closestZone - currentPrice) / currentPrice * 100, 1)
     return percentageToZone
 
@@ -239,8 +232,7 @@ def createTableRow(df, coin, timeframe, priceChangeDict={}):
 def createTableRow2(df, coin, timeframe, priceChangeDict={}, btc_df=None):
     if coin[:-2] == "btcusdt":  # if the coin is btcusdt, we don't need btc/btc pair
         return {
-            "usd": {createTableRow(df, coin, timeframe, priceChangeDict)},
-            "btc": {},
+            "usd": createTableRow(df, coin, timeframe, priceChangeDict),
         }
 
     # getting alt/btc pair
@@ -338,5 +330,10 @@ def createEntireTable():  # for experimenting -- not used for any calculations
 
 
 def main():  # for experimenting -- not used for any calculations
-    df = getResponse("ETH/USD", "1day", 1000)
-    print(nearestZoneMetric(df))
+    df = getResponse("BTC/USD", "1h", 1000)
+    oneRow = createTableRow2(df, "btcusdt1h", "1h")
+    print(oneRow)
+
+
+if __name__ == "__main__":
+    main()

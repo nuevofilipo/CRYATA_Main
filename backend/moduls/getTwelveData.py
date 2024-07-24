@@ -216,7 +216,3 @@ def fixingData(df):
             prev_high = row["High"]
 
     return df
-
-
-# output = getResponse("DOGE/USD", "1day", 100)
-# print(output)

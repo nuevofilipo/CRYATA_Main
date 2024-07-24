@@ -14,24 +14,16 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
     <title>Crypto Market Overview</title>
-    <link rel="stylesheet" href="../css-files/tableViewStyle.css" />
-    <!-- <link rel="stylesheet" href="../css-files/chatgpt.css" /> -->
+    <link rel="stylesheet" type="text/css" href="../css-files/tableViewStyle.css" />
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/nuevofilipo/cryata-cdn-resources@latest/table view/tableViewStyle.css"> -->
   </head>
   <body>
     <button id="backToTopBtn" title="Go to top">
       <i class="fa fa-arrow-up"></i>
     </button>
-    <!-- <div class="navbar">
-      <image
-        src="cryata navbar.png"
-        content="width=device-width, initial-scale=1.0"
-      >
-      </image> -->
     </div>
       <div class="table-container">
         <div class="header-container">
-          <!-- <h2>Crypto Market Overview</h2> -->
           <div class="btn-group">
             <button
               class="tablinks"
@@ -79,7 +71,7 @@
             <button
               class="pairAgainst active"
               data-currency="usd"
-              onclick="updatePairAgainst(event, 'usd')"
+              onclick="changePairAgainst(event, 'usd')"
               value="usd"
             >
               /USD
@@ -87,7 +79,7 @@
             <button
               class="pairAgainst right"
               data-currency="btc"
-              onclick="updatePairAgainst(event, 'btc')"
+              onclick="changePairAgainst(event, 'btc')"
               value="btc"
             >
               /BTC

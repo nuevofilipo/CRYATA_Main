@@ -1,28 +1,115 @@
-// Function to add a new row to the table
-function addRow(
-  currentPairAgainst,
-  index,
-  coin,
-  price,
-  priceChange,
-  contextBands,
-  varvIndicator,
-  momentum,
-  volatilityMean,
-  meanPerformance,
-  medianPerformance,
-  nearestZone
-) {
+async function main(timeframe) {
+    var currentPairAgainst = document.querySelector(".pairAgainst.active").value;
+    const data = await getTableViewData("table" + timeframe, currentPairAgainst);
+    var varvIndicator = [];
+    var contextBands = [];
+    var volatilityMean = [];
+
+    // there is same data across timeframes for some indicators, so we have to fetch that
+    if (timeframe !== "1d") {
+      var DailyData = await getTableViewData("table1d", currentPairAgainst);
+      varvIndicator = data.map((entry) => {
+        const dailyEntry = DailyData.find((dailyEntry) => dailyEntry.coin === entry.coin);
+        return dailyEntry ? dailyEntry.varvIndicator : "undefined";
+      });
+      contextBands = data.map((entry) => {
+        const dailyEntry = DailyData.find((dailyEntry) => dailyEntry.coin === entry.coin);
+        return dailyEntry ? dailyEntry.contextBands : "undefined";
+      });
+      volatilityMean = data.map((entry) => {
+        const dailyEntry = DailyData.find((dailyEntry) => dailyEntry.coin === entry.coin);
+        if (dailyEntry) {
+          const key = `volatilityMean${timeframe}`;
+          volatilityMean = dailyEntry[key];
+          return volatilityMean;
+        } else {
+          return "undefined";
+        }
+      });
+    } else {
+      varvIndicator = data.map((entry) => entry.varvIndicator);
+      contextBands = data.map((entry) => entry.contextBands);
+      volatilityMean = data.map((entry) => entry.volatilityMean1d);
+    }
+
+    data.forEach(function (entry, index) {
+      addRow(
+        currentPairAgainst,
+        entry.index,
+        entry.coin,
+        entry.price,
+        entry.priceChange,
+        contextBands[index],
+        varvIndicator[index],
+        entry.momentumIndicator,
+        volatilityMean[index],
+        entry.meanPerformance,
+        entry.medianPerformance,
+        entry.nearestZone
+      );
+    });
+}
+
+
+function addRow(currentPairAgainst, index, coin, price, priceChange, contextBands, varvIndicator, momentum, volatilityMean, meanPerformance, medianPerformance, nearestZone) {
   var table = document.getElementById("cryptoTable");
-  var row = table.insertRow(-1); // Insert row at the end of the table
+  var row = table.insertRow(-1); 
   row.setAttribute("data-coin", coin);
 
+  // creating new cells
   var cell1 = row.insertCell(0);
   var cell2 = row.insertCell(1);
-  cell2.style.textAlign = "left";
-
   var cell3 = row.insertCell(2);
   var cell3b = row.insertCell(3);
+  var cell4 = row.insertCell(4);
+  var cell5 = row.insertCell(5);
+  var cell6 = row.insertCell(6);
+  var cell7 = row.insertCell(7);
+  var cell8 = row.insertCell(8);
+  var cell9 = row.insertCell(9);
+  var cell10 = row.insertCell(10);
+
+  // setting values in cells
+  cell1.innerHTML = index;
+  cell2.innerHTML = coin;
+  if (currentPairAgainst === "usd") {
+    cell3.innerHTML = "$" + String(price);
+  } else {
+    cell3.innerHTML = String(price) + " BTC";
+  }
+  cell3b.innerHTML = String(priceChange) + " %";
+  cell4.innerHTML = contextBands;
+  if (varvIndicator === 0) {
+    cell5.innerHTML = "below";
+  } else if (varvIndicator === 11) {
+    cell5.innerHTML = "above";
+  } else {
+    cell5.innerHTML = varvIndicator;
+  }
+  if (momentum === 1) {
+    cell6.innerHTML = '<span style="font-size:30px; color: #26A69A;">&#8593;</span>'; // Upward arrow
+  } else if (momentum === -1) {
+    cell6.innerHTML = '<span style="font-size:30px; color: #EF5350;">&#8595;</span>'; // Downward arrow
+  } else {
+    cell6.innerHTML = '<span style="font-size:30px; color: #ffd073;">&#8594;</span>'; // No arrow if momentumIndicator is neither 1 nor -1
+  }
+  cell7.innerHTML = volatilityMean;
+  cell8.innerHTML = meanPerformance;
+  cell9.innerHTML = medianPerformance;
+  cell10.innerHTML = nearestZone + " %";
+  
+
+  // aligning text
+  cell2.style.textAlign = "left";
+  cell3.style.textAlign = "right";
+  cell3b.style.textAlign = "right";
+  cell4.style.textAlign = "center";
+  cell7.style.textAlign = "right";
+  cell8.style.textAlign = "right";
+  cell9.style.textAlign = "right";
+  cell10.style.textAlign = "right";
+
+  // styling the cells
   if (priceChange > 0) {
     cell3b.style.color = "#26A69A"; // green
   } else if (priceChange === 0) {
@@ -32,33 +119,7 @@ function addRow(
   } else {
     cell3b.style.color = "white";
   }
-
-  var cell4 = row.insertCell(4);
-  cell4.style.textAlign = "right";
-  var cell5 = row.insertCell(5);
-  var cell6 = row.insertCell(6);
-  var cell7 = row.insertCell(7);
-  var cell8 = row.insertCell(8);
-  var cell9 = row.insertCell(9);
-  var cell10 = row.insertCell(10);
-  cell10.innerHTML = nearestZone + " %";
-  cell10.style.textAlign = "right";
-
-  cell1.innerHTML = index;
-  cell2.innerHTML = coin;
-  if (currentPairAgainst === "usd") {
-    cell3.innerHTML = "$"+String(price);
-  } else {
-    cell3.innerHTML = String(price) + " BTC";
-  }
-  cell3.style.textAlign = "right";
-  cell3b.innerHTML = String(priceChange) + " %";
-  cell3b.style.textAlign = "right";
-  // cell3b.innerHTML = priceChange;
-  cell4.innerHTML = contextBands;
-  cell4.style.color = "black";
-  cell4.style.textAlign = "center";
-
+  cell4.style.color = "white";
   if (contextBands === 2 || contextBands === 1) {
     cell4.style.color = "#EF5350";
     cell4.textContent = "short potential";
@@ -69,78 +130,24 @@ function addRow(
     cell4.style.color = "#26A69A";
     cell4.textContent = "long potential";
   }
-
-  if (varvIndicator === 0) {
-    cell5.innerHTML = "below";
-  } else if (varvIndicator === 11) {
-    cell5.innerHTML = "above";
-  } else {
-    cell5.innerHTML = varvIndicator;
-  }
-
-  // adding arrows for momentum
-  if (momentum === 1) {
-    cell6.innerHTML =
-      '<span style="font-size:30px; color: #26A69A;">&#8593;</span>'; // Upward arrow
-  } else if (momentum === -1) {
-    cell6.innerHTML =
-      '<span style="font-size:30px; color: #EF5350;">&#8595;</span>'; // Downward arrow
-  } else {
-    cell6.innerHTML =
-      '<span style="font-size:30px; color: #ffd073;">&#8594;</span>'; // No arrow if momentumIndicator is neither 1 nor -1
-  }
-
-  cell7.innerHTML = volatilityMean;
-  cell8.innerHTML = meanPerformance;
-  cell9.innerHTML = medianPerformance;
-
-  cell7.style.textAlign = "right";
-  cell8.style.textAlign = "right";
-  cell9.style.textAlign = "right";
 }
 
-// Object to keep track of sorting state for the current column
+async function getTableViewData(tableName, currentPairAgainst) {
+  if (currentPairAgainst === "usd") {
+    currentPairAgainst = "";
+  } else {
+    currentPairAgainst = "_btc";
+  }
+  const response = await fetch(`https://table-view-api-production.up.railway.app/?name=${tableName}${currentPairAgainst}`);
+  const data = await response.json();
+  return data;
+}
+
+//! sorting functionality ------------------
 var sortingState = {
   columnIndex: null,
   order: null,
 };
-
-function addRemoveSortingIcon(columnIndex) {
-  // Get all table headers
-  var headers = document.getElementsByTagName("th");
-
-  // Remove existing sort classes and icons from all headers
-  for (var i = 0; i < headers.length; i++) {
-    if (i == columnIndex) continue;
-
-    headers[i].classList.remove("asc", "desc");
-    headers[i].innerHTML = headers[i].innerText; // Remove any icons
-  }
-
-  // Get the header for the specified column
-  var th = headers[columnIndex];
-
-  // Toggle between ascending and descending states
-  if (th.classList.contains("asc")) {
-    // If currently ascending, switch to descending
-    th.classList.remove("asc");
-    th.classList.add("desc");
-    if (th.classList.contains("right-th")) {
-      th.innerHTML = '<i class="fa fa-caret-down"></i> ' + th.innerText;
-    } else {
-      th.innerHTML = th.innerText + ' <i class="fa fa-caret-down"></i>';
-    }
-  } else {
-    // If not currently ascending, switch to ascending
-    th.classList.remove("desc");
-    th.classList.add("asc");
-    if (th.classList.contains("right-th")) {
-      th.innerHTML = '<i class="fa fa-caret-up"></i> ' + th.innerText;
-    } else {
-      th.innerHTML = th.innerText + ' <i class="fa fa-caret-up"></i>';
-    }
-  }
-}
 
 function sortTable(columnIndex) {
   var table, rows, switching, i, x, y, shouldSwitch;
@@ -189,7 +196,7 @@ function sortTable(columnIndex) {
   }
 }
 
-// Function to compare cell content
+// helper function for sortTable function
 function compareCells(cellX, cellY, order) {
   var contentX = cellX.innerHTML.toLowerCase();
   var contentY = cellY.innerHTML.toLowerCase();
@@ -212,89 +219,8 @@ function compareCells(cellX, cellY, order) {
   }
 }
 
-// Function to fetch data from the API
-async function getTableViewData(tableName, currentPairAgainst) {
-  if (currentPairAgainst === "usd") {
-    currentPairAgainst = "";
-  } else {
-    currentPairAgainst = "_btc";
-  }
-
-
-  const response = await fetch(
-    `https://table-view-api-production.up.railway.app/?name=${tableName}${currentPairAgainst}`
-  );
-  const data = await response.json();
-  return data;
-}
-
-// Loop through API response and add rows to the table
-async function main(timeframe) {
-  var currentPairAgainst = document.querySelector(".pairAgainst.active").value;
-  const data = await getTableViewData("table" + timeframe, currentPairAgainst);
-  var DailyData = null;
-  var varvIndicator = [];
-  var contextBands = [];
-  var volatilityMean = [];
-  if (timeframe !== "1d") {
-    DailyData = await getTableViewData("table1d");
-    varvIndicator = data.map((entry) => {
-      const dailyEntry = DailyData.find(
-        (dailyEntry) => dailyEntry.coin === entry.coin
-      );
-      return dailyEntry ? dailyEntry.varvIndicator : "undefined";
-    });
-    contextBands = data.map((entry) => {
-      const dailyEntry = DailyData.find(
-        (dailyEntry) => dailyEntry.coin === entry.coin
-      );
-      return dailyEntry ? dailyEntry.contextBands : "undefined";
-    });
-    volatilityMean = data.map((entry) => {
-      const dailyEntry = DailyData.find(
-        (dailyEntry) => dailyEntry.coin === entry.coin
-      );
-      if (dailyEntry) {
-        const key = `volatilityMean${timeframe}`;
-        volatilityMean = dailyEntry[key];
-        return volatilityMean;
-      } else {
-        return "undefined";
-      }
-    });
-  } else {
-    varvIndicator = data.map((entry) => entry.varvIndicator);
-    contextBands = data.map((entry) => entry.contextBands);
-    volatilityMean = data.map((entry) => entry.volatilityMean1d);
-  }
-
-  data.forEach(function (entry, index) {
-    addRow(
-      currentPairAgainst,
-      entry.index,
-      entry.coin,
-      entry.price,
-      entry.priceChange,
-      contextBands[index],
-      varvIndicator[index],
-      entry.momentumIndicator,
-      volatilityMean[index],
-      entry.meanPerformance,
-      entry.medianPerformance,
-      entry.nearestZone
-    );
-  });
-
-  headerTr = document.getElementsByClassName("headerTr");
-}
-
-async function updateTable(timeframe){
-  var table = document.getElementById("cryptoTable");
-  table.innerHTML =
-  "<tr class='headerTr'><th class='center-th' onclick='sortTable(0)'>#</th><th class='left-th' onclick='sortTable(1)'>Coin</th><th class='right-th' onclick='sortTable(2)'>Price</th><th class='right-th' onclick='sortTable(3)'>Change</th><th class='center-th' onclick='sortTable(4)'>Context Bands</th><th class='center-th' onclick='sortTable(5)'>VARV</th><th class='center-th' onclick='sortTable(6)'>Momentum</th><th class='right-th' onclick='sortTable(7)'>Volatility</th><th class='right-th' onclick='sortTable(8)'>Mean Performance</th><th class='right-th' onclick='sortTable(9)'>Median Performance</th><th class='right-th' onclick='sortTable(10)'>nearest zone</th></tr>";
-  main(timeframe);
-}
-
+//! update and change functions ------------------
+// "change" functions that users can trigger
 async function changeTimeFrame(event, timeframe) {
   // reset table
   updateTable(timeframe);
@@ -306,50 +232,62 @@ async function changeTimeFrame(event, timeframe) {
   event.currentTarget.className += " active";
 }
 
-function updatePairAgainst(event, pairAgainst) {
+function changePairAgainst(event, pairAgainst) {
   var options = document.querySelectorAll(".pairAgainst");
   for (var i = 0; i < options.length; i++) {
     options[i].classList.remove("active");
-    
   }
   event.currentTarget.classList.add("active");
-   var currTimeframe = document.querySelector(".tablinks.active").getAttribute("data-timeframe");
+  var currTimeframe = document.querySelector(".tablinks.active").getAttribute("data-timeframe");
   updateTable(currTimeframe);
-
 }
 
-// Event delegation to handle clicks on dynamically added rows
-document
-  .getElementById("cryptoTable")
-  .addEventListener("click", function (event) {
-    // Find the closest tr element to the clicked target
-    const tr = event.target.closest("tr");
-    // Check if the tr element exists and does not have the headerTr class
-    if (tr != null && !tr.classList.contains("headerTr")) {
-      const coin = tr.getAttribute("data-coin");
-      const timeframe = document
-        .querySelector(".active")
-        .getAttribute("data-timeframe");
-      const coinPair = coin + "/USD";
-      if (coin !== null) {
-        goToChartViewPage(coinPair);
-      }
+
+async function updateTable(timeframe) {
+  var table = document.getElementById("cryptoTable");
+  table.innerHTML =
+    "<tr class='headerTr'><th class='center-th' onclick='sortTable(0)'>#</th><th class='left-th' onclick='sortTable(1)'>Coin</th><th class='right-th' onclick='sortTable(2)'>Price</th><th class='right-th' onclick='sortTable(3)'>Change</th><th class='center-th' onclick='sortTable(4)'>Context Bands</th><th class='center-th' onclick='sortTable(5)'>VARV</th><th class='center-th' onclick='sortTable(6)'>Momentum</th><th class='right-th' onclick='sortTable(7)'>Volatility</th><th class='right-th' onclick='sortTable(8)'>Mean Performance</th><th class='right-th' onclick='sortTable(9)'>Median Performance</th><th class='right-th' onclick='sortTable(10)'>nearest zone</th></tr>";
+  main(timeframe);
+}
+
+
+
+//! html functionality ------------------
+function addRemoveSortingIcon(columnIndex) {
+  var headers = document.getElementsByTagName("th");
+
+  for (var i = 0; i < headers.length; i++) {
+    if (i == columnIndex) continue;
+    headers[i].classList.remove("asc", "desc");
+    headers[i].innerHTML = headers[i].innerText; // Remove the sorting arrows
+  }
+  var th = headers[columnIndex];
+  // toggle between ascending and descending
+  if (th.classList.contains("asc")) {
+    th.classList.remove("asc");
+    th.classList.add("desc");
+    if (th.classList.contains("right-th")) {
+      th.innerHTML = '<i class="fa fa-caret-down"></i> ' + th.innerText;
+    } else {
+      th.innerHTML = th.innerText + ' <i class="fa fa-caret-down"></i>';
     }
-  });
-
-
-
-//! html functionality
-function goToChartViewPage(coin) {
-    // for this to work, the local host of the chart view page has to be open
-    var timeframe = document.querySelector(".tablinks.active").getAttribute("data-timeframe");
-   window.location.href = `http://127.0.0.1:5501/frontend/html-files/chartViewPage.html?coin=${coin}&timeframe=${timeframe}`;
+  } else {
+    th.classList.remove("desc");
+    th.classList.add("asc");
+    if (th.classList.contains("right-th")) {
+      th.innerHTML = '<i class="fa fa-caret-up"></i> ' + th.innerText;
+    } else {
+      th.innerHTML = th.innerText + ' <i class="fa fa-caret-up"></i>';
+    }
+  }
 }
 
-let mybutton = document.getElementById("backToTopBtn");
-window.onscroll = function () {
-  scrollFunction();
-};
+function goToChartViewPage(coin) {
+  var timeframe = document.querySelector(".tablinks.active").getAttribute("data-timeframe");
+  // change when not in local
+  window.location.href = `http://127.0.0.1:5501/frontend/html-files/chartViewPage.html?coin=${coin}&timeframe=${timeframe}`;
+}
+
 function scrollFunction() {
   if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
     mybutton.style.display = "block";
@@ -357,6 +295,27 @@ function scrollFunction() {
     mybutton.style.display = "none";
   }
 }
+
+//! event listeners ------------------
+// for going to the chartviewpage upon click on some coins row
+document.getElementById("cryptoTable").addEventListener("click", function (event) {
+  const tr = event.target.closest("tr");
+  if (tr != null && !tr.classList.contains("headerTr")) {
+    const coin = tr.getAttribute("data-coin");
+    const timeframe = document.querySelector(".active").getAttribute("data-timeframe");
+    var pairAgainst = document.querySelector(".pairAgainst.active").value;
+    var coinPair = coin + "/USD";
+    if (pairAgainst === "btc") {
+      coinPair = coin + "/BTC";
+    }
+    if (coin !== null) {
+      goToChartViewPage(coinPair);
+    }
+  }
+});
+
+// for scrolling to top on button click
+let mybutton = document.getElementById("backToTopBtn");
 mybutton.onclick = function () {
   window.scrollTo({
     top: 0,
@@ -364,15 +323,14 @@ mybutton.onclick = function () {
   });
 };
 
+window.onscroll = function () {
+  scrollFunction();
+};
 
 
-//! Initial call to populate table with data
+//! initial call ------------------
 async function init() {
-  // wait 1 second
-  
-  await new Promise((r) => setTimeout(r, 100));
-  main("1d");
-  console.log("initializing complete");
+  await main("1d");
 }
 
 document.addEventListener("DOMContentLoaded", init);
