@@ -68,36 +68,10 @@ var addedRanges = new Map();
 
 //! functions for fetching data asyncronously ----------------------------------------------
 // for use with local data
-async function getData(route){
-  changeTimeFrameFromUrl();
-  const response = await fetch(
-    `http://127.0.0.1:5000/api/${route}/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}` 
-  )
-  const data = await response.json();
-  return data;
-}
-
-async function getRangesData(range_value){
-  const response = await fetch(
-    `http://127.0.0.1:5000/api/ranges/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}&ranges=${range_value}` 
-  )
-  const data = await response.json();
-  return data;
-}
-
-async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
-  const response = await fetch(
-    `http://127.0.0.1:5000/api/${endpoint}/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}&${additionalParameter}=${indicatorTimeframe}` 
-  )
-  const data = await response.json();
-  return data;
-}
-
-// for use with external hosted data
 // async function getData(route){
 //   changeTimeFrameFromUrl();
 //   const response = await fetch(
-//     `https://new-cryata-backend-production.up.railway.app//api/${route}/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}`
+//     `http://127.0.0.1:5000/api/${route}/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}` 
 //   )
 //   const data = await response.json();
 //   return data;
@@ -105,7 +79,7 @@ async function getDataIndividualTimeframe(endpoint, additionalParameter,  indica
 
 // async function getRangesData(range_value){
 //   const response = await fetch(
-//     `https://new-cryata-backend-production.up.railway.app/api/ranges/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}&ranges=${range_value}` 
+//     `http://127.0.0.1:5000/api/ranges/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}&ranges=${range_value}` 
 //   )
 //   const data = await response.json();
 //   return data;
@@ -113,12 +87,38 @@ async function getDataIndividualTimeframe(endpoint, additionalParameter,  indica
 
 // async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
 //   const response = await fetch(
-//     `https://new-cryata-backend-production.up.railway.app/api/${endpoint}/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}&${additionalParameter}=${indicatorTimeframe}`
+//     `http://127.0.0.1:5000/api/${endpoint}/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}&${additionalParameter}=${indicatorTimeframe}` 
 //   )
 //   const data = await response.json();
 //   return data;
-    
 // }
+
+// for use with external hosted data
+async function getData(route){
+  changeTimeFrameFromUrl();
+  const response = await fetch(
+    `https://new-cryata-backend-production.up.railway.app//api/${route}/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}`
+  )
+  const data = await response.json();
+  return data;
+}
+
+async function getRangesData(range_value){
+  const response = await fetch(
+    `https://new-cryata-backend-production.up.railway.app/api/ranges/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}&ranges=${range_value}` 
+  )
+  const data = await response.json();
+  return data;
+}
+
+async function getDataIndividualTimeframe(endpoint, additionalParameter,  indicatorTimeframe){
+  const response = await fetch(
+    `https://new-cryata-backend-production.up.railway.app/api/${endpoint}/?coin=${getCurrentCoin()}&timeframe=${getCurrentTimeframe()}&${additionalParameter}=${indicatorTimeframe}`
+  )
+  const data = await response.json();
+  return data;
+    
+}
 
 //! functions for creating and removing boxes and ranges----------------------------------------------
 async function createBoxesData(mapping, data, color, key){
@@ -453,7 +453,12 @@ async function updateSmallIndicatorCoin() {
 //! getter functions: current coin and current timeframe
 function getCurrentCoin(){
   if (getUrlParameterCoin() != null && !g_urlParamsProcessedCoin){
-    document.getElementById("coin-selector").value = getUrlParameterCoin();
+    var coin = getUrlParameterCoin();
+    if (coin.endsWith("BTC")){
+      changePairAgainstFromUrl(coin.slice(-3));
+      coin = coin.replace("BTC", "USD");
+    }
+    document.getElementById("coin-selector").value = coin;
     g_urlParamsProcessedCoin = true;
     return getUrlParameterCoin();    
   }
@@ -493,6 +498,16 @@ function getUrlParameterTimeframe() {
   return syntaxMap[myParam];
 }
 
+function changePairAgainstFromUrl(pairAgainst){
+  const buttons = document.querySelectorAll('.pairAgainst');
+  buttons.forEach(button => {
+    if (button.getAttribute('data-currency') == pairAgainst){
+      button.classList.add('active');
+    } else if (button.classList.contains('active')){
+      button.classList.remove('active');
+    }
+  } );
+}
 
 
 function changeTimeFrameFromUrl(){

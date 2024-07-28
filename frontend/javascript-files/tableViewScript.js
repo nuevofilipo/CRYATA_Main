@@ -138,7 +138,7 @@ async function getTableViewData(tableName, currentPairAgainst) {
   } else {
     currentPairAgainst = "_btc";
   }
-  const response = await fetch(`https://table-view-api-production.up.railway.app/?name=${tableName}${currentPairAgainst}`);
+  const response = await fetch(`https://supportive-insight-production.up.railway.app/?name=${tableName}${currentPairAgainst}`);
   const data = await response.json();
   return data;
 }
@@ -150,13 +150,11 @@ var sortingState = {
 };
 
 function sortTable(columnIndex) {
+  console.log("Sorting table by column index: " + columnIndex);
   var table, rows, switching, i, x, y, shouldSwitch;
-
   addRemoveSortingIcon(columnIndex);
-
   table = document.getElementById("cryptoTable");
   switching = true;
-
   // Reset sorting state for other columns if a new column is clicked
   if (sortingState.columnIndex !== columnIndex) {
     sortingState.columnIndex = columnIndex;
@@ -165,30 +163,44 @@ function sortTable(columnIndex) {
     // Toggle sorting order if the same column is clicked again
     sortingState.order = sortingState.order === "asc" ? "desc" : "asc";
   }
-
   while (switching) {
     switching = false;
     rows = table.rows;
-
     for (i = 1; i < rows.length - 1; i++) {
       shouldSwitch = false;
       x = rows[i].getElementsByTagName("td")[columnIndex];
       y = rows[i + 1].getElementsByTagName("td")[columnIndex];
-
       // Compare content based on sorting state for the column
-      if (sortingState.order === "asc") {
-        if (compareCells(x, y, sortingState.order) > 0) {
-          shouldSwitch = true;
-          break;
+      if (columnIndex === 10) {
+        // Sort by absolute value for column index 10
+        var xValue = Math.abs(parseFloat(x.innerHTML));
+        var yValue = Math.abs(parseFloat(y.innerHTML));
+        if (sortingState.order === "asc") {
+          if (xValue > yValue) {
+            shouldSwitch = true;
+            break;
+          }
+        } else {
+          if (xValue < yValue) {
+            shouldSwitch = true;
+            break;
+          }
         }
       } else {
-        if (compareCells(x, y, sortingState.order) < 0) {
-          shouldSwitch = true;
-          break;
+        // Use the existing comparison for other columns
+        if (sortingState.order === "asc") {
+          if (compareCells(x, y, sortingState.order) > 0) {
+            shouldSwitch = true;
+            break;
+          }
+        } else {
+          if (compareCells(x, y, sortingState.order) < 0) {
+            shouldSwitch = true;
+            break;
+          }
         }
       }
     }
-
     if (shouldSwitch) {
       rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
       switching = true;
@@ -200,7 +212,7 @@ function sortTable(columnIndex) {
 function compareCells(cellX, cellY, order) {
   var contentX = cellX.innerHTML.toLowerCase();
   var contentY = cellY.innerHTML.toLowerCase();
-  var lastStrings = ["no data %", "not sufficient data", "nan %", "undefined"];
+  var lastStrings = ["no data %", "not sufficient data", "nan %", "undefined", "no data", "null"];
 
   const isLastString = (str) => lastStrings.includes(str);
 
@@ -285,7 +297,7 @@ function addRemoveSortingIcon(columnIndex) {
 function goToChartViewPage(coin) {
   var timeframe = document.querySelector(".tablinks.active").getAttribute("data-timeframe");
   // change when not in local
-  window.location.href = `http://127.0.0.1:5501/frontend/html-files/chartViewPage.html?coin=${coin}&timeframe=${timeframe}`;
+  window.location.href = `http://127.0.0.1:5501/frontend/html-files/chartViewPage.html?coin=${coin}&timeframe=${timeframe}`; 
 }
 
 function scrollFunction() {
