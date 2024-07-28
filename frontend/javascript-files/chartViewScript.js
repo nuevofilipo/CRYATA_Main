@@ -217,6 +217,7 @@ async function setData(){
 // setting context bands data
 async function setLineData(){
   if (indicatorState() == true){
+  googleAnalyticsEvent("context_bands");
   data = await getData("4lines");
   if (data.length == 0 ){
     showNotification('Data not available');
@@ -258,8 +259,12 @@ async function removeContextBandsData(){
 }
 
 
+
+
+
 async function setVarvData(){
   if (varvIndicatorState() == true){
+  googleAnalyticsEvent("varv");
   data = await getData("varv");
   if (data.length == 0 ){
     showNotification('Data not available');
@@ -555,6 +560,16 @@ function varvIndicatorState(){
 
 
 //!html functionality ----------------------------------------------
+function googleAnalyticsEvent(indicatorClicked){
+  gtag('event', 'indicator_activation', {
+    'event_category': 'Indicator',
+    'event_label': indicatorClicked,
+    'value': 1,
+    'debug_mode': true
+  });
+}
+
+
 // function to show notification that data is not available
 function showNotification(message) {
   const notification = document.getElementById('notification');
@@ -708,6 +723,7 @@ Buttons.forEach(button => {
         const type = button.getAttribute('data-type');
         const color = button.getAttribute('data-color');
         if (button.classList.contains('active')) {
+          googleAnalyticsEvent(indicator);
           const data = await getDataIndividualTimeframe( indicator, "indicatorTimeframe",  indTime);
           try {
             if (data.length == 0) throw new Error("No data available");

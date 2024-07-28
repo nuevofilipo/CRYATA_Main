@@ -9,13 +9,25 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4Q19X6P6JV"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-4Q19X6P6JV");
+    </script>
   </head>
 
   <body>
     <div class="navbar">
       <img src="cryata small screen.png" alt="Logo" />
-    </div> 
-     <!-- copy everything below until closing of chart-container div into webflow -->
+    </div>
+    <!-- copy everything below until closing of chart-container div into webflow -->
     <div id="notification" class="notification"></div>
     <div class="chart-container">
       <link rel="stylesheet" href="../css-files/chartViewStyle.css" />
@@ -255,7 +267,7 @@
       </main>
 
       <script type="text/javascript" src="../javascript-files/chartViewScript.js"></script>
-      <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/cryata-cdn-resources@latest/chart view/chartViewScript4.js"></script>
+      <!-- <script src="https://cdn.jsdelivr.net/gh/nuevofilipo/cryata-cdn-resources@latest/chart view/chartViewScript4.js"></script> -->
     </div>
   </body>
 </html>
